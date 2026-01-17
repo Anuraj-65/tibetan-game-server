@@ -1,10 +1,16 @@
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const io = require('socket.io')(http, {
+  cors: {
+    origin: "https://tibetankeys.com", // Your Firebase domain
+    methods: ["GET", "POST"]
+  }
+});
 const path = require('path');
 
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
+
 const PORT = process.env.PORT || 3000;
 const GAME_DURATION = 60; 
 
@@ -169,6 +175,5 @@ function endGame(room) {
 }
 
 function getLobbyData() { return rooms.map(r => ({ id: r.id, count: r.players.length, status: r.status, timeLeft: r.timer })); }
-
 
 http.listen(PORT, () => { console.log(`Server running on http://localhost:${PORT}`); });
