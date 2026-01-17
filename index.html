@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="bo">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ62DL1S2M"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-WQ62DL1S2M');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>TibetanKeys | Master Tibetan Typing in the Digital Age</title>
+    <meta name="description" content="Learn Tibetan typing online with TibetanKeys. Master the Tibetan script using Monlam fonts. Preserve your culture through digital literacy and professional typing lessons.">
+    <meta name="keywords" content="Tibetan typing, Tibetan keyboard, Monlam fonts, learn Tibetan online, Tibetan script preservation, Tibetan literacy, བོད་ཡིག">
+    
+    <link rel="canonical" href="https://tibetankeys.com">
+    <meta property="og:title" content="TibetanKeys - Learn Monlam Bod-yig Typing">
+    <meta property="og:description" content="Master Monlam Bod-Yig (TCRCKB) through interactive typing lessons. Learn the official Tibetan keyboard standard directly in your browser.">
+    <meta property="og:image" content="og.png"> 
+    <meta property="og:url" content="https://tibetankeys.com">
+    
+    <link rel="icon" type="image/png" href="og.png">
+    
+    <style>
+        /* FONTS PRESERVED */
+        @font-face { font-family: 'Lakdi'; src: url('Monlam Lakdi Ouchen.ttf'); }
+        @font-face { font-family: 'Tsikmachok'; src: url('Monlam Tsikmachok.ttf'); }
+        @font-face { font-family: 'Chouk'; src: url('Monlam Uni Chouk.ttf'); }
+        @font-face { font-family: 'Dutsa1'; src: url('Monlam Uni Dutsa1.ttf'); }
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
+        @font-face { font-family: 'Tikrang'; src: url('Monlam Uni Tikrang.ttf'); }
+        @font-face { font-family: 'YigChong'; src: url('Monlam yig-chong.ttf'); }
+        @font-face { font-family: 'BodYig'; src: url('Monlam BodYig.ttf'); }
+        @font-face { font-family: 'Dutsa2'; src: url('Monlam Uni Dutsa2.ttf'); }
+        @font-face { font-family: 'Gakyil'; src: url('Monlam Gakyil.ttf'); }
+        @font-face { font-family: 'KhamDri'; src: url('Monlam KhamDri.ttf'); }
+        @font-face { font-family: 'Ouchen1'; src: url('Monlam Uni Ouchen1.ttf'); }
+        @font-face { font-family: 'Raldri'; src: url('Monlam Raldri.ttf'); }
+        @font-face { font-family: 'Tsumachu'; src: url('Monlam Tsumachu.ttf'); }
+        @font-face { font-family: 'Umed1'; src: url('Monlam Uni Umed1.ttf'); }
+        @font-face { font-family: 'Umed2'; src: url('Monlam Uni Umed2.ttf'); }
+
+        :root {
+            --bg: #010a16; --text: #ffffff; --accent: #d4af37;
+            --nav-bg: rgba(255, 255, 255, 0.05); 
+        }
+
+        body, html { 
+            margin: 0; padding: 0; height: 100vh; width: 100%; 
+            background: var(--bg); color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; overflow: hidden; 
+        }
+
+        /* ATMOSPHERE LAYER */
+        #atmosphere { position: fixed; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .font-star { 
+            position: absolute; opacity: 0; animation: fall linear infinite; 
+            filter: blur(var(--blur)); color: var(--char-color); will-change: transform;
+            text-shadow: 0 0 10px var(--glow);
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-20vh) rotate(0deg); opacity: 0; }
+            15% { opacity: var(--star-opacity); }
+            85% { opacity: var(--star-opacity); }
+            100% { transform: translateY(110vh) rotate(var(--rotation)); opacity: 0; }
+        }
+
+        /* NAVIGATION */
+        nav {
+            position: fixed; top: 0; width: 100%; display: flex; 
+            justify-content: center; gap: 40px; padding: 15px 0;
+            background: var(--nav-bg); backdrop-filter: blur(25px); 
+            z-index: 5000; border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+        }
+        nav a { 
+            color: rgba(255, 255, 255, 0.8); 
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: 700; 
+            letter-spacing: 2px; 
+            cursor: pointer; 
+            transition: 0.3s ease; 
+            text-transform: uppercase; 
+            display: inline-block;
+        }
+        nav a:hover { 
+            color: var(--accent); 
+            transform: scale(1.15);
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .page { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; }
+        .active { display: flex; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* HOME SECTION */
+        .tk-logo-png { width: 320px; height: auto; animation: heartbeat 2.5s infinite ease-in-out; margin-bottom: 10px; z-index: 5; }
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+        .typewriter-stage { height: 100px; display: flex; align-items: center; justify-content: center; width: 100%; z-index: 100; position: relative; }
+        
+        #typewriter { 
+            font-size: clamp(30px, 5vw, 60px); 
+            background: linear-gradient(to bottom, #fff, var(--accent)); 
+            -webkit-background-clip: text; 
+            background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            white-space: nowrap; 
+            padding: 0 120px; 
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
+        .tagline { color: var(--accent); text-transform: uppercase; letter-spacing: 4px; margin: 15px 0; font-size: 14px; z-index: 100; }
+        .start-btn { background: var(--accent); color: #000; border: none; padding: 14px 40px; border-radius: 50px; font-weight: 900; cursor: pointer; transition: 0.4s; z-index: 100; }
+        .start-btn:hover { box-shadow: 0 0 30px var(--accent); transform: scale(1.1); }
+
+        /* ABOUT SECTION */
+        #about { padding-top: 60px; flex-direction: row; align-items: stretch; height: 90vh; width: 100vw; overflow: hidden; }
+        .about-pillar { flex: 1; position: relative; overflow: hidden; transition: all 0.7s cubic-bezier(0.25, 1, 0.3, 1); border-right: 1px solid rgba(212, 175, 55, 0.2); background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px); display: flex; flex-direction: column; justify-content: center; cursor: pointer; z-index: 5; }
+        .pillar-title { width: 100%; text-align: center; font-size: 20px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; transition: all 0.5s ease; font-weight: 800; display: block; z-index: 10; }
+        .pillar-content { opacity: 0; padding: 40px; transition: all 0.5s ease; text-align: left; pointer-events: none; max-width: 600px; margin: 0 auto; position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); width: 80%; }
+        .about-pillar:hover { flex: 8; background: rgba(255, 255, 255, 0.05); border-right: 2px solid var(--accent); }
+        .about-pillar:hover .pillar-title { font-size: 32px; transform: translateY(-180px); letter-spacing: 5px; }
+        .about-pillar:hover .pillar-content { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+        .pillar-content p { font-size: 1.3rem; line-height: 1.8; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .pillar-content b { color: var(--accent); }
+
+        /* CONTACT CARD */
+        #contact { padding-top: 80px; justify-content: center; } /* Vertical Center */
+        .contact-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(212, 175, 55, 0.2); padding: 40px; border-radius: 20px; max-width: 650px; width: 90%; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+        .contact-card h2 { color: var(--accent); text-align: center; margin-top: 0; letter-spacing: 4px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 15px; margin-bottom: 25px; }
+        .contact-item { margin-bottom: 20px; }
+        .contact-item b { color: var(--accent); display: block; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 5px; }
+        .contact-item p { margin: 0; font-size: 1.1rem; color: #eee; line-height: 1.5; }
+        .contact-item a { color: #fff; text-decoration: none; }
+
+        /* INSTALL SECTION */
+        .install-series-container { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 90%; max-width: 800px; padding: 80px 0; }
+        .video-box { width: 100%; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(212, 175, 55, 0.2); padding: 25px; border-radius: 25px; text-align: left; }
+        .video-box h3 { color: var(--accent); margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; font-size: 1rem; }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 15px; background: #000; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .monlam-download-zone { width: 100%; text-align: center; padding: 30px; background: rgba(212, 175, 55, 0.05); border-radius: 25px; border: 1px dashed var(--accent); margin-bottom: 20px; }
+
+        /* --- FIXED CREDITS SECTION (Wide & Non-Scrolling) --- */
+        #credits { 
+            padding-top: 80px; 
+            justify-content: center; /* Center Vertically */
+            overflow: hidden; /* No Scroll */
+        }
+        
+        .credits-grid { 
+            display: grid; 
+            /* CHANGE: 4 Columns (1 Row) instead of 2x2 */
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 20px; 
+            /* CHANGE: Much Wider */
+            max-width: 1400px; 
+            width: 95%; 
+            padding: 20px; 
+        }
+        
+        .credit-card { 
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(212, 175, 55, 0.2); 
+            padding: 25px; /* Slightly Reduced Padding */
+            border-radius: 20px; 
+            transition: 0.4s ease; 
+            text-align: left; 
+        }
+        
+        .credit-card h3 { color: var(--accent); margin-top: 0; letter-spacing: 2px; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
+        .credit-card p { color: #eee; font-size: 0.95rem; line-height: 1.5; margin-bottom: 0; }
+        .credit-card:hover { border-color: var(--accent); transform: scale(1.02); background: rgba(255,255,255,0.08); }
+
+        /* --- FIXED DONATE SECTION (Wide & Non-Scrolling) --- */
+        #donate { 
+            padding-top: 80px; 
+            justify-content: center; /* Center Vertically */
+            overflow: hidden; 
+        }
+        
+        .donate-container { 
+            /* CHANGE: Wider Container */
+            max-width: 1000px; 
+            width: 90%;
+            padding: 40px; 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 25px; 
+            border: 1px solid rgba(212, 175, 55, 0.3); 
+            backdrop-filter: blur(15px); 
+            text-align: center; 
+        }
+        
+        .donate-container h1 { color: var(--accent); margin-top: 0; font-size: 2.2rem; letter-spacing: 3px; margin-bottom: 10px; }
+        .support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .support-box { background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; position: relative; }
+        .support-box:hover { border-color: var(--accent); background: rgba(255,255,255,0.05); }
+        .qr-trigger-area { width: 140px; height: 140px; margin: 15px auto; position: relative; z-index: 10; }
+        .qr-image { width: 100%; height: 100%; border-radius: 12px; display: block; border: 4px solid #fff; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); background: #fff; }
+        
+        .qr-trigger-area:hover { cursor: none; }
+        .qr-trigger-area:hover .qr-image { transform: scale(2.2); box-shadow: 0 0 150px rgba(0,0,0,1), 0 0 50px var(--bg); z-index: 9999; position: relative; }
+        .support-box:has(.qr-trigger-area:hover) p, 
+        .support-box:has(.qr-trigger-area:hover) h3 { opacity: 0; }
+        
+        .paypal-glow-btn:hover { background: #005ea6 !important; box-shadow: 0 0 20px rgba(0, 112, 186, 0.6) !important; transform: translateY(-2px); }
+
+        /* MINI FOOTER */
+        .mini-footer { position: fixed; bottom: 0; width: 100%; z-index: 1000; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); display: grid; grid-template-columns: 1.5fr 1fr 1.5fr; align-items: center; font-size: 11px; color: rgba(255,255,255,0.5); padding: 10px 40px; box-sizing: border-box; }
+        .footer-left { text-align: left; display: flex; gap: 15px; align-items: center; }
+        .footer-left a { color: var(--accent); text-decoration: none; transition: 0.3s; opacity: 0.7; }
+        .footer-left a:hover { opacity: 1; }
+        .footer-middle { text-align: center; font-weight: 600; letter-spacing: 1px; }
+        .footer-right { text-align: right; }
+
+        /* =========================================
+           🌍 GLOBAL AUTO-FIT PATCH (MOBILE & TABLET)
+           ========================================= */
+
+        .tagline {
+            font-size: clamp(10px, 2.5vw, 16px) !important;
+            width: 90%;
+            margin: 15px auto;
+        }
+
+        /* 2. RESPONSIVE NAVIGATION BAR */
+        @media (max-width: 900px) {
+            nav {
+                gap: 15px; /* Shrink gap between links */
+                padding: 15px 10px;
+                flex-wrap: wrap; /* Allow wrapping if screen is very small */
+            }
+            
+            nav a {
+                font-size: 11px; /* Smaller text for mobile */
+                letter-spacing: 1px;
+            }
+        }
+
+        /* 3. STACKABLE SECTIONS & SCROLLING ON MOBILE */
+        @media (max-width: 900px) {
+            /* On Tablets/Phones, we MUST allow scrolling because 4 columns won't fit */
+            body, html { overflow-y: auto !important; height: auto !important; }
+            #credits, #donate { overflow-y: auto !important; height: auto !important; display: flex; padding-bottom: 100px; }
+            
+            /* Stack Credits back to 2 columns or 1 column */
+            .credits-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            
+            .donate-container { width: 95%; padding: 20px; }
+            .support-grid { grid-template-columns: 1fr; gap: 20px; }
+        }
+
+        @media (max-width: 600px) {
+            .credits-grid { grid-template-columns: 1fr; } /* 1 Column on tiny phones */
+        }
+
+        /* 3. STACKABLE SECTIONS (Like 'About') */
+        @media (max-width: 768px) {
+            #about {
+                flex-direction: column; /* Stack columns vertically */
+                height: auto; /* Let it grow naturally */
+            }
+
+            .about-pillar {
+                width: 100%;
+                height: 200px; /* Fixed height for stacked pillars */
+                border-right: none;
+                border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            }
+            
+            .about-pillar:hover {
+                flex: none; /* Disable the expansion effect on mobile to prevent glitches */
+                height: 300px; 
+            }
+            
+            .pillar-title {
+                transform: translateY(0) !important; /* Keep title visible */
+            }
+        }
+
+        /* 4. RESPONSIVE FOOTER */
+        @media (max-width: 768px) {
+            .mini-footer {
+                position: relative; /* Unstick from bottom on mobile */
+                display: flex;
+                flex-direction: column; /* Stack items vertically */
+                gap: 15px;
+                padding: 20px;
+                text-align: center;
+                margin-top: 50px;
+            }
+
+            .footer-left, .footer-middle, .footer-right {
+                text-align: center;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 5. MOBILE OPTIMIZATIONS */
+        @media (max-width: 768px) { 
+            #atmosphere { display: none; } /* Save battery on phones */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="atmosphere"></div>
+
+    <nav>
+        <a onclick="showPage('home')">Home</a>
+        <a onclick="showPage('about')">About</a>
+        <a href="lessons.html">Lessons</a>
+        <a href="paper.html">Paper</a> 
+        <a href="leaderboard.html" style="color: #00e676; text-shadow: 0 0 10px rgba(0,230,118,0.4);">Leaderboard</a>
+        <a href="timer.html">Timer</a> 
+        <a onclick="showPage('Install')">Install</a>
+        <a onclick="showPage('contact')">Contact</a>
+        <a onclick="showPage('credits')">Credits</a>
+        <a onclick="showPage('donate')">Donate</a>
+    </nav>
+
+    <section id="home" class="page active">
+        <img src="tk.png" class="tk-logo-png" alt="TibetanKeys">
+        <div class="typewriter-stage"><div id="typewriter"></div></div>
+        <div class="tagline">Master Tibetan Typing In the Digital Age</div>
+        <button class="start-btn" onclick="window.location.href='lessons.html?start=0'">BEGIN THE ASCENT</button>
+    </section>
+
+    <section id="about" class="page">
+        <div class="about-pillar">
+            <div class="pillar-title">My TCV Roots</div>
+            <div class="pillar-content">
+                <p>My journey with the Tibetan community began in the "Baby Room". Though I am Indian by birth, my heart was shaped by the Tibetan language, culture, and kind teachers. I grew up learning from the very script I now seek to preserve.</p>
+            </div>
+        </div>
+        <div class="about-pillar">
+            <div class="pillar-title">4 Years of Service</div>
+            <div class="pillar-content">
+                <p>Today, life has come full circle. Years ago, I sat at these desks as a student. Now, I stand at the front as a teacher. It's a privilege to see the journey come full circle. I have been serving at TCV for the past four years as a Computer Teacher. I live by the motto "Others Before Self," and I have embraced a path of gratitude: <b>"I came to learn, and now I have come to serve."</b></p>
+            </div>
+        </div>
+        <div class="about-pillar">
+            <div class="pillar-title">World's First</div>
+            <div class="pillar-content">
+                <p>We are entering a digital age where if a language isn't typed, it risks being forgotten. <b>TibetanKeys</b> is the world’s first platform where you can master Tibetan typing directly in your browser. No downloads, no barriers—just the modern way to connect with your roots.</p>
+            </div>
+        </div>
+        <div class="about-pillar" style="border-right: none;">
+            <div class="pillar-title">Digital Freedom</div>
+            <div class="pillar-content">
+                <p>By mastering the Monlam Bod-Yig standard, we ensure our script lives forever. Every Tibetan should know how to type in their mother tongue. I hope this initiative brings us all a step closer to getting our freedom back. <b style="color:var(--accent); letter-spacing: 3px;">FREE TIBET.</b></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="Install" class="page" style="overflow-y: auto; justify-content: flex-start;">
+        <div class="install-series-container">
+            <h1 style="color:var(--accent); letter-spacing: 5px; text-transform: uppercase; margin-bottom: 0;">Installation Guide</h1>
+            <div class="monlam-download-zone">
+                <p style="color: #fff; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem;">Ready to download the software?</p>
+                <a href="https://monlamit.com/app-store/monlam-bodyig.html" target="_blank" class="start-btn" style="text-decoration: none; display: inline-block;">VISIT MONLAM IT DOWNLOAD CENTER</a>
+            </div>
+            <div class="video-box"><h3>1. Windows Installation Guide</h3><div class="video-container"><iframe src="https://www.youtube.com/embed/VIDEO_ID_1"></iframe></div></div>
+            <div class="video-box"><h3>2. macOS Installation Guide</h3><div class="video-container"><iframe src="https://www.youtube.com/embed/VIDEO_ID_2"></iframe></div></div>
+            <div class="video-box"><h3>3. Common Problems & Solutions</h3><div class="video-container"><iframe src="https://www.youtube.com/embed/8egCOgwQYQY"></iframe></div></div>
+        </div>
+    </section>
+
+    <section id="contact" class="page">
+        <div class="contact-card">
+            <h2>CONTACT US</h2>
+            <div class="contact-item"><b>Administrator</b><p>Anuraj</p></div>
+            <div class="contact-item"><b>Operating Address</b><p>Computer Department, TCV School (Suja), HP, 175032, India.</p></div>
+            <div class="contact-item"><b>Email Support</b><p><a href="mailto:anuraaj65@gmail.com" style="color:white;">anuraaj65@gmail.com</a></p></div>
+            <div class="contact-item"><b>Support Hours</b><p>Monday to Saturday (9:00 AM - 5:00 PM IST)</p></div>
+            <img src="Anuraj.jpg" alt="Anuraj" style="position: absolute; bottom: 20px; right: 20px; width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);">
+        </div>
+    </section>
+
+    <section id="credits" class="page">
+        <h2 style="color:var(--accent); letter-spacing: 5px; margin-bottom: 30px; text-transform: uppercase;">Acknowledgments</h2>
+        <div class="credits-grid">
+            <div class="credit-card"><h3>Monlam IT</h3><p>For their revolutionary work in Tibetan digital fonts and the Monlam Bod-Yig standard. This platform is built upon the foundation they laid for our language's digital future.</p></div>
+            <div class="credit-card"><h3>TCV Schools</h3><p>For being my home and family since childhood. To my teachers and the institution that nurtured me from the "Baby Room" to the Computer Lab, I owe my path of service.</p></div>
+            <div class="credit-card"><h3>My Family</h3><p>Dear Mom, Dad and Sis, Thank you for the unwavering love and the roots that keep me grounded. Everything I build is a reflection of the values and strength you have given me.</p></div>
+            <div class="credit-card"><h3>Friends & Life</h3><p>To my friends and the shared experiences that make this life worth living. For the inspiration, the laughter, and the journey we are walking together.</p></div>
+        </div>
+    </section>
+
+    <section id="donate" class="page">
+        <div class="donate-container">
+            <h1>Support Our Mission</h1>
+            <p style="margin-bottom: 30px; line-height: 1.6;">Your voluntary contributions keep <b>TibetanKeys</b> free for students worldwide. Every bit of support helps preserve the Tibetan script for the digital age.</p>
+            <div class="support-grid">
+                <div class="support-box" style="border-color: var(--accent);">
+                    <h3 style="color: var(--accent);">SUPPORT FROM INDIA</h3>
+                    <div class="qr-trigger-area"><img src="QRcode.png" alt="UPI QR Code" class="qr-image"></div>
+                    <p style="font-size: 0.8rem; opacity: 0.7;">Scan with GPay, PhonePe or BHIM</p>
+                </div>
+                <div class="support-box" style="border: 1.5px solid #0070ba; padding: 25px; border-radius: 12px; text-align: center; background: rgba(0, 112, 186, 0.05);">
+                    <h3 style="color: #0070ba; margin-top: 0; letter-spacing: 1px; font-size: 14px; margin-bottom: 10px;">INTERNATIONAL SUPPORT</h3>
+                    <div style="margin: 0 auto;"><img src="pp.png" alt="PayPal" style="height: 100px; width: auto; display: block; margin: 0 auto; filter: drop-shadow(0 0 5px rgba(0,112,186,0.2));"></div>
+                    <p style="font-size: 12px; color: #555; margin-top: 5px; margin-bottom: 25px; line-height: 1.5;">Support the preservation of Tibetan script</p>
+                    <a href="https://www.paypal.me/anuraj65" target="_blank" class="paypal-glow-btn" style="background:#0070ba; color:white; padding: 12px 28px; font-size: 11px; text-decoration: none; border-radius: 50px; font-weight: 600; display: inline-block; transition: 0.3s; box-shadow: 0 4px 15px rgba(0, 112, 186, 0.3);">DONATE VIA PAYPAL</a>
+                </div>
+            </div>
+            <p style="font-size: 0.7rem; opacity: 0.5; margin-top: 30px;">* Contributions are voluntary and non-refundable.</p>
+        </div>
+    </section>
+
+    <footer class="mini-footer">
+        <div class="footer-left">
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <span style="margin: 0 10px; opacity: 0.3;">|</span>
+            <span style="color: rgba(255,255,255,0.6);">Visitors: <span id="visitor-count" style="color: #d4af37;">...</span></span>
+        </div>
+        <div class="footer-middle">TibetanKeys | © 2026</div>
+        <div class="footer-right">Creator: <span>Anuraj</span></div>
+    </footer>
+
+    <script>
+        const alphabet = ['ཀ','ཁ','ག','ང','ཅ','ཆ','ཇ','ཉ','ཏ','ཐ','ད','ན','པ','ཕ','བ','མ','ཙ','ཚ','ཛ','ཝ','ཞ','ཟ','འ','ཡ','ར','ལ','ཤ','ས','ཧ','ཨ'];
+        const fonts = ['Lakdi', 'Tsikmachok', 'Chouk', 'Dutsa1', 'OuChan2', 'Tikrang', 'YigChong'];
+        const atmosColors = ['#d4af37', '#ffffff', '#ff4d4d', '#40E0D0'];
+
+        function initAtmosphere() {
+            const container = document.getElementById('atmosphere');
+            container.innerHTML = ''; 
+            for (let i = 0; i < 60; i++) { 
+                const star = document.createElement('div');
+                star.className = 'font-star';
+                star.innerText = alphabet[Math.floor(Math.random() * alphabet.length)];
+                let leftPos = Math.random() * 100;
+                if (leftPos > 35 && leftPos < 65) { leftPos = leftPos < 50 ? leftPos - 30 : leftPos + 30; }
+                const depth = Math.floor(Math.random() * 3);
+                let size, blur, opacity, speed, glow;
+                if (depth === 0) { size = 15; blur = '6px'; opacity = 0.1; speed = 25; glow = 'transparent'; }
+                else if (depth === 1) { size = 25; blur = '2px'; opacity = 0.3; speed = 15; glow = 'rgba(255,255,255,0.1)'; }
+                else { size = 40; blur = '0px'; opacity = 0.5; speed = 10; glow = 'rgba(212, 175, 55, 0.3)'; }
+                star.style.left = leftPos + 'vw';
+                star.style.fontSize = size + 'px';
+                star.style.fontFamily = fonts[Math.floor(Math.random() * fonts.length)];
+                star.style.animationDuration = (Math.random() * 10 + speed) + 's';
+                star.style.setProperty('--rotation', (Math.random() * 720 - 360) + 'deg');
+                star.style.setProperty('--char-color', atmosColors[Math.floor(Math.random() * atmosColors.length)]);
+                star.style.setProperty('--star-opacity', opacity);
+                star.style.setProperty('--blur', blur);
+                star.style.setProperty('--glow', glow);
+                container.appendChild(star);
+            }
+        }
+
+        /* --- SESSION VISITOR COUNTER (Hit Counter) --- */
+        function initCounter() {
+            const counterDisplay = document.getElementById('visitor-count');
+            if(!counterDisplay) return;
+
+            // We use a specific key: 'test_flight'
+            // Every time this runs, it adds +1
+            fetch('https://api.counterapi.dev/v1/tibetankeys/test_flight/up')
+                .then(response => response.json())
+                .then(data => {
+                    counterDisplay.innerText = data.count;
+                })
+                .catch(err => {
+                    console.log("Counter Error:", err);
+                    counterDisplay.innerText = "1"; 
+                });
+        }
+
+        let charIdx = 0, fontIdx = 0, isDeleting = false;
+        function typeEffect() {
+            const display = document.getElementById("typewriter");
+            if(!display) return;
+            const phrase = "བོད་ཀྱི་བདག་པོ་བོད་མི་ཡིན།";
+            display.style.fontFamily = fonts[fontIdx];
+            display.innerText = phrase.substring(0, isDeleting ? charIdx-- : charIdx++);
+            let speed = isDeleting ? 60 : 160;
+            if (!isDeleting && charIdx > phrase.length) { speed = 2500; isDeleting = true; }
+            else if (isDeleting && charIdx < 0) { isDeleting = false; fontIdx = (fontIdx + 1) % fonts.length; speed = 600; }
+            setTimeout(typeEffect, speed);
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('atmosphere').style.display = (id === 'lessons') ? 'none' : 'block';
+        }
+        window.onload = () => { initAtmosphere(); typeEffect(); initCounter(); };
+    </script>
+</body>
+</html>

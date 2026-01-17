@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="bo">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ62DL1S2M"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-WQ62DL1S2M');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TibetanKeys | Basic Training</title>
+    
+    <link rel="icon" type="image/png" href="og.png">
+
+    <style>
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
+
+        :root { --bg: #010a16; --accent: #d4af37; --text: #ffffff; --error: #ff4d4d; --success: #00e676; }
+        
+        body, html { 
+            margin: 0; padding: 0;
+            background: var(--bg); color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            height: 100vh; width: 100vw;
+            overflow: hidden; 
+            display: flex; flex-direction: column; 
+            user-select: none;
+        }
+
+        /* --- HUD --- */
+        .hud { 
+            width: 100%; padding: 0 40px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1); 
+            background: rgba(1, 10, 22, 0.95); box-sizing: border-box; 
+            height: 60px; flex-shrink: 0; z-index: 50;
+        }
+        .level-info h1 { margin: 0; font-size: 14px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; }
+        
+        .size-controls {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .size-btn {
+            background: none; border: none; color: var(--accent);
+            font-size: 18px; cursor: pointer; font-weight: bold;
+            width: 30px; height: 30px; display: flex; justify-content: center; align-items: center;
+            border-radius: 50%; transition: 0.2s;
+        }
+        .size-btn:hover { background: rgba(212, 175, 55, 0.2); color: #fff; }
+
+        .phase-indicator { font-size: 12px; letter-spacing: 2px; color: var(--success); text-transform: uppercase; font-weight: bold; }
+
+        /* --- STAGE --- */
+        .stage { 
+            flex: 1; display: flex; flex-direction: column; 
+            justify-content: flex-start; 
+            width: 100%; box-sizing: border-box; overflow: hidden; position: relative;
+        }
+        
+        .target-container {
+            flex: 1; 
+            width: 100%;
+            overflow-y: hidden; 
+            position: relative;
+            mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 90%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 90%, transparent 100%);
+        }
+
+        .target-text { 
+            font-family: 'OuChan2', serif; 
+            text-shadow: 0 0 30px rgba(0,0,0,0.6); 
+            display: flex; flex-wrap: wrap; 
+            justify-content: center; 
+            align-content: flex-start; 
+            
+            width: 90%; 
+            margin: 0 auto;
+            
+            padding-top: 10px; 
+            padding-bottom: 60vh; 
+            
+            /* CHANGE 1: INCREASED GAP FOR PHASE 1 */
+            gap: 50px; 
+            row-gap: 15px; 
+            line-height: 1.4;
+            
+            transition: all 0.3s ease;
+        }
+
+        /* Drill Mode */
+        .target-text.drill-mode { gap: 10px !important; row-gap: 15px !important; }
+
+        .break { flex-basis: 100%; height: 0; margin: 0; }
+
+        .char { opacity: 0.2; transition: 0.2s; position: relative; min-width: 12px; text-align: center; }
+        
+        .char.current { 
+            opacity: 1; color: var(--accent); 
+            transform: scale(1.3); 
+            text-shadow: 0 0 30px var(--accent); 
+            z-index: 10; 
+        }
+        .char.current::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 100%; height: 3px; background: var(--accent); box-shadow: 0 0 15px var(--accent); }
+        
+        .char.correct { opacity: 1; color: #fff; text-shadow: 0 0 15px #fff; }
+        .char.wrong { opacity: 1; color: var(--error); animation: shake 0.3s; }
+        .char.space-char { min-width: 25px; }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* --- KEYBOARD --- */
+        #keyboard-wrapper { 
+            width: 98%; max-width: 950px; margin: 0 auto 10px auto; 
+            display: flex; justify-content: center; flex-shrink: 0; 
+            position: relative; z-index: 20; background: transparent;
+        }
+        #keyboard-wrapper svg {
+            width: 100%; height: auto; max-height: 45vh; 
+            display: block; filter: drop-shadow(0 -10px 20px rgba(0,0,0,0.8));
+        }
+
+        .st0 { fill: #d4af37; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; pointer-events: none; }
+        .st1 { fill: none; opacity: .6; stroke: #d4af37; stroke-width: 1.5px; transition: all 0.1s; }
+        .st2 { fill: #010a16; }
+        .bump { fill: #d4af37; opacity: 0.8; }
+        .key-guide { stroke: #fff !important; stroke-width: 3px !important; fill: rgba(255, 255, 255, 0.25) !important; opacity: 1 !important; filter: drop-shadow(0 0 12px rgba(255,255,255,0.9)); animation: breathe 0.8s infinite alternate; }
+        .key-hit { fill: var(--accent) !important; stroke: var(--accent) !important; filter: drop-shadow(0 0 15px var(--accent)); transition: 0.05s; }
+        @keyframes breathe { from { opacity: 0.6; } to { opacity: 1; } }
+
+        /* --- MODAL --- */
+        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(15px); }
+        .result-box { background: rgba(0, 230, 118, 0.05); border: 2px solid var(--success); padding: 50px; text-align: center; box-shadow: 0 0 60px rgba(0,230,118,0.3); max-width: 500px; width: 90%; }
+        .res-title { color: var(--success); font-size: 28px; letter-spacing: 5px; margin-bottom: 20px; text-transform: uppercase; font-weight: 900; }
+        .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .res-val { font-size: 40px; font-weight: bold; color: #fff; }
+        .res-label { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 2px; }
+        .res-btn { background: var(--success); color: #000; border: none; padding: 15px 40px; font-weight: bold; letter-spacing: 3px; cursor: pointer; transition: 0.3s; text-transform: uppercase; margin-top: 10px; }
+        .res-btn:hover { background: #fff; box-shadow: 0 0 30px #fff; transform: translateY(-2px); }
+
+        .back-btn { position: fixed; bottom: 15px; left: 40px; color: rgba(255,255,255,0.3); text-decoration: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; transition: 0.3s; z-index: 50; }
+        .back-btn:hover { color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .size-controls { display: none; }
+            .hud { padding: 0 15px; height: 50px; justify-content: center; }
+            .back-btn { top: 60px; bottom: auto; left: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hud">
+        <div class="level-info"><h1 id="level-title">Ascent</h1></div>
+        <div class="size-controls"><button class="size-btn" onclick="adjustFontSize(-10)">−</button><button class="size-btn" onclick="adjustFontSize(10)">+</button></div>
+        <div class="phase-indicator" id="phase-txt">Phase 1: Learning</div>
+    </div>
+
+    <div class="stage">
+        <div class="target-container" id="scroll-container"><div class="target-text" id="target-display"></div></div>
+        <div id="keyboard-wrapper">
+             <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 400">
+                <rect class="st2" width="950" height="400"/>
+                <g id="row-1"><g><rect class="st1" x="20" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(43.79 52)">~</text></g><g><rect class="st1" x="80" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(103.94 52)">1</text></g><g><rect class="st1" x="140" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(163.94 52)">2</text></g><g><rect class="st1" x="200" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(223.94 52)">3</text></g><g><rect class="st1" x="260" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(283.94 52)">4</text></g><g><rect class="st1" x="320" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(343.94 52)">5</text></g><g><rect class="st1" x="380" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(403.94 52)">6</text></g><g><rect class="st1" x="440" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(463.94 52)">7</text></g><g><rect class="st1" x="500" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(523.94 52)">8</text></g><g><rect class="st1" x="560" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(583.94 52)">9</text></g><g><rect class="st1" x="620" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(643.94 52)">0</text></g><g><rect class="st1" x="680" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(705.17 52)">-</text></g><g><rect class="st1" x="740" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(763.79 52)">=</text></g><g><rect class="st1" x="800" y="20" width="115" height="55" rx="6" ry="6"/><text class="st0" transform="translate(822.57 52)">BACKSPACE</text></g></g><g id="row-2"><g><rect class="st1" x="20" y="85" width="85" height="55" rx="6" ry="6"/><text class="st0" transform="translate(51.1 117)">TAB</text></g><g><rect class="st1" x="110" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(132.72 117)">Q</text></g><g><rect class="st1" x="170" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(191.81 117)">W</text></g><g><rect class="st1" x="230" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(253.33 117)">E</text></g><g><rect class="st1" x="290" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(313.03 117)">R</text></g><g><rect class="st1" x="350" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(373.64 117)">T</text></g><g><rect class="st1" x="410" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(433.33 117)">Y</text></g><g><rect class="st1" x="470" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(493.03 117)">U</text></g><g><rect class="st1" x="530" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(555.47 117)">I</text></g><g><rect class="st1" x="590" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(612.72 117)">O</text></g><g><rect class="st1" x="650" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(673.33 117)">P</text></g><g><rect class="st1" x="710" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(735.17 117)">[</text></g><g><rect class="st1" x="770" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(795.17 117)">]</text></g><g><rect class="st1" x="830" y="85" width="85" height="55" rx="6" ry="6"/><text class="st0" transform="translate(870.47 117)">\</text></g></g><g id="row-3"><g><rect class="st1" x="20" y="150" width="105" height="55" rx="6" ry="6"/><text class="st0" transform="translate(56.72 182)">CAPS</text></g><g><rect class="st1" x="130" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(153.03 182)">A</text></g><g><rect class="st1" x="190" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(213.33 182)">S</text></g><g><rect class="st1" x="250" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(273.03 182)">D</text></g><g><rect class="st1" x="310" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(333.64 182)">F</text><rect class="bump" x="327" y="190" width="20" height="2" rx="1"/></g><g><rect class="st1" x="370" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(392.72 182)">G</text></g><g><rect class="st1" x="430" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(453.03 182)">H</text></g><g><rect class="st1" x="490" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(513.94 182)">J</text><rect class="bump" x="507" y="190" width="20" height="2" rx="1"/></g><g><rect class="st1" x="550" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(573.03 182)">K</text></g><g><rect class="st1" x="610" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(633.64 182)">L</text></g><g><rect class="st1" x="670" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(695.17 182)">;</text></g><g><rect class="st1" x="730" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(755.69 182)">'</text></g><g><rect class="st1" x="790" y="150" width="125" height="55" rx="6" ry="6"/><text class="st0" transform="translate(833.36 182)">ENTER</text></g></g><g id="row-4"><g><rect class="st1" x="20" y="215" width="135" height="55" rx="6" ry="6"/><text class="st0" transform="translate(71.11 247)">SHIFT</text></g><g><rect class="st1" x="160" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(183.64 247)">Z</text></g><g><rect class="st1" x="220" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(243.33 247)">X</text></g><g><rect class="st1" x="280" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(303.03 247)">C</text></g><g><rect class="st1" x="340" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(363.33 247)">V</text></g><g><rect class="st1" x="400" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(423.03 247)">B</text></g><g><rect class="st1" x="460" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(483.03 247)">N</text></g><g><rect class="st1" x="520" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(542.42 247)">M</text></g><g><rect class="st1" x="580" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(605.47 247)">,</text></g><g><rect class="st1" x="640" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(665.47 247)">.</text></g><g><rect class="st1" x="700" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(725.47 247)">/</text></g><g><rect class="st1" x="760" y="215" width="155" height="55" rx="6" ry="6"/><text class="st0" transform="translate(821.11 247)">SHIFT</text></g></g><g id="row-5"><g><rect class="st1" x="270" y="280" width="400" height="55" rx="6" ry="6"/><text class="st0" transform="translate(439.54 312)">SPACEBAR</text></g></g>
+            </svg>
+        </div>
+    </div>
+
+    <div id="result-modal">
+        <div class="result-box">
+            <div class="res-title">Level Mastered</div>
+            <div class="res-grid">
+                <div><div class="res-val" id="res-wpm">0</div><div class="res-label">WPM</div></div>
+                <div><div class="res-val" id="res-acc">100%</div><div class="res-label">ACCURACY</div></div>
+            </div>
+            <button class="res-btn" onclick="window.location.href='lessons.html'">Return to Map</button>
+        </div>
+    </div>
+
+    <a href="lessons.html" class="back-btn">← Abort Ascent</a>
+
+    <script>
+        const NORMAL_MAP = { 'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':' ' };
+        const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ' };
+        const LEFT_HAND_KEYS = ['`','1','2','3','4','5','q','w','e','r','t','a','s','d','f','g','z','x','c','v','b'];
+
+        const basicLessons = [
+            { type: "special", text: "START", footer: "POSITIONING" },
+            { type: "tibetan", text: "ཀ ཁ ག ང", footer: "ALPHABET" },
+            { type: "tibetan", text: "ཅ ཆ ཇ ཉ", footer: "ALPHABET" },
+            { type: "special", text: "TEST I", footer: "MIXED 1 & 2" },
+            { type: "special", text: "GAME I", footer: "REWARD" },
+            { type: "tibetan", text: "ཏ ཐ ད ན", footer: "ALPHABET" },
+            { type: "tibetan", text: "པ ཕ བ མ", footer: "ALPHABET" },
+            { type: "special", text: "TEST II", footer: "MIXED 3 & 4" },
+            { type: "special", text: "GAME II", footer: "REWARD" },
+            { type: "tibetan", text: "ཙ ཚ ཛ ཝ", footer: "ALPHABET" },
+            { type: "tibetan", text: "ཞ ཟ འ ཡ", footer: "ALPHABET" },
+            { type: "special", text: "TEST III", footer: "MIXED 5 & 6" },
+            { type: "special", text: "GAME III", footer: "REWARD" },
+            { type: "tibetan", text: "ར ལ ཤ ས", footer: "ALPHABET" },
+            { type: "tibetan", text: "ཧ ཨ ་ །", footer: "ALPHABET" },
+            { type: "special", text: "TEST IV", footer: "MIXED 7 & 8" },
+            { type: "special", text: "GAME IV", footer: "REWARD" },
+            { type: "special", text: "FINAL", footer: "ALL 30 CHARS" },
+            { type: "special", text: "GAME", footer: "BASIC COMPLETE" }
+        ];
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const levelIndex = parseInt(urlParams.get('level') || "1");
+        const isTestMode = urlParams.get('mode') === 'test';
+
+        let currentLesson = basicLessons[levelIndex];
+        let baseChars = [];
+
+        if (currentLesson.text === "TEST I") baseChars = "ཀཁགངཅཆཇཉ".split('');
+        else if (currentLesson.text === "TEST II") baseChars = "ཏཐདནཔཕབམ".split('');
+        else if (currentLesson.text === "TEST III") baseChars = "ཙཚཛཝཞཟའཡ".split('');
+        else if (currentLesson.text === "TEST IV") baseChars = "རལཤསཧཨ།".split('');
+        else if (currentLesson.text === "FINAL") baseChars = "ཀཁགངཅཆཇཉཏཐདནཔཕབམཙཚཛཝཞཟའཡརལཤསཧཨ".split('');
+        else baseChars = currentLesson.text.replace(/ /g, '').split('');
+
+        // 1. PHASE 1: START WITH JUST 4 CHARS
+        let targetString = "";
+        if (!isTestMode) {
+            targetString = baseChars.join(''); 
+        } else {
+            targetString = generateDrillString(100); 
+        }
+
+        let currentIndex = 0;
+        let isPhase1 = !isTestMode; 
+        let phase1RepCount = 0; 
+        let drillStarted = isTestMode; 
+        let startTime = isTestMode ? new Date() : null;
+        let errors = 0;
+        let charCount = 0;
+        let currentFontSize = 140; 
+
+        document.getElementById('level-title').innerText = isTestMode ? `Test: ${currentLesson.footer}` : `Level ${levelIndex}: ${currentLesson.footer}`;
+        const display = document.getElementById('target-display');
+        const phaseTxt = document.getElementById('phase-txt');
+        if(isTestMode) phaseTxt.innerText = "ASSESSMENT MODE";
+
+        function renderString() {
+            display.innerHTML = '';
+            
+            if (isPhase1) {
+                display.className = 'target-text';
+                currentFontSize = 140; 
+            } else {
+                display.className = 'target-text drill-mode';
+                currentFontSize = 100; 
+            }
+            
+            if (window.innerWidth > 768) display.style.fontSize = currentFontSize + "px";
+            else display.style.fontSize = ""; 
+
+            const chars = targetString.split('');
+            chars.forEach((char, i) => {
+                const span = document.createElement('span');
+                span.innerText = char;
+                span.className = 'char';
+                if (i < currentIndex) span.classList.add('correct');
+                if (i === currentIndex) span.classList.add('current');
+                
+                if(char === ' ') span.classList.add('space-char');
+                display.appendChild(span);
+            });
+            
+            // ORPHAN KILLER: APPLIES TO TESTS AND PHASE 2
+            if(!isPhase1) ensureNoOrphan();
+            updateGuide();
+            setTimeout(scrollToCursor, 50);
+        }
+        
+        function ensureNoOrphan() {
+            setTimeout(() => {
+                const spans = Array.from(document.querySelectorAll('.char'));
+                if (spans.length === 0) return;
+                const lastSpan = spans[spans.length - 1];
+                const lastTop = lastSpan.offsetTop;
+                const lastLineItems = spans.filter(s => Math.abs(s.offsetTop - lastTop) < 10);
+                
+                if (lastLineItems.length > 0 && lastLineItems.length < 3) {
+                    const extra = " " + baseChars[0] + " " + baseChars[1] + " " + baseChars[0] + " " + baseChars[2];
+                    targetString += extra;
+                    extra.split('').forEach(c => {
+                        const s = document.createElement('span');
+                        s.innerText = c;
+                        s.className = 'char';
+                        if(c===' ') s.classList.add('space-char');
+                        display.appendChild(s);
+                    });
+                }
+            }, 50);
+        }
+
+        function generateDrillString(length) {
+            let newStr = "";
+            for(let i=0; i<length; i++) {
+                newStr += baseChars[Math.floor(Math.random() * baseChars.length)];
+                if(i < length-1) newStr += " "; 
+            }
+            return newStr;
+        }
+
+        function startDrillPhase() {
+            targetString = generateDrillString(60); 
+            currentIndex = 0;
+            isPhase1 = false;
+            phaseTxt.innerText = "Phase 2: Speed Drill";
+            renderString();
+            drillStarted = true;
+            startTime = new Date();
+        }
+
+        function scrollToCursor() {
+            const currentEl = document.querySelector('.char.current');
+            if (currentEl) currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Tab" || e.key === "Alt") { e.preventDefault(); return; }
+            if (e.key === "Shift") return;
+
+            triggerHitEffect(e.key);
+
+            const spans = document.querySelectorAll('.char');
+            if (currentIndex >= spans.length) return;
+
+            const physicalKey = e.key.toLowerCase();
+            let typedChar = (e.shiftKey ? SHIFT_MAP[physicalKey] : NORMAL_MAP[physicalKey]) || "";
+            if (isPhase1 && e.code === "Space") return; 
+            if (!isPhase1 && e.code === "Space") typedChar = " ";
+
+            const targetChar = targetString[currentIndex];
+            let isMatch = (typedChar === targetChar);
+            if (targetChar === " " && e.code === "Space") isMatch = true;
+
+            if (isMatch) {
+                spans[currentIndex].className = 'char correct';
+                spans[currentIndex].classList.remove('current'); 
+                currentIndex++;
+                
+                if(drillStarted) charCount++;
+
+                while(currentIndex < targetString.length && targetString[currentIndex] === ' ') {
+                    if (spans[currentIndex]) spans[currentIndex].className = 'char correct space-char';
+                    currentIndex++;
+                }
+
+                if (currentIndex < spans.length) {
+                    spans[currentIndex].className = 'char current';
+                    updateGuide();
+                    scrollToCursor();
+                } else {
+                    // CHANGE 2: DOUBLE AND RESET TO LEFT
+                    if (isPhase1) {
+                        if (phase1RepCount === 0) {
+                            phase1RepCount++;
+                            currentIndex = 0; 
+                            // SHOW 8 CHARACTERS (4 + 4)
+                            targetString = baseChars.join('') + baseChars.join(''); 
+                            renderString(); // Full re-render to wipe screen
+                        } else {
+                            setTimeout(startDrillPhase, 200);
+                        }
+                    } 
+                    else {
+                        finishLevel();
+                    }
+                }
+            } else {
+                spans[currentIndex].classList.add('wrong');
+                if(drillStarted) errors++;
+                setTimeout(() => spans[currentIndex].classList.remove('wrong'), 200);
+            }
+        });
+
+        function updateGuide() {
+            document.querySelectorAll('.key-guide').forEach(el => el.classList.remove('key-guide'));
+            if (currentIndex >= targetString.length) return;
+            
+            const nextChar = targetString[currentIndex];
+            let keyToHighlight = "";
+            let useShift = false;
+
+            if (nextChar === " ") {
+                keyToHighlight = " "; 
+                useShift = false;
+            } else {
+                for(let [k, v] of Object.entries(NORMAL_MAP)) { if(v === nextChar) { keyToHighlight = k; useShift = false; break; } }
+                if(!keyToHighlight) {
+                    for(let [k, v] of Object.entries(SHIFT_MAP)) { if(v === nextChar) { keyToHighlight = k; useShift = true; break; } }
+                }
+            }
+
+            if (keyToHighlight) {
+                highlightSVGKey(keyToHighlight, 'key-guide');
+                if (useShift) {
+                    if (LEFT_HAND_KEYS.includes(keyToHighlight)) highlightShiftKey('right', 'key-guide');
+                    else highlightShiftKey('left', 'key-guide');
+                }
+            }
+        }
+
+        function highlightSVGKey(keyChar, className) {
+            const texts = document.querySelectorAll('text.st0');
+            const target = (keyChar === " ") ? "SPACEBAR" : keyChar.toUpperCase();
+            texts.forEach(t => {
+                const label = t.textContent.trim();
+                if ((label === target) || (target === ";" && label === ";") || (target === "SPACEBAR" && label === "SPACEBAR")) {
+                    const rect = t.parentElement.querySelector('rect.st1');
+                    if (rect) rect.classList.add(className);
+                }
+            });
+        }
+
+        function highlightShiftKey(side, className) {
+            const shifts = [];
+            document.querySelectorAll('text.st0').forEach(t => { if (t.textContent.trim() === "SHIFT") shifts.push(t); });
+            if (shifts.length >= 2) {
+                const targetText = (side === 'left') ? shifts[0] : shifts[1];
+                const rect = targetText.parentElement.querySelector('rect.st1');
+                if (rect) rect.classList.add(className);
+            }
+        }
+
+        function triggerHitEffect(key) {
+            let k = key; if(key === " ") k = "SPACEBAR";
+            highlightSVGKey(k, 'key-hit');
+            setTimeout(() => { document.querySelectorAll('.key-hit').forEach(el => el.classList.remove('key-hit')); }, 100);
+        }
+
+        function adjustFontSize(delta) {
+            currentFontSize = Math.max(10, Math.min(300, currentFontSize + delta));
+            if (window.innerWidth > 768) display.style.fontSize = currentFontSize + "px";
+        }
+
+        function finishLevel() {
+            localStorage.setItem('tk_lvl_' + levelIndex, 'true');
+            const timeMins = (new Date() - startTime) / 60000;
+            const wpm = Math.round((charCount / 5) / timeMins) || 0;
+            const acc = Math.round(((charCount - errors) / charCount) * 100) || 100;
+            const stats = { wpm: wpm, acc: acc };
+            localStorage.setItem('tk_stats_' + levelIndex, JSON.stringify(stats));
+            document.getElementById('res-wpm').innerText = wpm;
+            document.getElementById('res-acc').innerText = acc + "%";
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        renderString();
+    </script>
+</body>
+</html>

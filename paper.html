@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="bo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TibetanKeys | Paper Studio</title>
+    <link rel="icon" type="image/png" href="og.png">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        /* --- FONTS --- */
+        @font-face { font-family: 'Lakdi'; src: url('Monlam Lakdi Ouchen.ttf'); }
+        @font-face { font-family: 'Tsikmachok'; src: url('Monlam Tsikmachok.ttf'); }
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
+        @font-face { font-family: 'Tikrang'; src: url('Monlam Uni Tikrang.ttf'); }
+
+        :root {
+            --bg: #050d18;
+            --ribbon-bg: rgba(1, 10, 22, 0.85); /* Semi-transparent */
+            --accent: #d4af37;
+            --text: #ffffff;
+            --nav-h: 110px;
+            --foot-h: 40px;
+            --page-w: 210mm; 
+            --page-h: 297mm;
+        }
+
+        body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
+
+        /* --- TRANSPARENT BLUR NAV --- */
+        nav {
+            position: fixed; top: 0; width: 100%; height: var(--nav-h);
+            background: var(--ribbon-bg);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            display: flex; align-items: center; 
+            /* Changed to space-between to manage Logo left, Tools center */
+            justify-content: space-between; 
+            padding: 0; 
+            box-sizing: border-box; z-index: 5000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        /* --- BIG ICON LOGO (LEFT) --- */
+        .logo-section { 
+            display: flex; align-items: center; justify-content: center;
+            width: 140px; height: 100%;
+            background: rgba(255, 255, 255, 0.03); 
+            border-right: 1px solid rgba(255,255,255,0.15);
+            text-decoration: none; cursor: pointer; transition: 0.3s;
+            flex-shrink: 0; /* Prevents shrinking */
+        }
+        .logo-section:hover { background: rgba(212, 175, 55, 0.08); }
+        
+        .logo-img { 
+            width: auto; 
+            height: 85px; /* Maximum height for impact */
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.6)); 
+            transition: 0.3s;
+        }
+        .logo-section:hover .logo-img { transform: scale(1.05); }
+
+        /* --- CENTERED RIBBON CONTAINER --- */
+        .ribbon-container {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100%; 
+            flex-grow: 1; /* Takes up remaining space to center content */
+            padding-right: 140px; /* Offset to balance the logo width visually */
+        }
+
+        .ribbon-group {
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            height: 75%; padding: 0 20px; /* More padding for center look */
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .ribbon-group:last-child { border-right: none; }
+        
+        .group-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+        .tools-row { display: flex; align-items: center; gap: 8px; height: 100%; }
+
+        /* BUTTONS & INPUTS */
+        .icon-btn {
+            background: transparent; border: 1px solid transparent; color: #ccc;
+            border-radius: 4px; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;
+            position: relative; transition: 0.2s; min-width: 32px;
+        }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--accent); border-color: rgba(255,255,255,0.1); }
+        .icon-btn:active { transform: scale(0.95); background: var(--accent); color: black; }
+        
+        .material-icons { font-size: 24px; }
+
+        .ribbon-select { background: #111; color: white; border: 1px solid #444; font-size: 11px; border-radius: 3px; padding: 4px; outline: none; }
+        .ribbon-num { background: #111; color: white; border: 1px solid #444; font-size: 11px; width: 40px; text-align: center; border-radius: 3px; padding: 4px; outline: none; }
+
+        /* TOOLTIP */
+        .icon-btn:hover::after {
+            content: attr(data-tooltip);
+            position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: black; padding: 3px 6px;
+            font-size: 9px; font-weight: bold; border-radius: 3px;
+            white-space: nowrap; pointer-events: none; z-index: 6000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        /* COLOR PICKER */
+        .color-wrapper { position: relative; }
+        .color-grid {
+            display: none; position: absolute; top: 100%; left: 0; background: #222; border: 1px solid #555;
+            padding: 8px; grid-template-columns: repeat(5, 1fr); gap: 4px; z-index: 100; width: 130px;
+        }
+        .color-wrapper:hover .color-grid { display: grid; }
+        .color-dot { width: 20px; height: 20px; border-radius: 3px; cursor: pointer; border: 1px solid #444; }
+        .color-dot:hover { transform: scale(1.1); border-color: #fff; }
+
+        /* --- WORKSPACE --- */
+        .workspace {
+            margin-top: var(--nav-h); height: calc(100vh - var(--nav-h) - var(--foot-h));
+            overflow-y: auto; background: #0a111a; padding: 40px;
+            display: flex; flex-direction: column; align-items: center; scroll-behavior: smooth;
+        }
+
+        #page-wrapper { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; }
+
+        .page-container {
+            width: var(--page-w); height: var(--page-h); 
+            background: #000; color: #fff;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);
+            padding: 25.4mm; box-sizing: border-box; 
+            font-size: 24px; line-height: 1.6; outline: none; font-family: 'OuChan2';
+            word-break: keep-all; overflow-wrap: anywhere; overflow: hidden; position: relative;
+        }
+        
+        .page-header {
+            position: absolute; top: 0; left: 0; width: 100%; height: 20mm;
+            border-bottom: 1px dashed rgba(255,255,255,0.2);
+            display: none; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); font-size: 14px;
+        }
+        .page-container.has-header { padding-top: 30mm; }
+        .page-container.has-header .page-header { display: flex; }
+
+        /* FOOTER */
+        footer {
+            position: fixed; bottom: 0; width: 100%; height: var(--foot-h);
+            background: var(--ribbon-bg); backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; font-size: 11px; color: rgba(255,255,255,0.6); z-index: 5000;
+        }
+
+        @media print {
+            nav, footer { display: none; }
+            .workspace { background: white; padding: 0; height: auto; overflow: visible; }
+            .page-container { margin: 0; box-shadow: none; border: none; page-break-after: always; color: black !important; background: white !important; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="logo-section">
+        <img src="og.png" class="logo-img" alt="Logo">
+    </a>
+
+    <div class="ribbon-container">
+        
+        <div class="ribbon-group">
+            <div class="tools-row">
+                <button class="icon-btn" data-tooltip="Open File" onmousedown="event.preventDefault(); document.getElementById('fileInput').click()">
+                    <span class="material-icons">folder_open</span>
+                </button>
+                <input type="file" id="fileInput" hidden onchange="loadFile(event)">
+                
+                <button class="icon-btn" data-tooltip="Save .DOC" onmousedown="event.preventDefault(); saveDoc()">
+                    <span class="material-icons">save</span>
+                </button>
+                <button class="icon-btn" data-tooltip="Print / PDF" onclick="window.print()">
+                    <span class="material-icons">print</span>
+                </button>
+                <button class="icon-btn" data-tooltip="New Paper" onclick="if(confirm('Clear all?')) location.reload()">
+                    <span class="material-icons">note_add</span>
+                </button>
+                
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <label style="font-size:9px; color:#888;">Margin</label>
+                    <select class="ribbon-select" onchange="setMargin(this.value)">
+                        <option value="normal">Normal</option>
+                        <option value="narrow">Narrow</option>
+                        <option value="wide">Wide</option>
+                    </select>
+                </div>
+            </div>
+            <div class="group-label">Paper</div>
+        </div>
+
+        <div class="ribbon-group">
+            <div class="tools-row">
+                <select id="fontSelect" class="ribbon-select" onchange="exec('fontName', this.value)" style="width: 100px;">
+                    <option value="OuChan2">OuChan2</option>
+                    <option value="Lakdi">Lakdi</option>
+                    <option value="Tsikmachok">Tsikmachok</option>
+                    <option value="Tikrang">Tikrang</option>
+                </select>
+                
+                <button class="icon-btn" data-tooltip="Increase (5pt)" onmousedown="event.preventDefault(); modSize(5)">
+                    <span class="material-icons">text_increase</span>
+                </button>
+                <input type="number" id="ptBox" class="ribbon-num" value="24" onchange="setSizeExact(this.value)" onfocus="saveSel()">
+                <button class="icon-btn" data-tooltip="Decrease (5pt)" onmousedown="event.preventDefault(); modSize(-5)">
+                    <span class="material-icons">text_decrease</span>
+                </button>
+
+                <div style="width:1px; height:20px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
+
+                <button class="icon-btn" data-tooltip="Bold" onmousedown="event.preventDefault(); exec('bold')">
+                    <span class="material-icons">format_bold</span>
+                </button>
+                <button class="icon-btn" data-tooltip="Superscript" onmousedown="event.preventDefault(); exec('superscript')">
+                    <span class="material-icons">superscript</span>
+                </button>
+                <button class="icon-btn" data-tooltip="Subscript" onmousedown="event.preventDefault(); exec('subscript')">
+                    <span class="material-icons">subscript</span>
+                </button>
+                
+                <button class="icon-btn" data-tooltip="Clear Format" onmousedown="event.preventDefault(); exec('removeFormat')">
+                    <span class="material-icons">format_clear</span>
+                </button>
+
+                <div class="color-wrapper">
+                    <button class="icon-btn" data-tooltip="Font Color">
+                        <span class="material-icons" style="color:var(--accent);">palette</span>
+                    </button>
+                    <div class="color-grid" id="colorGrid"></div>
+                </div>
+            </div>
+            <div class="group-label">Font</div>
+        </div>
+
+        <div class="ribbon-group">
+            <div class="tools-row">
+                <button class="icon-btn" data-tooltip="Align Left" onmousedown="event.preventDefault(); exec('justifyLeft')">
+                    <span class="material-icons">format_align_left</span>
+                </button>
+                <button class="icon-btn" data-tooltip="Center" onmousedown="event.preventDefault(); exec('justifyCenter')">
+                    <span class="material-icons">format_align_center</span>
+                </button>
+                <button class="icon-btn" data-tooltip="Align Right" onmousedown="event.preventDefault(); exec('justifyRight')">
+                    <span class="material-icons">format_align_right</span>
+                </button>
+                <button class="icon-btn" data-tooltip="Thai Distributed" onmousedown="event.preventDefault(); setThai()" style="color:var(--accent);">
+                    <span class="material-icons">format_align_justify</span>
+                </button>
+            </div>
+            <div class="group-label">Align</div>
+        </div>
+
+        <div class="ribbon-group">
+            <div class="tools-row">
+                <button class="icon-btn" data-tooltip="Add Header" onmousedown="event.preventDefault(); toggleHeader()">
+                    <span class="material-icons">view_day</span>
+                </button>
+                <button class="icon-btn" data-tooltip="Page Numbers Auto" style="opacity:0.5; cursor:default;">
+                    <span class="material-icons">123</span>
+                </button>
+            </div>
+            <div class="group-label">H & F</div>
+        </div>
+        
+    </div> </nav>
+
+<div class="workspace">
+    <div id="page-wrapper">
+        <div class="page-container" contenteditable="true" onkeydown="handleKey(event, this)" oninput="updateStats(); saveSel()" onmouseup="saveSel()" onkeyup="saveSel()">
+            <div class="page-header" contenteditable="true">HEADER AREA</div>
+            </div>
+    </div>
+</div>
+
+<footer>
+    <div style="display:flex; gap:15px; align-items: center;">
+        <span id="pageTrack">Page 1 of 1</span>
+        <span id="wordCount">Words: 0</span>
+        <span id="langBadge" style="border:1px solid var(--accent); color:var(--accent); padding:0 5px; border-radius:3px; font-weight:bold;">TIBETAN</span>
+    </div>
+    <div style="display:flex; gap:15px; align-items:center;">
+        <span id="charCount">Char: 0</span>
+        <span class="material-icons" style="cursor:pointer; font-size:16px; opacity:0.6;" onclick="setView('column')" title="Single View">description</span>
+        <span class="material-icons" style="cursor:pointer; font-size:16px; opacity:0.6;" onclick="setView('row')" title="Grid View">grid_view</span>
+        <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:10px;">
+            <span style="cursor:pointer;" onclick="setZoom(-0.1)">-</span>
+            <span id="zoomVal" style="color:var(--accent); font-weight:bold;">100%</span>
+            <span style="cursor:pointer;" onclick="setZoom(0.1)">+</span>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+<script>
+    let savedRange = null;
+    let curLang = 'tibetan';
+    let lastCtrl = 0;
+    let zoom = 1.0;
+
+    // --- SELECTION ---
+    function saveSel() { const s=window.getSelection(); if(s.rangeCount>0) savedRange=s.getRangeAt(0); }
+    function restoreSel() { const s=window.getSelection(); s.removeAllRanges(); if(savedRange) s.addRange(savedRange); }
+
+    // --- COMMANDS ---
+    function exec(cmd, val=null) {
+        restoreSel(); document.execCommand(cmd, false, val); saveSel(); updateStats();
+    }
+
+    // --- FONT SIZE ---
+    function setSizeExact(val) {
+        restoreSel(); document.execCommand('insertHTML', false, `<span style="font-size:${val}px">${window.getSelection()}</span>`); saveSel();
+    }
+    function modSize(delta) {
+        let box = document.getElementById('ptBox');
+        let v = parseInt(box.value) + delta;
+        if(v<1) v=1; box.value = v; setSizeExact(v);
+    }
+
+    // --- LAYOUT ---
+    function setMargin(t) {
+        const p = document.querySelectorAll('.page-container');
+        p.forEach(x => {
+            if(t==='narrow') x.style.padding='12.7mm';
+            if(t==='normal') x.style.padding='25.4mm';
+            if(t==='wide') x.style.padding='50mm';
+        });
+    }
+    function toggleHeader() { document.querySelectorAll('.page-container').forEach(p => p.classList.toggle('has-header')); }
+    
+    function setThai() {
+        restoreSel();
+        const p = window.getSelection().anchorNode.parentElement.closest('.page-container');
+        if(p) { p.style.textAlign="justify"; p.style.textJustify="distribute"; p.style.textAlignLast="justify"; }
+    }
+    
+    function setView(m) { document.getElementById('page-wrapper').style.flexDirection = m; }
+    function setZoom(v) { zoom=Math.max(0.4, Math.min(2.0, zoom+v)); document.getElementById('page-wrapper').style.transform=`scale(${zoom})`; document.getElementById('zoomVal').innerText=Math.round(zoom*100)+"%"; }
+
+    // --- INPUT ---
+    const normMap={'k':'ཀ','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','t':'ཏ','y':'ཡ','u':'ུ','i':'ི','o':'ོ','p':'པ','[':'༷',']':'྄','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ',';':'ཌྷ',"'":"འ",'\\':'༔','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ',',':'ྱ','.':'ྲ','/':'།'};
+    const shftMap={'K':'ཁ','A':'ཨ','~':'༸','!':'༑','@':'༄༅','#':'༅','$':'“','%':'”','^':'༈','&':'༼','*':'༽','(':'(',')':')','_':'ཱྀ','+':'ྃ','Q':'ཋ','W':'ྭ','E':'ཻ','R':'ཪ','T':'ཐ','Y':'ྱ','U':'ཱུ','I':'ྀ','O':'ཽ','P':'ཕ','{':'ྂ','}':'༵','S':'ཤ','D':'ཛ','F':'དྷ','G':'གྷ','H':'ྷ','J':'ཛྷ','L':'ླ',':':'ཿ','"':'ཱ','|':'྅','Z':'ཞ','X':'ཚ','C':'ཆ','V':'ཎ','B':'བྷ','N':'ཉ','M':'ཥ','<':'‚','>':'ླ','?':'„'};
+    const subMap={'k':'ྐ','q':'ྚ','w':'ྭ','r':'ྲ','t':'ྟ','y':'ྱ','p':'ྤ','s':'ྶ','d':'ྡ','f':'ྔ','g':'ྒ','h':'ྷ','j':'ྗ','l':'ླ','z':'ྯ','x':'ྩ','c':'ྕ','v':'ྜ','b':'ྦ','n':'ྣ','m':'ྨ'};
+    let isLink = false;
+
+    function handleKey(e, el) {
+        if(e.key === 'Control') {
+            if(Date.now()-lastCtrl<300) { curLang=curLang==='tibetan'?'english':'tibetan'; document.getElementById('langBadge').innerText=curLang.toUpperCase(); }
+            lastCtrl=Date.now(); return;
+        }
+        if(e.key==='Backspace' && el.innerText.trim().length===0 && document.querySelectorAll('.page-container').length>1) {
+            e.preventDefault(); const prev=el.previousElementSibling; el.remove(); prev.focus();
+            const r=document.createRange(); r.selectNodeContents(prev); r.collapse(false);
+            const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); updateStats(); return;
+        }
+        if(curLang==='tibetan' && e.key.length===1 && !e.ctrlKey && !e.altKey) {
+            e.preventDefault();
+            let char="";
+            if(e.code==='Space') char=e.shiftKey?" ":"་";
+            else if(e.key==='a' && !e.shiftKey) { isLink=true; return; }
+            else {
+                char=e.shiftKey?(shftMap[e.key]||""):(normMap[e.key]||"");
+                if(isLink && subMap[e.key.toLowerCase()]) { char=subMap[e.key.toLowerCase()]; isLink=false; }
+                else isLink=false;
+            }
+            if(char) document.execCommand('insertText', false, char);
+        }
+        
+        setTimeout(()=>{
+            if(!el.nextElementSibling && el.scrollHeight>el.clientHeight) {
+                const nP = el.cloneNode(true); nP.innerHTML="";
+                if(el.classList.contains('has-header')) nP.innerHTML='<div class="page-header" contenteditable="true">HEADER</div>';
+                nP.onkeydown=function(ev){handleKey(ev,this)}; nP.oninput=function(){updateStats();saveSel()}; nP.onmouseup=saveSel;
+                document.getElementById('page-wrapper').appendChild(nP); nP.focus();
+            }
+            updateStats();
+        }, 10);
+    }
+
+    // --- COLORS ---
+    const colors=['#ffffff','#d4af37','#ff4d4d','#40E0D0','#00ff00','#ff00ff','#1e90ff','#ffa500','#ffff00','#00ffff','#ff1493','#7cfc00','#8a2be2','#ff4500','#00ced1','#adff2f','#ff69b4','#ba55d3','#f0e68c','#cd5c5c','#3cb371','#4682b4','#d2691e','#9acd32','#e6e6e6'];
+    const cGrid=document.getElementById('colorGrid');
+    colors.forEach(c=>{
+        const d=document.createElement('div'); d.className='color-dot'; d.style.background=c;
+        d.onmousedown=(e)=>{ e.preventDefault(); exec('foreColor', c); };
+        cGrid.appendChild(d);
+    });
+
+    function updateStats() {
+        let t=0, c=0, p=0;
+        const pages=document.querySelectorAll('.page-container'); p=pages.length;
+        pages.forEach(pg=>{ t+=(pg.innerText.match(/་/g)||[]).length; c+=pg.innerText.length; });
+        document.getElementById('wordCount').innerText=`Words: ${t}`;
+        document.getElementById('charCount').innerText=`Char: ${c}`;
+        document.getElementById('pageTrack').innerText=`Page 1 of ${p}`;
+    }
+
+    function saveDoc() {
+        let txt=""; document.querySelectorAll('.page-container').forEach(p=>txt+=p.innerText+"\n\n");
+        const blob=new Blob(['\ufeff', txt], {type:'application/msword'});
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`Paper_${Date.now()}.doc`; a.click();
+    }
+    async function loadFile(e) {
+        const f=e.target.files[0]; if(!f) return;
+        const r=new FileReader();
+        r.onload=async(ev)=>{
+            const res=f.name.endsWith('.docx')?(await mammoth.extractRawText({arrayBuffer:ev.target.result})).value:new TextDecoder().decode(ev.target.result);
+            document.querySelector('.page-container').innerHTML=res.replace(/\n/g, '<br>');
+        };
+        r.readAsArrayBuffer(f);
+    }
+</script>
+</body>
+</html>

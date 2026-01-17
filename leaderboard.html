@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="bo">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ62DL1S2M"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-WQ62DL1S2M');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="icon" type="image/png" href="og.png">
+
+    <title>TibetanKeys Leaderboard | The Hall of Masters</title>
+    
+    <style>
+    /* ... your existing CSS starts here ... */
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
+        @font-face { font-family: 'BodYig'; src: url('Monlam BodYig.ttf'); }
+
+        :root {
+            --bg: #010a16;
+            --panel: rgba(255, 255, 255, 0.05);
+            --accent: #d4af37; /* Gold */
+            --text: #ffffff;
+            --green: #00e676;
+            --red: #ff4444; 
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg); color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scroll only */
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        /* --- NAVIGATION (FIXED TOP) --- */
+        nav {
+            position: fixed; top: 0; width: 100%; display: flex; 
+            justify-content: center; gap: 40px; padding: 15px 0;
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(25px); 
+            z-index: 5000; border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            flex-wrap: wrap;
+        }
+        nav a { 
+            color: rgba(255, 255, 255, 0.8); 
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            cursor: pointer; 
+            transition: 0.3s ease;
+            display: inline-block;
+        }
+        nav a:hover { 
+            color: var(--accent); 
+            transform: scale(1.15);
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        /* Active State for Leaderboard */
+        nav a.active { 
+            color: var(--green); 
+            border-bottom: 2px solid var(--green); 
+            text-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+        }
+
+        /* --- MAIN LAYOUT --- */
+        .container {
+            max-width: 1200px;
+            margin: 120px auto 100px; /* Top margin accounts for Fixed Nav */
+            padding: 20px; text-align: center;
+        }
+
+        h1 {
+            color: var(--accent); letter-spacing: 4px; text-transform: uppercase;
+            font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+        .subtitle { color: #888; margin-bottom: 20px; font-size: 1.1rem; }
+
+        .weekly-notice {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.08); 
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: #ccc; font-size: 0.9rem; padding: 8px 25px;
+            border-radius: 50px; margin-bottom: 40px;
+            backdrop-filter: blur(5px); font-weight: 500;
+        }
+        .weekly-notice b { color: var(--accent); }
+
+        /* --- LEADERBOARD TABLE (SCROLLS WITH PAGE) --- */
+        .table-wrapper {
+            border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); background: var(--panel);
+            /* Removed fixed height/overflow so it expands naturally */
+        }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { 
+            position: sticky; top: 60px; /* Sticks below the Nav bar */
+            z-index: 100; 
+            background: #0b1624; color: var(--accent); 
+            font-weight: 600; letter-spacing: 1px;
+            padding: 20px 15px; text-align: left;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+        }
+        /* Corner radius for header */
+        th:first-child { border-top-left-radius: 20px; }
+        th:last-child { border-top-right-radius: 20px; }
+
+        td { 
+            padding: 15px; text-align: left; 
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.01); 
+        }
+        .rank-badge { 
+            display: inline-block; width: 30px; height: 30px; line-height: 30px; 
+            text-align: center; border-radius: 50%; font-weight: bold; font-size: 14px;
+        }
+        .rank-1 { background: #FFD700; color: #000; box-shadow: 0 0 15px #FFD700; }
+        .rank-2 { background: #C0C0C0; color: #000; }
+        .rank-3 { background: #CD7F32; color: #000; }
+        .rank-other { color: #555; border: 1px solid #333; }
+        .score-col { color: var(--green); font-weight: bold; font-size: 1.2rem; }
+        .detail-col { font-size: 0.9rem; color: #aaa; }
+        
+        .retry-btn {
+            background: none; border: 1px solid #444; color: #888;
+            border-radius: 5px; cursor: pointer; padding: 5px 10px;
+            transition: 0.3s; font-size: 1.2rem;
+        }
+        .retry-btn:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.1); }
+
+        .floating-bar {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            z-index: 900; display: flex; justify-content: center;
+        }
+        .arena-btn {
+            background: var(--accent); color: #000; border: none;
+            padding: 15px 50px; font-size: 1.2rem; font-weight: 900;
+            border-radius: 50px; cursor: pointer; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 30px rgba(212, 175, 55, 0.3);
+            transition: 0.3s; animation: pulse-btn 2s infinite; border: 2px solid #fff;
+        }
+        .arena-btn:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(212, 175, 55, 0.6); }
+        @keyframes pulse-btn { 0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); } 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 6000;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #0b1624; border: 1px solid var(--accent);
+            padding: 40px; border-radius: 20px; 
+            width: 95%; max-width: 1400px;
+            text-align: center; position: relative;
+        }
+        .error-text { color: var(--red); font-size: 0.9rem; min-height: 24px; margin-top: 10px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
+        .error-text.visible { opacity: 1; }
+        
+        input {
+            width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px;
+            border: 1px solid #333; background: #050d16; color: #fff;
+            box-sizing: border-box; font-size: 1rem;
+        }
+        input:focus { border-color: var(--accent); outline: none; }
+        input.input-error { border-color: var(--red); box-shadow: 0 0 10px rgba(255, 68, 68, 0.2); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* --- GAME SCREEN --- */
+        #game-screen { display: none; text-align: left; }
+        
+        .game-display-area {
+            font-family: 'OuChan2', serif; 
+            /* Font size set by JS now */
+            line-height: 2.2; 
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #555; 
+            padding: 40px 60px; 
+            border-radius: 20px;
+            margin-bottom: 20px; 
+            text-align: left;
+            position: relative; 
+            cursor: text;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.6);
+            height: 400px; 
+            overflow: hidden; 
+            scroll-behavior: smooth;
+            word-break: normal;
+            white-space: normal;
+        }
+
+        /* WORD WRAPPER */
+        .tibetan-word {
+            display: inline-block;
+            white-space: nowrap;
+            margin-right: 2px;
+            vertical-align: bottom;
+        }
+
+        .stack { 
+            display: inline-block; 
+            position: relative; 
+            margin-right: 1px;
+            vertical-align: bottom;
+        }
+        
+        /* GHOST OVERLAY */
+        .stack .ghost-text {
+            position: absolute; left: 0; bottom: 0; width: 100%; text-align: center;
+            color: var(--accent); text-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+            font-family: 'OuChan2', serif; font-size: inherit; line-height: inherit; 
+            white-space: nowrap; pointer-events: none; background: transparent;
+        }
+        .stack .ghost-text.error { color: var(--red); text-shadow: 0 0 10px rgba(255, 68, 68, 0.8); }
+        .stack.current-target { background: rgba(255, 255, 255, 0.05); border-radius: 8px; }
+        .correct { color: #fff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.5); } 
+
+        #hidden-input { position: absolute; opacity: 0; top: 0; left: 0; height: 0; width: 0; }
+        .timer-box { font-size: 2rem; font-weight: bold; color: var(--accent); margin-bottom: 20px; text-align: center; }
+        
+        /* CONTROLS (Restart + Zoom) */
+        .controls-bar { margin-top: 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; }
+        .ctrl-btn { background: none; border: 2px solid #555; color: #888; padding: 8px 15px; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
+        .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .ctrl-btn.restart:hover { border-color: var(--red); color: var(--red); }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            nav { gap: 15px; padding: 15px 10px; overflow-x: auto; justify-content: flex-start; }
+            .detail-col { display: none; } 
+            h1 { font-size: 1.5rem; }
+            .floating-bar { bottom: 20px; width: 90%; }
+            .arena-btn { width: 100%; }
+            th { top: 60px; padding: 10px; font-size: 12px; }
+            td { padding: 10px; font-size: 12px; }
+            .game-display-area { padding: 20px; height: 300px; }
+            .controls-bar { flex-wrap: wrap; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="index.html#about">About</a>
+        <a href="lessons.html">Lessons</a>
+        <a href="paper.html">Paper</a> 
+        <a href="leaderboard.html" class="active">Leaderboard</a>
+        <a href="timer.html">Timer</a>
+        <a href="index.html#Install">Install</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="index.html#credits">Credits</a>
+        <a href="index.html#donate">Donate</a>
+    </nav>
+
+    <div class="container">
+        <h1>Hall of Masters</h1>
+        <div class="subtitle">The Guardians of the Digital Script</div>
+        <div class="weekly-notice">
+            <span>⚠️ The Challenge Text changes every <b>Monday</b>. The Hall resets weekly.</span>
+        </div>
+        <div class="table-wrapper">
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th width="8%">Rank</th>
+                        <th width="20%">Name</th>
+                        <th width="18%">Location</th>
+                        <th width="12%" class="detail-col">Time</th>
+                        <th width="12%" class="detail-col">WPM</th>
+                        <th width="12%" class="detail-col">Accuracy</th>
+                        <th width="12%">Score</th>
+                        <th width="10%">Retry</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr><td colspan="8" style="text-align:center; padding: 30px;">Connecting to the Archives...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="floating-bar">
+        <button class="arena-btn" onclick="openRegisterModal()">ENTER THE ARENA</button>
+    </div>
+
+    <div id="register-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 style="color:var(--accent);">Identity Check</h2>
+            <p>Enter your details. Use the same PIN to update your score later.</p>
+            <input type="text" id="p-name" placeholder="Your Name (e.g. Tenzin)">
+            <input type="text" id="p-loc" placeholder="Location (e.g. Dharamshala)">
+            <input type="number" id="p-pin" placeholder="4-Digit Secret PIN" oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);">
+            <div id="reg-error" class="error-text"></div>
+            <button class="arena-btn" style="width:100%; margin-top:20px; border-radius:10px;" onclick="startGameSetup()">START CHALLENGE</button>
+            <button onclick="closeModal('register-modal')" style="background:none; border:none; color:#555; margin-top:15px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="verify-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 style="color:var(--accent);">Welcome Back</h2>
+            <p id="verify-msg">Enter your Secret PIN to update your score.</p>
+            <input type="number" id="v-pin" placeholder="4-Digit Secret PIN" oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);">
+            <div id="verify-error" class="error-text"></div>
+            <button class="arena-btn" style="width:100%; margin-top:20px; border-radius:10px;" onclick="verifyPin()">VERIFY & PLAY</button>
+            <button onclick="closeModal('verify-modal')" style="background:none; border:none; color:#555; margin-top:15px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="game-modal" class="modal">
+        <div class="modal-content">
+            <div class="timer-box" id="timer">00:00</div>
+            
+            <div id="game-display" class="game-display-area" onclick="focusInput()">
+                </div>
+
+            <input type="text" id="hidden-input" autocomplete="off">
+            
+            <div id="challenge-source" style="display:none;">
+                འཛམ་གླིང་གི་ཡང་ཐོག་ཏུ་ཆགས་པའི་ང་ཚོའི་ཕ་ཡུལ་བོད་ལྗོངས་ནི་རི་མཐོ་ས་གཙང་དང་གངས་རི་ར་བས་བསྐོར་བའི་ཡུལ་གྲུ་ཞིག་ཡིན།
+            </div>
+
+            <div class="controls-bar">
+                <button class="ctrl-btn" onmousedown="event.preventDefault(); adjustFontSize(-5)">A-</button>
+                <button class="ctrl-btn" onmousedown="event.preventDefault(); adjustFontSize(5)">A+</button>
+                <div style="flex-grow:1;"></div> 
+                <button class="ctrl-btn restart" onclick="launchGame()">RESTART</button>
+                <button class="arena-btn" style="padding: 10px 30px; font-size: 1rem;" onclick="finishGame()">SUBMIT NOW</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 style="color:var(--green);">CHALLENGE COMPLETE</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; text-align: left;">
+                <div>Time Taken:</div> <div id="res-time" style="color:var(--accent); font-weight:bold;">0s</div>
+                <div>Raw WPM:</div> <div id="res-wpm" style="color:var(--accent); font-weight:bold;">0</div>
+                <div>Accuracy:</div> <div id="res-acc" style="color:var(--accent); font-weight:bold;">0%</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <div style="font-size: 0.9rem; color:#888;">FINAL SCORE</div>
+                <div id="res-score" style="font-size: 3rem; font-weight:900; color:var(--green);">0</div>
+            </div>
+            <button id="upload-btn" class="arena-btn" style="width:100%; border-radius:10px;" onclick="uploadScore()">SUBMIT TO ARCHIVES</button>
+            <p id="upload-status" style="margin-top:10px; font-size:0.8rem; color:#888;"></p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbz0It0oTzk88tXjVWP1oshnegZMMInfM3GxDFdKWhPdrIl2bHxcyN2Kn23vRG-o6xutvQ/exec";
+        const BAD_WORDS = ["fuck", "shit", "bitch", "ass", "idiot", "stupid", "hell", "damn"];
+
+        const NORMAL_MAP = { 
+            'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ',
+            'z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ',
+            'r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',
+            ',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦',
+            '7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':'་' 
+        };
+        const SHIFT_MAP = { 
+            'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ',
+            'z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ',
+            'r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',
+            ',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈',
+            '7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ',
+            '>': 'ླ' 
+        };
+        const SUBJOINED_MAP = {
+            'k':'ྐ', 'g':'ྒ', 'b':'ྦ', 't':'ྟ', 'd':'ྡ', 'z':'ྯ',
+            'p':'ྤ', 'm':'ྨ', 'n':'ྣ', 'l':'ླ', 's':'ྶ', 'h':'ྷ',
+            'j':'ྗ', 'c':'ྕ', 'x':'ྩ', 'f':'ྔ', 'q':'ྚ', 'v':'ྜ',
+            'w':'ྭ', 'r':'ྲ', 'y':'ྱ', '\'':'ཱ' 
+        };
+
+        let allPlayers = [];
+        let selectedPlayer = null;
+        let startTime, timerInterval;
+        let isPlaying = false;
+        let finalData = {};
+        
+        let targetStacks = [];
+        let currentStackIndex = 0;
+        let currentTyped = ""; 
+        let totalTypedChars = 0;
+        let correctKeystrokes = 0;
+        
+        let isStackingMode = false;
+        let currentFontSize = 48; 
+
+        window.onload = function() {
+            fetch(API_URL).then(res => res.json()).then(data => { allPlayers = data; renderTable(data); })
+                .catch(err => { document.getElementById('table-body').innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">Archives Offline (Try Refreshing)</td></tr>`; });
+            
+            const ghost = document.getElementById('hidden-input');
+            ghost.addEventListener('keydown', handleKeydown);
+            
+            adjustFontSize(0); // Init size
+        };
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            if(data.length === 0) { tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No Masters Yet. Be the First!</td></tr>`; return; }
+
+            data.forEach((player, index) => {
+                let rankClass = 'rank-other';
+                if(index === 0) rankClass = 'rank-1';
+                if(index === 1) rankClass = 'rank-2';
+                if(index === 2) rankClass = 'rank-3';
+                let accDisplay = player.accuracy;
+                if (accDisplay == 1) { accDisplay = "100%"; }
+                else if (!isNaN(accDisplay) && accDisplay < 1 && accDisplay > 0) { accDisplay = Math.round(accDisplay * 100) + "%"; }
+                else if (!isNaN(accDisplay) && String(accDisplay).indexOf('%') === -1) { accDisplay = accDisplay + "%"; }
+                let timeDisplay = player.time || '-';
+                if(timeDisplay !== '-' && timeDisplay.includes(':')) {
+                    if(timeDisplay.includes('1899')) {
+                         let t = new Date(timeDisplay);
+                         if(!isNaN(t)) { timeDisplay = `${t.getMinutes()}m ${t.getSeconds()}s`; }
+                    } else {
+                        const parts = timeDisplay.split(':');
+                        const min = parseInt(parts[0], 10);
+                        const sec = parseInt(parts[1], 10);
+                        timeDisplay = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+                    }
+                }
+                const row = `<tr><td><span class="rank-badge ${rankClass}">${index + 1}</span></td><td><b style="color:white;">${player.name}</b></td><td>${player.location}</td><td class="detail-col">${timeDisplay}</td><td class="detail-col">${player.wpm || '-'}</td><td class="detail-col">${accDisplay || '-'}</td><td class="score-col">${player.score}</td><td><button class="retry-btn" onclick="openVerifyModal(${index})" title="Improve Score">⟳</button></td></tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function adjustFontSize(delta) {
+            currentFontSize += delta;
+            if(currentFontSize < 20) currentFontSize = 20; 
+            if(currentFontSize > 80) currentFontSize = 80; 
+            
+            const display = document.getElementById('game-display');
+            display.style.fontSize = currentFontSize + "px";
+            
+            focusInput(); 
+        }
+
+        function launchGame() {
+            if(timerInterval) clearInterval(timerInterval);
+            
+            document.getElementById('game-modal').style.display = 'flex';
+            const rawText = document.getElementById('challenge-source').innerText.trim();
+            targetStacks = tokenizeTibetan(rawText);
+            
+            const display = document.getElementById('game-display');
+            display.innerHTML = ''; 
+            display.scrollTop = 0; 
+            
+            // --- WORD GROUPING LOGIC ---
+            let currentWordDiv = document.createElement('span');
+            currentWordDiv.className = 'tibetan-word';
+            
+            targetStacks.forEach((s, i) => {
+                let span = document.createElement('span');
+                span.innerText = s;
+                span.classList.add('stack');
+                span.id = `stack-${i}`;
+                
+                if (i === 0) {
+                    span.classList.add('current-target'); 
+                    let ghost = document.createElement('span');
+                    ghost.className = 'ghost-text';
+                    ghost.id = 'current-ghost';
+                    span.appendChild(ghost);
+                }
+                
+                currentWordDiv.appendChild(span);
+
+                // Break word at Tseh or Space
+                if (s.includes('་') || s.includes(' ') || i === targetStacks.length - 1) {
+                    display.appendChild(currentWordDiv);
+                    currentWordDiv = document.createElement('span');
+                    currentWordDiv.className = 'tibetan-word';
+                }
+            });
+
+            currentStackIndex = 0;
+            currentTyped = "";
+            totalTypedChars = 0;
+            correctKeystrokes = 0;
+            isPlaying = false;
+            isStackingMode = false;
+            
+            document.getElementById('timer').innerText = "00:00";
+            focusInput();
+        }
+
+        function tokenizeTibetan(text) {
+            const stacks = [];
+            let current = "";
+            const isCombiner = (char) => {
+                const code = char.charCodeAt(0);
+                return (code >= 0x0F71 && code <= 0x0FBC) || 
+                       (code === 0x0F35 || code === 0x0F37 || code === 0x0F39);
+            };
+
+            for (let char of text) {
+                if (current.length === 0) {
+                    current += char; 
+                } else {
+                    if (isCombiner(char)) {
+                        current += char; 
+                    } else {
+                        stacks.push(current); 
+                        current = char; 
+                    }
+                }
+            }
+            if(current) stacks.push(current);
+            return stacks;
+        }
+
+        function handleKeydown(e) {
+            if (e.ctrlKey || e.metaKey || e.key === 'Tab' || e.key === 'Enter') { e.preventDefault(); return; }
+            
+            if (e.key === 'Backspace') {
+                if (currentTyped.length > 0) {
+                    currentTyped = currentTyped.slice(0, -1);
+                    isStackingMode = false; 
+                    updateGhostText(false);
+                }
+                return;
+            }
+
+            const lookupKey = e.key.toLowerCase();
+            let tibetanChar = null;
+
+            if (e.key === 'a' && !e.shiftKey) {
+                e.preventDefault();
+                isStackingMode = true;
+                return;
+            }
+
+            if (isStackingMode) {
+                if (SUBJOINED_MAP[lookupKey]) {
+                    tibetanChar = SUBJOINED_MAP[lookupKey];
+                    isStackingMode = false;
+                } else {
+                    isStackingMode = false;
+                }
+            }
+
+            if (!tibetanChar) {
+                if (e.shiftKey && e.key === '>') { 
+                     tibetanChar = SHIFT_MAP['>'];
+                } 
+                else if (e.shiftKey) {
+                    if (SHIFT_MAP[lookupKey]) tibetanChar = SHIFT_MAP[lookupKey];
+                } else {
+                    if (NORMAL_MAP[lookupKey]) tibetanChar = NORMAL_MAP[lookupKey];
+                }
+            }
+
+            if (tibetanChar) {
+                e.preventDefault();
+                if (!isPlaying) {
+                    isPlaying = true;
+                    startTime = new Date();
+                    timerInterval = setInterval(updateTimer, 1000);
+                }
+
+                currentTyped += tibetanChar;
+                totalTypedChars++;
+                checkInput();
+            }
+        }
+
+        function checkInput() {
+            const targetStack = targetStacks[currentStackIndex];
+            
+            if (targetStack.startsWith(currentTyped)) {
+                updateGhostText(false); 
+                correctKeystrokes++;
+
+                if (currentTyped === targetStack) {
+                    const span = document.getElementById(`stack-${currentStackIndex}`);
+                    span.classList.remove('current-target');
+                    span.classList.add('correct');
+                    const oldGhost = document.getElementById('current-ghost');
+                    if(oldGhost) oldGhost.remove();
+
+                    currentStackIndex++;
+                    
+                    if (currentStackIndex < targetStacks.length) {
+                        const nextSpan = document.getElementById(`stack-${currentStackIndex}`);
+                        nextSpan.classList.add('current-target');
+                        
+                        let newGhost = document.createElement('span');
+                        newGhost.className = 'ghost-text';
+                        newGhost.id = 'current-ghost';
+                        nextSpan.appendChild(newGhost);
+
+                        checkAutoScroll(nextSpan);
+
+                        currentTyped = "";
+                        isStackingMode = false;
+                        updateGhostText(false); 
+                    } else {
+                        finishGame();
+                    }
+                }
+            } else {
+                updateGhostText(true); 
+            }
+        }
+
+        function checkAutoScroll(activeElement) {
+            const container = document.getElementById('game-display');
+            if (activeElement.offsetTop > container.scrollTop + container.offsetHeight - 120) {
+                 activeElement.scrollIntoView({block: "center", behavior: "smooth"});
+            }
+        }
+
+        function updateGhostText(isError) {
+            const ghost = document.getElementById('current-ghost');
+            if(ghost) {
+                ghost.innerText = currentTyped;
+                if(isError) ghost.classList.add('error');
+                else ghost.classList.remove('error');
+            }
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = Math.floor((now - startTime) / 1000);
+            const m = Math.floor(diff / 60).toString().padStart(2,'0');
+            const s = (diff % 60).toString().padStart(2,'0');
+            document.getElementById('timer').innerText = `${m}:${s}`;
+        }
+
+        function finishGame() {
+            clearInterval(timerInterval);
+            const endTime = new Date();
+            let timeSeconds = (endTime - startTime) / 1000;
+            if (timeSeconds < 1) timeSeconds = 1;
+            const fullText = targetStacks.join("");
+            const wpm = Math.round((fullText.length / 5) / (timeSeconds / 60));
+            const accuracy = totalTypedChars > 0 ? Math.round((correctKeystrokes / totalTypedChars) * 100) : 0;
+            const score = Math.round(wpm * (accuracy / 100));
+            finalData = {
+                name: document.getElementById('p-name').value,
+                location: document.getElementById('p-loc').value,
+                pin: document.getElementById('p-pin').value,
+                score: score, wpm: wpm, accuracy: accuracy + "%", 
+                time: document.getElementById('timer').innerText
+            };
+            document.getElementById('res-time').innerText = finalData.time;
+            document.getElementById('res-wpm').innerText = wpm;
+            document.getElementById('res-acc').innerText = finalData.accuracy;
+            document.getElementById('res-score').innerText = score;
+            closeModal('game-modal');
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function focusInput() { document.getElementById('hidden-input').focus(); }
+        function openRegisterModal() { document.getElementById('register-modal').style.display = 'flex'; clearError('reg-error'); }
+        function openVerifyModal(index) {
+            selectedPlayer = allPlayers[index];
+            document.getElementById('verify-msg').innerText = `Welcome back, ${selectedPlayer.name}. Enter PIN.`;
+            document.getElementById('v-pin').value = "";
+            clearError('verify-error');
+            document.getElementById('verify-modal').style.display = 'flex';
+        }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function showError(id, msg) { document.getElementById(id).innerText = msg; document.getElementById(id).classList.add('visible'); }
+        function clearError(id) { 
+            const e = document.getElementById(id); if(e){e.classList.remove('visible'); e.innerText="";} 
+        }
+
+        function startGameSetup() {
+            clearError('reg-error');
+            const name = document.getElementById('p-name').value.trim();
+            const pin = document.getElementById('p-pin').value.toString();
+            
+            if(!name) return showError('reg-error', "Name required");
+
+            if (!/^[a-zA-Z. ]+$/.test(name)) {
+                return showError('reg-error', "Name: Only letters, spaces, and dots allowed.");
+            }
+
+            for(let w of BAD_WORDS) if(name.toLowerCase().includes(w)) return showError('reg-error', "Bad name");
+            if(pin.length!==4) return showError('reg-error', "PIN must be 4 digits");
+            closeModal('register-modal'); launchGame();
+        }
+
+        function verifyPin() {
+            clearError('verify-error');
+            if(String(document.getElementById('v-pin').value) === String(selectedPlayer.pin)) {
+                document.getElementById('p-name').value = selectedPlayer.name;
+                document.getElementById('p-loc').value = selectedPlayer.location;
+                document.getElementById('p-pin').value = selectedPlayer.pin;
+                closeModal('verify-modal'); launchGame();
+            } else showError('verify-error', "Wrong PIN");
+        }
+        function uploadScore() {
+            const btn = document.getElementById('upload-btn');
+            const status = document.getElementById('upload-status');
+            btn.disabled = true; btn.innerText = "UPLOADING..."; status.innerText = "Sending...";
+            fetch(API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(finalData) })
+            .then(() => { status.innerText = "Success!"; setTimeout(() => { location.reload(); }, 2000); })
+            .catch(() => { status.innerText = "Error"; btn.disabled = false; });
+        }
+    </script>
+</body>
+</html>

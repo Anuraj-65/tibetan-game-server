@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="bo">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ62DL1S2M"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-WQ62DL1S2M');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TibetanKeys | The Ascent</title>
+    
+    <link rel="icon" type="image/png" href="og.png">
+
+    <style>
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
+
+        :root {
+            --bg: #010a16;
+            --accent: #d4af37;
+            --success: #00e676; 
+            --error: #ff4d4d; /* RED FOR RESET */
+            --text: #ffffff;
+            --nav-h: 70px;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background: var(--bg); color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            scroll-behavior: smooth; overflow-x: hidden;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed; top: 0; width: 100%; height: var(--nav-h);
+            background: rgba(1, 10, 22, 0.95); backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 50px; box-sizing: border-box; z-index: 5000;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        .logo-section { display: flex; align-items: center; gap: 15px; text-decoration: none; color: #fff; }
+        .logo-img { width: 35px; height: auto; }
+        .logo-text { font-weight: 900; letter-spacing: 4px; font-size: 1.1rem; }
+        
+        .nav-right { display: flex; align-items: center; gap: 40px; }
+        .category-nav { display: flex; gap: 20px; }
+        
+        /* UPDATED NAV TEXT SIZE */
+        .cat-node { 
+            font-size: 13px; /* Bigger */
+            font-weight: 700; /* Bolder */
+            letter-spacing: 2px; 
+            text-transform: uppercase; 
+            color: rgba(255,255,255,0.6); 
+            cursor: pointer; transition: 0.3s; 
+        }
+        .cat-node:hover { color: var(--accent); }
+
+        /* UPDATED RESET BUTTON */
+        .reset-trigger {
+            font-size: 13px; 
+            font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: #ff4444; /* Bright Red */
+            background: rgba(255, 68, 68, 0.1); /* Subtle Red BG */
+            cursor: pointer; transition: 0.3s;
+            border: 1px solid rgba(255, 77, 77, 0.5); /* Visible Border */
+            padding: 8px 15px; border-radius: 6px;
+        }
+        .reset-trigger:hover { 
+            background: var(--error); color: #000; 
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.6); 
+        }
+
+        .progress-wire { position: fixed; top: var(--nav-h); left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.05); z-index: 5001; }
+        .wire-fill { width: 0%; height: 100%; background: var(--accent); box-shadow: 0 0 15px var(--accent); transition: width 0.3s ease; }
+
+        /* --- LAYOUT --- */
+        .container { 
+            padding: 0 50px 150px 50px; 
+            max-width: 1600px; 
+            margin: 100px auto 0 auto; 
+        }
+        
+        .category-section { margin-bottom: 80px; padding-top: 20px; }
+        .section-title { font-size: 32px; font-weight: 900; letter-spacing: 10px; color: var(--accent); text-transform: uppercase; margin-bottom: 40px; border-left: 4px solid var(--accent); padding-left: 20px; }
+        .lesson-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 25px; }
+
+        /* --- CARD STYLES --- */
+        .lesson-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            aspect-ratio: 1 / 0.9;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .lesson-card:hover { transform: translateY(-8px); border-color: var(--accent); background: rgba(212, 175, 55, 0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.6); z-index: 10; }
+        
+        .lesson-card:hover .tibetan-chars,
+        .lesson-card:hover .special-text { transform: scale(1.15); color: #fff; text-shadow: 0 0 25px var(--accent); }
+
+        .lesson-card.mastered {
+            border: 2px solid var(--success);
+            background: rgba(0, 230, 118, 0.08);
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.15);
+        }
+        .lesson-card.mastered::before {
+            content: '✓'; position: absolute; top: 10px; right: 15px;
+            font-size: 22px; color: var(--success); font-weight: 900;
+        }
+        .lesson-card.mastered .level-label { color: var(--success); opacity: 1; }
+
+        .card-stats {
+            color: var(--success);
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            text-shadow: 0 0 8px rgba(0, 230, 118, 0.6);
+            background: rgba(0,0,0,0.3);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+
+        .level-label { position: absolute; top: 20px; left: 20px; font-size: 11px; color: var(--accent); font-weight: 900; letter-spacing: 3px; opacity: 0.6; }
+        .tibetan-chars { font-family: 'OuChan2', serif; font-size: 52px; color: rgba(255,255,255,0.8); transition: 0.4s; }
+        .special-text { font-family: 'Impact', sans-serif; font-size: 28px; letter-spacing: 4px; color: rgba(255,255,255,0.9); transition: 0.4s; }
+        .footer-tag { position: absolute; bottom: 20px; font-size: 9px; text-transform: uppercase; letter-spacing: 4px; opacity: 0.3; }
+        
+        /* --- RESET MODAL --- */
+        #reset-modal {
+            display: none; /* Hidden by default */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+            z-index: 10000;
+            justify-content: center; align-items: center;
+        }
+        .reset-box {
+            background: #010a16;
+            border: 2px solid var(--error);
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 77, 77, 0.3);
+            max-width: 400px;
+        }
+        .reset-title { color: var(--error); font-size: 24px; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase; }
+        .reset-desc { color: #ccc; font-size: 14px; line-height: 1.6; margin-bottom: 30px; }
+        .reset-actions { display: flex; justify-content: center; gap: 20px; }
+        
+        .btn-confirm {
+            background: var(--error); color: #fff; border: none; padding: 10px 30px;
+            font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+            transition: 0.3s;
+        }
+        .btn-confirm:hover { background: #fff; color: var(--error); box-shadow: 0 0 20px var(--error); }
+        
+        .btn-cancel {
+            background: transparent; color: #888; border: 1px solid #555; padding: 10px 30px;
+            font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+            transition: 0.3s;
+        }
+        .btn-cancel:hover { border-color: #fff; color: #fff; }
+
+        @media (max-width: 1200px) { .lesson-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 700px) { .lesson-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        /* --- MOBILE PATCH --- */
+        @media (max-width: 768px) {
+            .container { 
+                padding: 0 15px 100px 15px !important; 
+                margin-top: 80px !important; 
+            }
+
+            .lesson-grid { 
+                grid-template-columns: repeat(2, 1fr) !important; 
+                gap: 15px !important;
+            }
+
+            nav {
+                padding: 0 15px !important;
+                height: 60px !important;
+            }
+            
+            .logo-text { display: none !important; }
+            .nav-right { gap: 15px !important; }
+
+            /* Slightly bigger mobile text too */
+            .cat-node, .reset-trigger {
+                font-size: 11px !important; /* Bumped up from 9px */
+                letter-spacing: 1px !important;
+                padding: 6px 10px !important;
+            }
+
+            .section-title {
+                font-size: 20px !important;
+                letter-spacing: 4px !important;
+                margin-bottom: 20px !important;
+                border-left-width: 3px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo-section"><img src="og.png" class="logo-img"><span class="logo-text">TIBETANKEYS</span></a>
+        
+        <div class="nav-right">
+            <div class="category-nav" id="cat-nav"></div>
+            <div class="reset-trigger" onclick="openResetModal()">Reset Data</div>
+        </div>
+    </nav>
+    
+    <div class="progress-wire"><div class="wire-fill" id="progress-fill"></div></div>
+    <main class="container" id="master-container"></main>
+
+    <div id="reset-modal">
+        <div class="reset-box">
+            <div class="reset-title">Are You Sure?</div>
+            <div class="reset-desc">
+                This will delete all progress, WPM stats, and mastery badges. 
+                <br><br><b>This action cannot be undone.</b>
+            </div>
+            <div class="reset-actions">
+                <button class="btn-cancel" onclick="closeResetModal()">No</button>
+                <button class="btn-confirm" onclick="confirmReset()">Yes, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONTENT LIBRARIES ---
+        const contentLibrary = {
+            vowels: ["ཨི་", "ཨུ་", "ཨེ་", "ཨོ་", "ཀི་", "ཀུ་", "ཀེ་", "ཀོ་", "གི་", "གུ་", "གེ་", "གོ་"],
+            headers: ["རྐ་", "ལྐ་", "སྐ་", "རྒ་", "ལྒ་", "སྒ་", "རྔ་", "ལྔ་", "སྔ་", "རྙ་", "སྙ་", "བརྙ"],
+            footers: ["ཀྱ་", "ཁྱ་", "གྱ་", "པྱ་", "ཕྱ་", "བྱ་", "མྱ་", "ཀྲ་", "ཁྲ་", "གྲ་", "ཏྲ་", "ཐྲ་"]
+        };
+        
+        // --- NEW LESSON STRUCTURE ---
+        const basicLessons = [
+            // --- LEVEL 0 (Untouched) ---
+            { type: "special", text: "START", footer: "POSITIONING" },
+
+            // --- GROUP 1 (Rows 1 & 2) ---
+            { type: "tibetan", text: "ཀ ཁ ག ང", footer: "ALPHABET" },
+            { type: "tibetan", text: "ཅ ཆ ཇ ཉ", footer: "ALPHABET" },
+            { type: "special", text: "TEST I", footer: "MIXED 1 & 2" },
+            { type: "special", text: "GAME I", footer: "REWARD" },
+
+            // --- GROUP 2 (Rows 3 & 4) ---
+            { type: "tibetan", text: "ཏ ཐ ད ན", footer: "ALPHABET" },
+            { type: "tibetan", text: "པ ཕ བ མ", footer: "ALPHABET" },
+            { type: "special", text: "TEST II", footer: "MIXED 5 & 6" },
+            { type: "special", text: "GAME II", footer: "REWARD" },
+
+            // --- GROUP 3 (Rows 5 & 6) ---
+            { type: "tibetan", text: "ཙ ཚ ཛ ཝ", footer: "ALPHABET" },
+            { type: "tibetan", text: "ཞ ཟ འ ཡ", footer: "ALPHABET" },
+            { type: "special", text: "TEST III", footer: "MIXED 9 & 10" },
+            { type: "special", text: "GAME III", footer: "REWARD" },
+
+            // --- GROUP 4 (Rows 7 & 8) ---
+            { type: "tibetan", text: "ར ལ ཤ ས", footer: "ALPHABET" },
+            { type: "tibetan", text: "ཧ ཨ ་ །", footer: "ALPHABET" },
+            { type: "special", text: "TEST IV", footer: "MIXED 13 & 14" },
+            { type: "special", text: "GAME IV", footer: "REWARD" },
+
+            // --- THE CONCLUSION (Grand Finale) ---
+            { type: "special", text: "FINAL", footer: "ALL 30 CHARS" },
+            { type: "special", text: "GAME", footer: "BASIC COMPLETE" }
+        ];
+
+        // --- CATEGORIES ---
+        const categories = [
+            { id: "basic", name: "Basic", data: basicLessons },
+            { id: "vowels", name: "Vowels", data: contentLibrary.vowels },
+            { id: "headers", name: "Headers", data: contentLibrary.headers },
+            { id: "footers", name: "Footers", data: contentLibrary.footers },
+            { id: "words", name: "Words", count: 20 },
+            { id: "sentences", name: "Sentences", count: 15 },
+            { id: "stanza", name: "Stanza", count: 10 },
+            { id: "paragraph", name: "Paragraph", count: 5 }
+        ];
+
+        const container = document.getElementById('master-container');
+        const nav = document.getElementById('cat-nav');
+        let globalLevelCounter = 0;
+
+        // --- RENDER LOOP ---
+        categories.forEach((cat, cIdx) => {
+            const node = document.createElement('div');
+            node.className = 'cat-node';
+            node.innerText = cat.name;
+            node.onclick = () => { document.getElementById(cat.id).scrollIntoView({behavior: "smooth"}); };
+            nav.appendChild(node);
+
+            const section = document.createElement('section');
+            section.id = cat.id;
+            section.className = 'category-section';
+            section.innerHTML = `<h2 class="section-title">${cIdx + 1}. ${cat.name}</h2>`;
+            const grid = document.createElement('div');
+            grid.className = 'lesson-grid';
+
+            const count = cat.data ? cat.data.length : cat.count;
+
+            for (let i = 0; i < count; i++) {
+                const card = document.createElement('div');
+                card.className = 'lesson-card';
+                const levelId = globalLevelCounter;
+                
+                let statsHTML = "";
+                // CHECK LOCALSTORAGE FOR COMPLETION
+                if (localStorage.getItem('tk_lvl_' + levelId) === 'true') {
+                    card.classList.add('mastered');
+                    const statsStr = localStorage.getItem('tk_stats_' + levelId);
+                    if (statsStr) {
+                        try {
+                            const stats = JSON.parse(statsStr);
+                            statsHTML = `<div class="card-stats">${stats.wpm} WPM | ${stats.acc}%</div>`;
+                        } catch(e) {}
+                    }
+                }
+
+                // --- THE SMART ROUTER ---
+                card.onclick = () => {
+                    // 1. Level 0 (Calibration)
+                    if (levelId === 0) {
+                        window.location.href = `level0.html`;
+                    }
+                    // 2. Games (Any card labeled "GAME")
+                    else if (cat.data && typeof cat.data[i] === 'object' && cat.data[i].type === "special" && cat.data[i].text.includes("GAME")) {
+                        window.location.href = `game-select.html?level=${levelId}`;
+                    }
+                    // 3. Tests (Any card labeled "TEST" or "FINAL") -> Send to Basic Room with Test Mode
+                    else if (cat.data && typeof cat.data[i] === 'object' && cat.data[i].type === "special" && (cat.data[i].text.includes("TEST") || cat.data[i].text.includes("FINAL"))) {
+                        window.location.href = `basic-room.html?level=${levelId}&mode=test`;
+                    }
+                    // 4. Category-Specific Rooms
+                    else if (cat.id === "vowels") window.location.href = `vowels-room.html?level=${levelId}`;
+                    else if (cat.id === "headers") window.location.href = `headers-room.html?level=${levelId}`;
+                    else if (cat.id === "footers") window.location.href = `footers-room.html?level=${levelId}`;
+                    else if (cat.id === "words") window.location.href = `words-room.html?level=${levelId}`;
+                    else if (cat.id === "sentences") window.location.href = `sentences-room.html?level=${levelId}`;
+                    else if (cat.id === "stanza") window.location.href = `stanza-room.html?level=${levelId}`;
+                    else if (cat.id === "paragraph") window.location.href = `paragraph-room.html?level=${levelId}`;
+                    
+                    // 5. Default (Basic Room)
+                    else {
+                        window.location.href = `basic-room.html?level=${levelId}`;
+                    }
+                };
+
+                let contentHTML = '';
+                let footerText = '';
+                if (cat.data) {
+                    const item = cat.data[i];
+                    if (typeof item === 'object') {
+                        contentHTML = item.type === "special" ? `<div class="special-text">${item.text}</div>` : `<div class="tibetan-chars">${item.text}</div>`;
+                        footerText = item.footer;
+                    } else {
+                        contentHTML = `<div class="tibetan-chars">${item}</div>`;
+                        footerText = "PRACTICE";
+                    }
+                } else {
+                    contentHTML = `<div class="tibetan-chars">...</div>`;
+                    footerText = cat.name.toUpperCase();
+                }
+
+                card.innerHTML = `
+                    <span class="level-label">LEVEL ${levelId}</span>
+                    ${contentHTML}
+                    ${statsHTML}
+                    <div class="footer-tag">${footerText}</div>
+                `;
+                grid.appendChild(card);
+                globalLevelCounter++;
+            }
+            section.appendChild(grid);
+            container.appendChild(section);
+        });
+
+        // --- PROGRESS BAR ---
+        window.onscroll = () => {
+            const winScroll = document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            document.getElementById("progress-fill").style.width = ((winScroll / height) * 100) + "%";
+        };
+
+        // --- RESET LOGIC ---
+        function openResetModal() {
+            document.getElementById('reset-modal').style.display = 'flex';
+        }
+        function closeResetModal() {
+            document.getElementById('reset-modal').style.display = 'none';
+        }
+        function confirmReset() {
+            // 1. Clear Data
+            localStorage.clear();
+            // 2. Hide Modal
+            closeResetModal();
+            // 3. Reload to reflect changes (remove green checks)
+            location.reload(); 
+        }
+    </script>
+</body>
+</html>

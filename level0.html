@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ62DL1S2M"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-WQ62DL1S2M');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TibetanKeys | Calibration</title>
+    
+    <link rel="icon" type="image/png" href="og.png">
+
+    <style>
+        :root { --bg: #010a16; --accent: #d4af37; --text: #ffffff; --error: #ff4d4d; --success: #00e676; }
+        
+        body, html { 
+            margin: 0; padding: 0;
+            background: var(--bg); color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            height: 100vh; width: 100vw;
+            overflow: hidden; 
+            display: flex; flex-direction: column; 
+            user-select: none;
+        }
+
+        /* --- HUD --- */
+        .hud { 
+            width: 100%; padding: 0 40px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1); 
+            background: rgba(1, 10, 22, 0.95); box-sizing: border-box; 
+            height: 60px; flex-shrink: 0;
+        }
+        .level-info h1 { margin: 0; font-size: 14px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; }
+        
+        .phase-indicator { font-size: 12px; letter-spacing: 2px; color: #888; text-transform: uppercase; font-weight: bold; }
+
+        /* --- STAGE --- */
+        .stage { 
+            flex: 1; display: flex; flex-direction: column; 
+            width: 100%; box-sizing: border-box; overflow: hidden; 
+        }
+
+        #instruction-text { 
+            color: var(--accent); font-size: 16px; letter-spacing: 4px; text-transform: uppercase; 
+            margin: 20px 0 10px 0; flex-shrink: 0; text-align: center; font-weight: 900;
+        }
+        
+        .target-container {
+            flex: 1; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            min-height: 100px; max-height: 40vh;
+        }
+
+        .target-text { 
+            font-size: 60px; font-weight: 900; letter-spacing: 15px;
+            text-transform: uppercase; 
+            display: flex; flex-wrap: wrap; justify-content: center; width: 95%;
+            text-shadow: 0 0 30px rgba(0,0,0,0.6);
+        }
+
+        .char { opacity: 0.2; transition: 0.1s; position: relative; }
+        .char.current { opacity: 1; color: var(--accent); transform: scale(1.2); text-shadow: 0 0 20px var(--accent); }
+        .char.correct { opacity: 1; color: #fff; text-shadow: 0 0 15px #fff; }
+        .char.wrong { opacity: 1; color: var(--error); }
+        .char.space-char { min-width: 20px; }
+
+        /* --- KEYBOARD --- */
+        #keyboard-wrapper { 
+            width: 98%; max-width: 900px; 
+            margin: auto auto 10px auto; 
+            display: flex; justify-content: center; flex-shrink: 1;
+        }
+        #keyboard-wrapper svg {
+            width: 100%; height: auto; max-height: 45vh;
+            display: block; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+
+        .st0 { fill: #d4af37; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; pointer-events: none; }
+        .st1 { fill: none; opacity: .6; stroke: #d4af37; stroke-width: 1.5px; transition: all 0.1s; }
+        .st2 { fill: #010a16; }
+        .bump { fill: #d4af37; opacity: 0.8; }
+        
+        .key-guide { stroke: #fff !important; stroke-width: 3px !important; fill: rgba(255, 255, 255, 0.25) !important; opacity: 1 !important; filter: drop-shadow(0 0 12px rgba(255,255,255,0.9)); animation: breathe 0.8s infinite alternate; }
+        .key-hit { fill: var(--accent) !important; stroke: var(--accent) !important; filter: drop-shadow(0 0 15px var(--accent)); transition: 0.05s; }
+        @keyframes breathe { from { opacity: 0.6; } to { opacity: 1; } }
+
+        /* --- MODAL --- */
+        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(15px); }
+        .result-box { background: rgba(0, 230, 118, 0.05); border: 2px solid var(--success); padding: 50px; text-align: center; box-shadow: 0 0 60px rgba(0,230,118,0.3); max-width: 500px; width: 90%; }
+        .res-msg { font-size: 18px; color: #fff; margin-bottom: 30px; letter-spacing: 2px; line-height: 1.8; font-weight: bold; text-transform: uppercase; }
+        .res-btn { background: var(--success); color: #000; border: none; padding: 15px 40px; font-weight: bold; letter-spacing: 3px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .res-btn:hover { background: #fff; box-shadow: 0 0 30px #fff; transform: translateY(-2px); }
+        
+        .back-btn { position: fixed; bottom: 15px; left: 40px; color: rgba(255,255,255,0.3); text-decoration: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; transition: 0.3s; z-index: 50; }
+        .back-btn:hover { color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .target-text { font-size: 30px; letter-spacing: 5px; }
+            .hud { padding: 0 15px; height: 50px; justify-content: center; }
+            .back-btn { top: 60px; bottom: auto; left: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hud">
+        <div class="level-info"><h1>LEVEL 0: CALIBRATION</h1></div>
+        <div class="phase-indicator">Guide Keys</div>
+    </div>
+
+    <div class="stage">
+        <div id="instruction-text">Place fingers on F and J</div>
+        
+        <div class="target-container">
+            <div class="target-text" id="target-display"></div>
+        </div>
+
+        <div id="keyboard-wrapper">
+             <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 400">
+                <rect class="st2" width="950" height="400"/>
+                <g id="row-1"><g><rect class="st1" x="20" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(43.79 52)">~</text></g><g><rect class="st1" x="80" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(103.94 52)">1</text></g><g><rect class="st1" x="140" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(163.94 52)">2</text></g><g><rect class="st1" x="200" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(223.94 52)">3</text></g><g><rect class="st1" x="260" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(283.94 52)">4</text></g><g><rect class="st1" x="320" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(343.94 52)">5</text></g><g><rect class="st1" x="380" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(403.94 52)">6</text></g><g><rect class="st1" x="440" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(463.94 52)">7</text></g><g><rect class="st1" x="500" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(523.94 52)">8</text></g><g><rect class="st1" x="560" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(583.94 52)">9</text></g><g><rect class="st1" x="620" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(643.94 52)">0</text></g><g><rect class="st1" x="680" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(705.17 52)">-</text></g><g><rect class="st1" x="740" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(763.79 52)">=</text></g><g><rect class="st1" x="800" y="20" width="115" height="55" rx="6" ry="6"/><text class="st0" transform="translate(822.57 52)">BACKSPACE</text></g></g><g id="row-2"><g><rect class="st1" x="20" y="85" width="85" height="55" rx="6" ry="6"/><text class="st0" transform="translate(51.1 117)">TAB</text></g><g><rect class="st1" x="110" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(132.72 117)">Q</text></g><g><rect class="st1" x="170" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(191.81 117)">W</text></g><g><rect class="st1" x="230" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(253.33 117)">E</text></g><g><rect class="st1" x="290" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(313.03 117)">R</text></g><g><rect class="st1" x="350" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(373.64 117)">T</text></g><g><rect class="st1" x="410" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(433.33 117)">Y</text></g><g><rect class="st1" x="470" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(493.03 117)">U</text></g><g><rect class="st1" x="530" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(555.47 117)">I</text></g><g><rect class="st1" x="590" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(612.72 117)">O</text></g><g><rect class="st1" x="650" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(673.33 117)">P</text></g><g><rect class="st1" x="710" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(735.17 117)">[</text></g><g><rect class="st1" x="770" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(795.17 117)">]</text></g><g><rect class="st1" x="830" y="85" width="85" height="55" rx="6" ry="6"/><text class="st0" transform="translate(870.47 117)">\</text></g></g><g id="row-3"><g><rect class="st1" x="20" y="150" width="105" height="55" rx="6" ry="6"/><text class="st0" transform="translate(56.72 182)">CAPS</text></g><g><rect class="st1" x="130" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(153.03 182)">A</text></g><g><rect class="st1" x="190" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(213.33 182)">S</text></g><g><rect class="st1" x="250" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(273.03 182)">D</text></g><g><rect class="st1" x="310" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(333.64 182)">F</text><rect class="bump" x="327" y="190" width="20" height="2" rx="1"/></g><g><rect class="st1" x="370" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(392.72 182)">G</text></g><g><rect class="st1" x="430" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(453.03 182)">H</text></g><g><rect class="st1" x="490" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(513.94 182)">J</text><rect class="bump" x="507" y="190" width="20" height="2" rx="1"/></g><g><rect class="st1" x="550" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(573.03 182)">K</text></g><g><rect class="st1" x="610" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(633.64 182)">L</text></g><g><rect class="st1" x="670" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(695.17 182)">;</text></g><g><rect class="st1" x="730" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(755.69 182)">'</text></g><g><rect class="st1" x="790" y="150" width="125" height="55" rx="6" ry="6"/><text class="st0" transform="translate(833.36 182)">ENTER</text></g></g><g id="row-4"><g><rect class="st1" x="20" y="215" width="135" height="55" rx="6" ry="6"/><text class="st0" transform="translate(71.11 247)">SHIFT</text></g><g><rect class="st1" x="160" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(183.64 247)">Z</text></g><g><rect class="st1" x="220" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(243.33 247)">X</text></g><g><rect class="st1" x="280" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(303.03 247)">C</text></g><g><rect class="st1" x="340" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(363.33 247)">V</text></g><g><rect class="st1" x="400" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(423.03 247)">B</text></g><g><rect class="st1" x="460" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(483.03 247)">N</text></g><g><rect class="st1" x="520" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(542.42 247)">M</text></g><g><rect class="st1" x="580" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(605.47 247)">,</text></g><g><rect class="st1" x="640" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(665.47 247)">.</text></g><g><rect class="st1" x="700" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(725.47 247)">/</text></g><g><rect class="st1" x="760" y="215" width="155" height="55" rx="6" ry="6"/><text class="st0" transform="translate(821.11 247)">SHIFT</text></g></g><g id="row-5"><g><rect class="st1" x="270" y="280" width="400" height="55" rx="6" ry="6"/><text class="st0" transform="translate(439.54 312)">SPACEBAR</text></g></g>
+            </svg>
+        </div>
+    </div>
+
+    <div id="result-modal">
+        <div class="result-box">
+            <div class="res-msg">
+                SYSTEM CALIBRATED<br><br>
+                FINGER POSITIONING: OPTIMAL<br>
+                HOME ROW: LOCKED<br><br>
+                READY FOR ASCENT
+            </div>
+            <button class="res-btn" onclick="window.location.href='lessons.html'">Return to Map</button>
+        </div>
+    </div>
+
+    <a href="lessons.html" class="back-btn">← Abort Ascent</a>
+
+    <script>
+        // --- CONFIG ---
+        const TARGET_STRING = "asdf jkl; asdf jkl;"; 
+        let currentIndex = 0;
+
+        const display = document.getElementById('target-display');
+
+        // --- RENDER ---
+        function renderString() {
+            display.innerHTML = '';
+            const chars = TARGET_STRING.split('');
+            
+            chars.forEach((char, i) => {
+                const span = document.createElement('span');
+                span.innerText = char.toUpperCase(); // Visuals are Upper
+                span.className = 'char' + (i === 0 ? ' current' : '');
+                if(char === ' ') span.classList.add('space-char');
+                display.appendChild(span);
+            });
+            updateGuide();
+        }
+
+        renderString();
+
+        // --- INPUT HANDLING ---
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Tab" || e.key === "Alt" || e.key === "Shift") return;
+
+            triggerHitEffect(e.key);
+
+            const spans = document.querySelectorAll('.char');
+            if (currentIndex >= spans.length) return;
+
+            const typedChar = e.key.toLowerCase(); 
+            const targetChar = TARGET_STRING[currentIndex];
+
+            let isMatch = (typedChar === targetChar);
+            if (targetChar === " " && e.code === "Space") isMatch = true;
+
+            if (isMatch) {
+                spans[currentIndex].className = 'char correct';
+                currentIndex++;
+                
+                if (currentIndex < spans.length) {
+                    spans[currentIndex].className = 'char current';
+                    updateGuide();
+                } else {
+                    finishLevel();
+                }
+            } else {
+                spans[currentIndex].classList.add('wrong');
+                setTimeout(() => spans[currentIndex].classList.remove('wrong'), 200);
+            }
+        });
+
+        // --- KEYBOARD LIGHTS ---
+        function updateGuide() {
+            document.querySelectorAll('.key-guide').forEach(el => el.classList.remove('key-guide'));
+            if (currentIndex >= TARGET_STRING.length) return;
+            
+            const nextChar = TARGET_STRING[currentIndex];
+            highlightSVGKey(nextChar, 'key-guide');
+        }
+
+        function highlightSVGKey(keyChar, className) {
+            const texts = document.querySelectorAll('text.st0');
+            const target = keyChar === " " ? "SPACEBAR" : keyChar.toUpperCase();
+            
+            texts.forEach(t => {
+                const label = t.textContent.trim();
+                let match = (label === target);
+                if (target === ";" && label === ";") match = true;
+                
+                if (match) {
+                    const rect = t.parentElement.querySelector('rect.st1');
+                    if (rect) rect.classList.add(className);
+                }
+            });
+        }
+
+        function triggerHitEffect(key) {
+            let k = key; if(key === " ") k = "SPACEBAR";
+            highlightSVGKey(k, 'key-hit');
+            setTimeout(() => { document.querySelectorAll('.key-hit').forEach(el => el.classList.remove('key-hit')); }, 100);
+        }
+
+        function finishLevel() {
+            // SAVE PROGRESS
+            localStorage.setItem('tk_lvl_0', 'true');
+            // SHOW MODAL
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

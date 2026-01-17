@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="bo">
+<head>
+    <script src="/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TibetanKeys | Live Arena</title>
+    <style>
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
+        body { margin: 0; overflow: hidden; background: #0b1624; color: #fff; font-family: 'Segoe UI', sans-serif; user-select: none; }
+        
+        /* --- VIEWS --- */
+        #lobby-view { display: flex; flex-direction: column; align-items: center; height: 100vh; justify-content: center; }
+        #game-view { display: none; width: 100%; height: 100%; position: relative; }
+
+        /* --- LOBBY STYLES --- */
+        h1 { color: #00e676; text-transform: uppercase; letter-spacing: 6px; font-size: 32px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0,230,118,0.4); }
+        .room-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; max-width: 1100px; width: 90%; }
+        .room-box {
+            background: rgba(20, 30, 40, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; height: 160px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
+        }
+        .room-box:hover { border-color: #00e676; background: rgba(0,230,118,0.1); transform: translateY(-5px); }
+        .room-box.full { opacity: 0.5; cursor: not-allowed; border-color: #ff4081; }
+        .timer-badge { background: #ff4081; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-top: 5px; display:none; }
+
+        /* --- WAITING OVERLAY --- */
+        #waiting-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,10,15,0.98); z-index: 50;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .big-timer { font-size: 120px; font-weight: 900; }
+        .players-list { display: flex; gap: 20px; margin-top: 30px; }
+        .player-card { width: 100px; height: 120px; border: 2px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; }
+        .player-card.joined { border-color: #00e676; background: rgba(0,230,118,0.1); }
+
+        /* --- GAME HUD (Redesigned) --- */
+        .hud-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;
+        }
+
+        /* 1. TIMER: Top Center */
+        .timer-wrapper {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7); padding: 5px 30px; border-radius: 30px;
+            border: 2px solid #444; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .time-box { 
+            font-size: 40px; color: #00e676; font-family: monospace; font-weight: bold; 
+            text-shadow: 0 0 10px rgba(0,230,118,0.5); line-height: 1;
+        }
+
+        /* 2. SCORES: Bottom Center (Moved from Top-Left) */
+        .score-panel { 
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: row; gap: 15px; 
+        }
+        .p-score { 
+            background: rgba(0,0,0,0.8); padding: 8px 15px; border-radius: 8px; border-bottom: 4px solid #555; 
+            display: flex; flex-direction: column; align-items: center; min-width: 80px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5); transition: 0.2s;
+        }
+        
+        /* COUNTDOWN OVERLAY */
+        #countdown-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            display: none; align-items: center; justify-content: center; 
+            z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+        }
+        #countdown-txt { font-size: 200px; font-weight: 900; color: #fff; text-shadow: 4px 4px 0 #000; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
+
+        /* --- MODAL --- */
+        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
+        .result-box { background: #111; padding: 40px; text-align: center; border: 2px solid #444; border-radius: 15px; width: 500px; box-shadow: 0 0 50px rgba(0,230,118,0.2); }
+        .score-table { width: 100%; margin: 20px 0; border-collapse: collapse; text-align: left; }
+        .score-table td { padding: 10px; border-bottom: 1px solid #333; font-size: 20px; }
+        .res-btn { background: #00e676; border: none; padding: 10px 30px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 20px; transition: 0.2s; }
+        .res-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px #00e676; }
+
+        .back-btn { position: fixed; bottom: 20px; left: 20px; color: rgba(255,255,255,0.4); text-decoration: none; font-size: 12px; z-index: 200; }
+    </style>
+</head>
+<body>
+
+    <div id="lobby-view">
+        <h1>Live Arena</h1>
+        <div style="color:#888; margin-bottom:30px; letter-spacing:2px;">SELECT A ROOM TO ENTER</div>
+        <div class="room-grid" id="grid"></div>
+        
+        <div id="waiting-overlay">
+            <div style="color:#00e676; letter-spacing: 4px;">STARTING IN</div>
+            <div class="big-timer" id="countdown">30</div>
+            <div class="players-list" id="p-list"></div>
+            <button onclick="leaveRoom()" style="margin-top:50px; padding:10px 30px; background:transparent; border:1px solid #555; color:#fff; cursor:pointer;">LEAVE</button>
+        </div>
+        <a href="game-select.html" class="back-btn">← Exit</a>
+    </div>
+
+    <div id="game-view">
+        <div class="hud-container">
+            <div class="timer-wrapper"><div class="time-box" id="game-timer">60</div></div>
+            <div class="score-panel" id="score-panel"></div>
+        </div>
+        <div id="countdown-overlay"><div id="countdown-txt">3</div></div>
+        <canvas id="game-canvas"></canvas>
+    </div>
+
+    <div id="result-modal">
+        <div class="result-box">
+            <h1 style="margin:0; font-size:40px;">BATTLE REPORT</h1>
+            <table class="score-table" id="score-table"></table>
+            <button class="res-btn" onclick="backToLobby()">Return to Lobby</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const NORMAL_MAP = { 'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':' ' };
+        const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ' };
+
+        let myRoomId = null;
+        let myId = null;
+        let gameActive = false;
+        let players = [];
+        let enemies = [];
+        let beams = [];
+        
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        function resize() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        socket.on('connect', () => { myId = socket.id; });
+
+        socket.on('update-lobby', (rooms) => {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            rooms.forEach(r => {
+                const box = document.createElement('div');
+                box.className = `room-box ${r.status === 'playing' ? 'full' : ''}`;
+                let statusHtml = r.status === 'playing' ? '<span style="color:#ff4081">BUSY</span>' : (r.count === 0 ? 'OPEN' : 'JOIN');
+                let countColor = r.count > 0 ? '#ffd700' : '#fff';
+                
+                box.innerHTML = `
+                    <div style="font-weight:bold; color:rgba(255,255,255,0.5)">ARENA ${r.id}</div>
+                    <div style="font-size:40px; color:${countColor}; font-weight:900">${r.count}/4</div>
+                    <div style="font-size:12px; letter-spacing:2px; font-weight:bold">${statusHtml}</div>
+                    ${r.status === 'waiting' ? `<div class="timer-badge" style="display:block">${r.timeLeft}s</div>` : ''}
+                `;
+                box.onclick = () => { myRoomId = r.id; socket.emit('join-room', r.id); };
+                grid.appendChild(box);
+            });
+        });
+
+        socket.on('room-state', (room) => {
+            document.getElementById('waiting-overlay').style.display = 'flex';
+            document.getElementById('countdown').innerText = room.timer;
+            const list = document.getElementById('p-list');
+            list.innerHTML = '';
+            for(let i=0; i<4; i++) {
+                const p = room.players[i];
+                const card = document.createElement('div');
+                card.className = `player-card ${p ? 'joined' : ''}`;
+                card.innerHTML = p 
+                    ? `<div style="font-size:40px">👤</div><div style="font-size:12px; color:#aaa">${p.name}</div>`
+                    : `<div style="font-size:40px; opacity:0.2">?</div>`;
+                list.appendChild(card);
+            }
+        });
+
+        socket.on('timer-update', (t) => { document.getElementById('countdown').innerText = t; });
+
+        socket.on('start-sequence', (val) => {
+            document.getElementById('lobby-view').style.display = 'none';
+            document.getElementById('game-view').style.display = 'block';
+            
+            const ol = document.getElementById('countdown-overlay');
+            const txt = document.getElementById('countdown-txt');
+            ol.style.display = 'flex';
+            txt.style.animation = 'none'; txt.offsetHeight; txt.style.animation = 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            txt.innerText = val;
+            txt.style.color = (val === "GO!") ? "#00e676" : "#fff";
+            if (val === "GO!") setTimeout(() => { ol.style.display = 'none'; }, 1000);
+        });
+
+        function leaveRoom() { socket.emit('leave-room', myRoomId); document.getElementById('waiting-overlay').style.display = 'none'; myRoomId = null; }
+
+        socket.on('game-start', (initialPlayers) => {
+            players = initialPlayers; enemies = []; beams = [];
+            gameActive = true; resize(); updateScoreUI(); loop();
+        });
+
+        socket.on('gametime-update', (t) => {
+            document.getElementById('game-timer').innerText = t;
+            if(t <= 10) document.getElementById('game-timer').style.color = '#ff4081';
+        });
+
+        socket.on('spawn-enemy', (data) => {
+            enemies.push({
+                id: data.id, char: data.char,
+                x: data.x * width, y: data.y * height,
+                vx: data.vx * width, vy: data.vy * height, life: 1.0
+            });
+        });
+
+        socket.on('enemy-destroyed', (data) => {
+            const eIdx = enemies.findIndex(e => e.id === data.enemyId);
+            if(eIdx === -1) return;
+            const killer = players.find(p => p.id === data.killerId);
+            if(killer && killer.pos) beams.push({ sx: killer.pos.x, sy: killer.pos.y, tx: enemies[eIdx].x, ty: enemies[eIdx].y, color: killer.color, life: 1.0 });
+            enemies.splice(eIdx, 1);
+        });
+
+        socket.on('score-update', (serverPlayers) => {
+            serverPlayers.forEach(sp => { const local = players.find(p => p.id === sp.id); if(local) local.score = sp.score; });
+            updateScoreUI();
+        });
+
+        socket.on('game-over', (finalPlayers) => {
+            gameActive = false;
+            document.getElementById('result-modal').style.display = 'flex';
+            finalPlayers.sort((a,b) => b.score - a.score);
+            const table = document.getElementById('score-table'); table.innerHTML = '';
+            finalPlayers.forEach((p, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td style="color:${p.color}">${i===0 ? '👑 ' : ''}${p.name}</td><td>${p.score}</td>`;
+                table.appendChild(tr);
+            });
+        });
+
+        function backToLobby() {
+            document.getElementById('result-modal').style.display = 'none';
+            document.getElementById('game-view').style.display = 'none';
+            document.getElementById('lobby-view').style.display = 'flex';
+            document.getElementById('waiting-overlay').style.display = 'none';
+            socket.emit('leave-room', myRoomId); myRoomId = null;
+        }
+
+        function updateScoreUI() {
+            const p = document.getElementById('score-panel'); p.innerHTML = '';
+            players.forEach(pl => {
+                const d = document.createElement('div'); d.className = 'p-score'; d.style.borderColor = pl.color;
+                d.innerHTML = `<div style="font-size:10px; color:${pl.color}; text-transform:uppercase;">${pl.name}</div><div style="font-weight:bold; font-size:18px">${pl.score}</div>`;
+                p.appendChild(d);
+            });
+        }
+
+        function calculatePositions() {
+            const cx = width/2; const cy = height/2; const pad = 80;
+            players.forEach((p, i) => {
+                if(players.length === 1) p.pos = {x:cx, y:cy};
+                else if(players.length === 2) p.pos = {x: i===0?pad:width-pad, y:cy};
+                else if(players.length === 3) { if(i===0) p.pos={x:cx,y:pad}; if(i===1) p.pos={x:pad,y:height-pad}; if(i===2) p.pos={x:width-pad,y:height-pad}; }
+                else { if(i===0) p.pos={x:pad,y:pad}; if(i===1) p.pos={x:width-pad,y:pad}; if(i===2) p.pos={x:pad,y:height-pad}; if(i===3) p.pos={x:width-pad,y:height-pad}; }
+            });
+        }
+
+        function loop() {
+            if(!gameActive) return;
+            // Clear trail
+            ctx.fillStyle = 'rgba(5,5,5,0.4)'; ctx.fillRect(0,0,width,height);
+            calculatePositions();
+
+            // Players
+            players.forEach(p => {
+                if(!p.pos) return;
+                ctx.shadowBlur = 20; ctx.shadowColor = p.color; ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(p.pos.x, p.pos.y, 25, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = p.color; ctx.lineWidth = 3; ctx.stroke();
+                ctx.fillStyle = p.color; ctx.font = '12px Arial'; ctx.textAlign='center'; ctx.fillText(p.name, p.pos.x, p.pos.y+40); ctx.shadowBlur = 0;
+            });
+
+            // Enemies (HIGH CONTRAST + GOLD 60PX)
+            ctx.font = 'bold 60px OuChan2'; ctx.textAlign='center'; ctx.textBaseline='middle';
+            enemies.forEach(e => {
+                e.x += e.vx; e.y += e.vy;
+                
+                const PADDING = 60;
+                if(e.x < PADDING) { e.x = PADDING; e.vx = Math.abs(e.vx); }
+                if(e.x > width - PADDING) { e.x = width - PADDING; e.vx = -Math.abs(e.vx); }
+                if(e.y < PADDING) { e.y = PADDING; e.vy = Math.abs(e.vy); }
+                if(e.y > height - PADDING) { e.y = height - PADDING; e.vy = -Math.abs(e.vy); }
+                
+                // TEXT RENDER: Black Stroke, Gold Fill, Hard Shadow
+                ctx.shadowColor = '#000'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 4;
+                ctx.lineWidth = 6; ctx.strokeStyle = '#000'; ctx.strokeText(e.char, e.x, e.y);
+                ctx.fillStyle = '#ffd700'; ctx.fillText(e.char, e.x, e.y);
+                ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+            });
+
+            beams.forEach((b, i) => {
+                ctx.beginPath(); ctx.strokeStyle = b.color; ctx.lineWidth = b.life * 6;
+                ctx.moveTo(b.sx, b.sy); ctx.lineTo(b.tx, b.ty); ctx.stroke();
+                b.life -= 0.08; if(b.life <= 0) beams.splice(i, 1);
+            });
+            requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if(!gameActive) return;
+            const k = e.key.toLowerCase();
+            let char = (e.shiftKey ? SHIFT_MAP[k] : NORMAL_MAP[k]) || (e.code === "Space" ? " " : "");
+            const target = enemies.find(en => en.char === char);
+            if(target) { socket.emit('enemy-killed', { roomId: myRoomId, enemyId: target.id }); socket.emit('player-score', { roomId: myRoomId, points: 10 }); }
+        });
+    </script>
+</body>
+</html>
