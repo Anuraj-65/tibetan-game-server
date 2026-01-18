@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="bo">
 <head>
-    <script src="/socket.io/socket.io.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ62DL1S2M"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -11,302 +10,407 @@
     </script>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TibetanKeys | Elemental Arena</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TibetanKeys | Windhorse Run</title>
+    <link rel="icon" type="image/png" href="og.png">
+
     <style>
         @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
-        body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; user-select: none; }
         
-        /* Star Background */
-        body { background-image: radial-gradient(white 1px, transparent 1px); background-size: 50px 50px; }
+        :root { --text: #ffffff; }
 
-        .hud { position: absolute; top: 0; width: 100%; padding: 20px; display: flex; justify-content: space-between; z-index: 100; color: #fff; font-weight: bold; pointer-events: none; }
-        .time-box { font-size: 40px; color: #00e676; text-shadow: 0 0 10px #00e676; }
+        body, html { 
+            margin: 0; padding: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            height: 100vh; width: 100vw;
+            overflow: hidden; user-select: none;
+            background: #000;
+        }
+
+        /* --- HUD --- */
+        .hud { 
+            position: absolute; top: 20px; left: 40px; 
+            z-index: 100; font-family: 'Courier New', monospace;
+            text-shadow: 0 2px 0 rgba(0,0,0,0.5);
+        }
         
-        /* Leaderboard */
-        .players-panel { display: flex; gap: 20px; }
-        .p-score-box { background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 20px; border: 2px solid #333; text-align: center; }
-        .p-name { font-size: 12px; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
-        .p-val { font-size: 24px; }
+        .distance-display { font-size: 48px; font-weight: 900; color: #fff; letter-spacing: -2px; }
+        .distance-label { font-size: 14px; opacity: 0.7; color: #fff; letter-spacing: 4px; text-transform: uppercase; }
 
+        /* --- CANVAS --- */
         #game-canvas { display: block; width: 100%; height: 100%; }
 
-        /* RESULT MODAL */
-        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
-        .result-box { background: #111; padding: 50px; text-align: center; border-radius: 15px; border: 2px solid #444; width: 400px; }
-        .res-title { font-size: 30px; font-weight: 900; color: #fff; margin-bottom: 20px; text-transform: uppercase; }
-        .winner-txt { font-size: 18px; color: #ffd700; margin-bottom: 30px; }
-        .res-btn { background: #00e676; color: #000; border: none; padding: 15px 40px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 5px; }
-        
-        .back-btn { position: fixed; bottom: 20px; left: 20px; color: rgba(255,255,255,0.3); text-decoration: none; font-size: 12px; font-weight: bold; text-transform: uppercase; z-index: 200; }
+        /* --- MODAL --- */
+        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .result-box { background: #fff; padding: 40px 60px; text-align: center; border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); transform: rotate(-2deg); }
+        .res-title { font-size: 24px; font-weight: 900; color: #333; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        .res-score { font-size: 80px; color: #000; font-weight: 900; margin-bottom: 20px; line-height: 1; }
+        .res-btn { background: #000; color: #fff; border: none; padding: 15px 40px; font-weight: bold; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .res-btn:hover { background: #333; transform: scale(1.05); }
+        .res-btn-sec { background: transparent; color: #555; border: 2px solid #ddd; margin-top: 10px; }
+        .res-btn-sec:hover { border-color: #000; color: #000; background: transparent; }
+
+        .back-btn { position: fixed; bottom: 20px; left: 20px; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 11px; letter-spacing: 2px; z-index: 200; text-transform: uppercase; font-weight: bold; mix-blend-mode: difference; }
     </style>
 </head>
 <body>
 
     <div class="hud">
-        <div class="players-panel" id="score-panel">
-            </div>
-        <div class="time-box" id="game-timer">60</div>
+        <div class="distance-display"><span id="dist">0</span>m</div>
+        <div class="distance-label">Distance Traveled</div>
     </div>
 
     <canvas id="game-canvas"></canvas>
 
     <div id="result-modal">
         <div class="result-box">
-            <div class="res-title">Battle Over</div>
-            <div class="winner-txt" id="winner-display">...</div>
-            <button class="res-btn" onclick="window.location.href='multiplayer-lobby.html'">Return to Lobby</button>
+            <div class="res-title">Run Ended</div>
+            <div class="res-score"><span id="final-dist">0</span>m</div>
+            <button class="res-btn" onclick="location.reload()">Run Again</button><br>
+            <button class="res-btn res-btn-sec" onclick="window.location.href='lessons.html'">Return</button>
         </div>
     </div>
 
-    <a href="game-select.html" class="back-btn">← Exit</a>
+    <a href="lessons.html" class="back-btn">← End Run</a>
 
     <script>
         // --- DATA ---
         const NORMAL_MAP = { 'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':' ' };
         const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ' };
 
-        // --- SETUP ---
+        // --- CONTENT LOADER ---
         const urlParams = new URLSearchParams(window.location.search);
-        const roomId = urlParams.get('room');
-        const socket = io();
+        const levelIndex = parseInt(urlParams.get('level') || "18");
         
-        let active = true;
-        let players = []; // [{id, name, score, color}]
-        let enemies = [];
-        let beams = []; // {sx, sy, tx, ty, color, life}
+        let gameChars = [];
+        if (levelIndex >= 1) gameChars.push(...'ཀཁགང'.split(''));
+        if (levelIndex >= 2) gameChars.push(...'ཅཆཇཉ'.split(''));
+        if (levelIndex >= 5) gameChars.push(...'ཏཐདན'.split(''));
+        if (levelIndex >= 6) gameChars.push(...'པཕབམ'.split(''));
+        if (levelIndex >= 9) gameChars.push(...'ཙཚཛཝ'.split(''));
+        if (levelIndex >= 10) gameChars.push(...'ཞཟའཡ'.split(''));
+        if (levelIndex >= 13) gameChars.push(...'རལཤས'.split(''));
+        if (levelIndex >= 14) gameChars.push(...'ཧཨ'.split(''));
+        if(gameChars.length === 0) gameChars = 'ཀཁགང'.split('');
 
-        // --- CANVAS ---
+        // --- ENGINE SETUP ---
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
-        function resize() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; }
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
         window.addEventListener('resize', resize);
         resize();
 
-        // --- JOIN ---
-        socket.emit('join-room', roomId);
+        // --- GAME STATE ---
+        let active = true;
+        let frame = 0;
+        let distance = 0;
+        let speed = 6; // Base Scroll Speed
+        let skyCycle = 0; // 0 to 1 (Day/Night)
 
-        // --- NETWORKING ---
-        socket.on('spawn-enemy', (data) => {
-            // Convert spawnType (0-4) to coordinates
-            let x, y, vx, vy;
-            const pad = 50;
-            const speed = data.speed;
+        // --- ENTITIES ---
+        // The Runner (Windhorse)
+        const player = {
+            x: 100,
+            y: 0, // Calculated dynamically relative to ground
+            width: 50,
+            height: 50,
+            yVel: 0,
+            isJumping: false,
+            color: '#fff'
+        };
 
-            if(data.spawnType === 4) { // Random Center Pop
-                x = Math.random() * (width - 200) + 100;
-                y = Math.random() * (height - 200) + 100;
-                vx = (Math.random() - 0.5) * speed;
-                vy = (Math.random() - 0.5) * speed;
-            } else if (data.spawnType === 0) { // Top
-                x = Math.random() * width; y = -pad; vx = (Math.random()-0.5)*speed; vy = speed;
-            } else if (data.spawnType === 1) { // Right
-                x = width + pad; y = Math.random() * height; vx = -speed; vy = (Math.random()-0.5)*speed;
-            } else if (data.spawnType === 2) { // Bottom
-                x = Math.random() * width; y = height + pad; vx = (Math.random()-0.5)*speed; vy = -speed;
-            } else { // Left
-                x = -pad; y = Math.random() * height; vx = speed; vy = (Math.random()-0.5)*speed;
+        let obstacles = []; // { x, char, width, height, type }
+        let particles = []; // { x, y, vx, vy, life, color }
+        let mountains = []; // Background parallax layers
+
+        // Initialize Mountains
+        for(let i=0; i<3; i++) {
+            let pts = [];
+            let x = 0;
+            while(x < width * 2) {
+                pts.push({x: x, y: height - 100 - (i*100) - Math.random()*150});
+                x += Math.random() * 100 + 50;
             }
-
-            enemies.push({
-                id: data.id, char: data.char,
-                x: x, y: y, vx: vx, vy: vy,
-                life: 100 // Opacity/Life
-            });
-        });
-
-        socket.on('enemy-destroyed', (data) => {
-            // Find Enemy
-            const eIdx = enemies.findIndex(e => e.id === data.enemyId);
-            if(eIdx === -1) return;
-            const target = enemies[eIdx];
-
-            // Find Killer (to draw beam)
-            const killer = players.find(p => p.id === data.killerId);
-            if(killer && killer.pos) {
-                // Add Beam
-                beams.push({
-                    sx: killer.pos.x, sy: killer.pos.y,
-                    tx: target.x, ty: target.y,
-                    color: killer.color,
-                    life: 1.0
-                });
-            }
-
-            // Remove Enemy
-            enemies.splice(eIdx, 1);
-        });
-
-        socket.on('score-update', (serverPlayers) => {
-            // Merge scores but keep positions
-            serverPlayers.forEach(sp => {
-                const local = players.find(p => p.id === sp.id);
-                if(local) local.score = sp.score;
-            });
-            updateScoreUI();
-        });
-
-        socket.on('room-state', (room) => {
-            // Initialize Players
-            players = room.players;
-            updateScoreUI();
-        });
-
-        socket.on('gametime-update', (t) => {
-            document.getElementById('game-timer').innerText = t;
-            if(t <= 10) document.getElementById('game-timer').style.color = '#ff4081';
-        });
-
-        socket.on('game-over', (finalPlayers) => {
-            active = false;
-            finalPlayers.sort((a,b) => b.score - a.score);
-            const winner = finalPlayers[0];
-            const isMe = winner.id === socket.id;
-            
-            let msg = isMe ? "VICTORY!" : winner.name + " WINS!";
-            if(finalPlayers.length === 1) msg = "TRAINING COMPLETE";
-
-            document.getElementById('winner-display').innerText = msg;
-            document.getElementById('result-modal').style.display = 'flex';
-        });
-
-        function updateScoreUI() {
-            const panel = document.getElementById('score-panel');
-            panel.innerHTML = '';
-            players.forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'p-score-box';
-                div.style.borderColor = p.color;
-                div.innerHTML = `<div class="p-name" style="color:${p.color}">${p.name}</div><div class="p-val">${p.score}</div>`;
-                panel.appendChild(div);
-            });
+            mountains.push({ points: pts, speed: (i+1) * 0.5, color: `rgba(20, 20, 30, ${0.3 + (i*0.2)})` });
         }
 
-        // --- POSITION LOGIC ---
-        function calculatePositions() {
-            const count = players.length;
-            const cx = width / 2;
-            const cy = height / 2;
-            const pad = 80;
-
-            players.forEach((p, i) => {
-                if (count === 1) {
-                    p.pos = { x: cx, y: cy };
-                } else if (count === 2) {
-                    p.pos = { x: (i===0 ? pad : width-pad), y: cy };
-                } else if (count === 3) {
-                    if(i===0) p.pos = { x: cx, y: pad }; // Top
-                    if(i===1) p.pos = { x: pad, y: height-pad }; // Bot Left
-                    if(i===2) p.pos = { x: width-pad, y: height-pad }; // Bot Right
-                } else { // 4 Players
-                    if(i===0) p.pos = { x: pad, y: pad }; // Top Left
-                    if(i===1) p.pos = { x: width-pad, y: pad }; // Top Right
-                    if(i===2) p.pos = { x: pad, y: height-pad }; // Bot Left
-                    if(i===3) p.pos = { x: width-pad, y: height-pad }; // Bot Right
-                }
-            });
-        }
-
-        // --- GAME LOOP ---
+        // --- LOOP ---
         function loop() {
             if (!active) return;
             
-            // Clear
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.3)'; // Trail effect
-            ctx.fillRect(0, 0, width, height);
+            // 1. Logic
+            frame++;
+            distance += (speed / 10);
+            document.getElementById('dist').innerText = Math.floor(distance);
+            
+            // Increase Speed slowly
+            if(frame % 600 === 0) speed += 0.5;
 
-            calculatePositions();
+            // Sky Cycle
+            skyCycle += 0.0005;
+            if(skyCycle > 1) skyCycle = 0;
 
-            // 1. Draw Players (Arrows)
-            players.forEach(p => {
-                if(!p.pos) return;
-                
-                // Draw Base
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = p.color;
-                ctx.fillStyle = '#111';
-                ctx.beginPath();
-                ctx.arc(p.pos.x, p.pos.y, 20, 0, Math.PI*2);
-                ctx.fill();
-
-                // Draw Arrow (Pointing to center or mouse? Let's point to center for idle look)
-                // Or better: Just a cool elemental symbol
-                ctx.strokeStyle = p.color;
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(p.pos.x - 10, p.pos.y + 10);
-                ctx.lineTo(p.pos.x, p.pos.y - 15);
-                ctx.lineTo(p.pos.x + 10, p.pos.y + 10);
-                ctx.lineTo(p.pos.x, p.pos.y + 5); // Indent
-                ctx.closePath();
-                ctx.stroke();
-                
-                // Name
-                ctx.fillStyle = p.color;
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(p.name, p.pos.x, p.pos.y + 35);
-                ctx.shadowBlur = 0;
-            });
-
-            // 2. Draw Enemies
-            ctx.font = 'bold 30px OuChan2';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            enemies.forEach((e, i) => {
-                e.x += e.vx;
-                e.y += e.vy;
-
-                // Bounce off walls (Arena style)
-                if(e.x < 0 || e.x > width) e.vx *= -1;
-                if(e.y < 0 || e.y > height) e.vy *= -1;
-
-                // Draw Glow
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#fff';
-                ctx.fillStyle = 'rgba(255,255,255,0.9)';
-                ctx.fillText(e.char, e.x, e.y);
-                ctx.shadowBlur = 0;
-            });
-
-            // 3. Draw Beams
-            for (let i = beams.length - 1; i >= 0; i--) {
-                let b = beams[i];
-                ctx.beginPath();
-                ctx.strokeStyle = b.color;
-                ctx.lineWidth = b.life * 5;
-                ctx.globalAlpha = b.life;
-                ctx.moveTo(b.sx, b.sy);
-                ctx.lineTo(b.tx, b.ty);
-                ctx.stroke();
-                ctx.globalAlpha = 1;
-                
-                b.life -= 0.1;
-                if(b.life <= 0) beams.splice(i, 1);
+            // Spawn Obstacles
+            // Minimum gap logic to prevent unfair overlap
+            let lastObsX = obstacles.length > 0 ? obstacles[obstacles.length-1].x : 0;
+            if (width - lastObsX > 300) { // Ensure gap
+                if (Math.random() < 0.02 + (speed * 0.001)) { // Spawn chance
+                    spawnObstacle();
+                }
+            } else if (obstacles.length === 0) {
+                if (Math.random() < 0.05) spawnObstacle();
             }
 
+            // 2. Draw Sky (Gradient based on cycle)
+            let skyTop, skyBot;
+            if (skyCycle < 0.5) { // Morning -> Day
+                skyTop = `hsl(200, 60%, ${20 + skyCycle*60}%)`; 
+                skyBot = `hsl(30, 80%, ${30 + skyCycle*40}%)`;
+            } else { // Day -> Night
+                skyTop = `hsl(200, 60%, ${80 - (skyCycle-0.5)*140}%)`; 
+                skyBot = `hsl(30, 80%, ${70 - (skyCycle-0.5)*120}%)`;
+            }
+            
+            let grad = ctx.createLinearGradient(0, 0, 0, height);
+            grad.addColorStop(0, skyTop);
+            grad.addColorStop(1, skyBot);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            // 3. Draw Sun/Moon
+            const celestialY = height/2 + Math.sin((skyCycle + 0.75) * Math.PI * 2) * (height/1.5);
+            const celestialX = width/2 + Math.cos((skyCycle + 0.75) * Math.PI * 2) * (width/1.5);
+            ctx.fillStyle = skyCycle < 0.5 ? '#ffd700' : '#fff';
+            ctx.shadowBlur = 40;
+            ctx.shadowColor = ctx.fillStyle;
+            ctx.beginPath();
+            ctx.arc(celestialX, celestialY, 40, 0, Math.PI*2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // 4. Parallax Mountains
+            mountains.forEach(m => {
+                ctx.fillStyle = m.color;
+                ctx.beginPath();
+                ctx.moveTo(0, height);
+                m.points.forEach(p => {
+                    p.x -= m.speed + (speed * 0.1); // Move parallax
+                    ctx.lineTo(p.x, p.y);
+                });
+                ctx.lineTo(width, height);
+                ctx.fill();
+
+                // Endless recycle
+                if(m.points[0].x < -200) {
+                    let first = m.points.shift();
+                    let lastX = m.points[m.points.length-1].x;
+                    first.x = lastX + Math.random() * 100 + 50;
+                    first.y = height - 100 - (Math.random()*150);
+                    m.points.push(first);
+                }
+            });
+
+            // 5. Draw Ground
+            const groundY = height - 100;
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, groundY, width, 100);
+            
+            // Ground stripes for speed illusion
+            ctx.fillStyle = '#222';
+            const stripeOffset = (frame * speed) % 100;
+            for(let i=0; i<width+100; i+=100) {
+                ctx.beginPath();
+                ctx.moveTo(i - stripeOffset, groundY);
+                ctx.lineTo(i - stripeOffset + 40, groundY);
+                ctx.lineTo(i - stripeOffset - 20, height);
+                ctx.lineTo(i - stripeOffset - 60, height);
+                ctx.fill();
+            }
+
+            // 6. Logic & Draw Obstacles
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obs = obstacles[i];
+                obs.x -= speed;
+
+                // Draw "Stone" Body
+                ctx.fillStyle = '#222';
+                // Simple shape
+                ctx.beginPath();
+                ctx.moveTo(obs.x, groundY);
+                ctx.lineTo(obs.x + obs.width/2, groundY - obs.height);
+                ctx.lineTo(obs.x + obs.width, groundY);
+                ctx.fill();
+
+                // Draw Text Aura
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#00e676'; // Green aura target
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 40px OuChan2';
+                ctx.fillText(obs.char, obs.x + obs.width/2, groundY - obs.height/2 + 5);
+                ctx.shadowBlur = 0;
+
+                // Collision
+                // Simple box check. Player is at player.x (100).
+                if (obs.x < player.x + player.width && obs.x + obs.width > player.x) {
+                    // CRASH!
+                    gameOver();
+                }
+
+                // Cleanup offscreen
+                if (obs.x < -100) {
+                    obstacles.splice(i, 1);
+                }
+            }
+
+            // 7. Draw Player (Windhorse / Runner)
+            // Jump physics visual
+            if (player.isJumping) {
+                player.yVel += 1; // Gravity
+                player.y += player.yVel;
+                if (player.y >= 0) {
+                    player.y = 0;
+                    player.isJumping = false;
+                }
+            }
+            
+            // Running bobbing
+            let runBob = player.isJumping ? 0 : Math.sin(frame * 0.3) * 5;
+            
+            ctx.save();
+            ctx.translate(player.x, groundY - 40 + player.y - runBob);
+            
+            // Simple bright avatar (The Windhorse Spirit)
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#fff';
+            ctx.fillStyle = '#fff';
+            
+            // Draw Horse-like shape (Stylized)
+            ctx.beginPath();
+            ctx.ellipse(20, 10, 25, 15, 0, 0, Math.PI*2); // Body
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(35, -5, 12, 0, Math.PI*2); // Head
+            ctx.fill();
+            
+            // Legs (animated)
+            if(!player.isJumping) {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(10, 20); ctx.lineTo(10 - Math.sin(frame*0.3)*10, 40); // Back leg
+                ctx.moveTo(30, 20); ctx.lineTo(30 + Math.sin(frame*0.3)*10, 40); // Front leg
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // 8. Particles
+            updateParticles();
+
             requestAnimationFrame(loop);
+        }
+
+        // --- GAME LOGIC ---
+        function spawnObstacle() {
+            const char = gameChars[Math.floor(Math.random() * gameChars.length)];
+            obstacles.push({
+                char: char,
+                x: width + 50,
+                width: 60,
+                height: 80
+            });
+        }
+
+        function destroyClosest(char) {
+            // Find the closest obstacle that matches the char
+            let bestDist = 99999;
+            let bestIdx = -1;
+
+            obstacles.forEach((obs, i) => {
+                if (obs.char === char) {
+                    if (obs.x < bestDist) {
+                        bestDist = obs.x;
+                        bestIdx = i;
+                    }
+                }
+            });
+
+            if (bestIdx !== -1) {
+                // SUCCESS
+                let target = obstacles[bestIdx];
+                spawnParticles(target.x + target.width/2, height - 100 - target.height/2);
+                obstacles.splice(bestIdx, 1);
+                
+                // Jump Effect
+                if(!player.isJumping) {
+                    player.yVel = -12;
+                    player.isJumping = true;
+                }
+            } else {
+                // Penalty? Slow down? 
+                // For now, no penalty, just keep running.
+            }
+        }
+
+        function gameOver() {
+            active = false;
+            document.getElementById('final-dist').innerText = Math.floor(distance);
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        // --- VISUALS ---
+        function spawnParticles(x, y) {
+            for(let i=0; i<10; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 1.0,
+                    color: `hsl(${Math.random()*60 + 10}, 100%, 50%)` // Fire colors
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.05;
+                
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+
+                if (p.life <= 0) particles.splice(i, 1);
+            }
         }
 
         // --- INPUT ---
         window.addEventListener('keydown', (e) => {
             if (!active) return;
+            if (e.key === "Shift" || e.key === "Tab") return;
+
             const physicalKey = e.key.toLowerCase();
             let typedChar = (e.shiftKey ? SHIFT_MAP[physicalKey] : NORMAL_MAP[physicalKey]) || "";
             if (e.code === "Space") typedChar = " ";
 
-            // Find Enemy
-            const target = enemies.find(en => en.char === typedChar);
-            
-            if (target) {
-                // Send Hit to Server
-                socket.emit('enemy-killed', { roomId: roomId, enemyId: target.id });
-                socket.emit('player-score', { roomId: roomId, points: 10 });
-            }
+            destroyClosest(typedChar);
         });
 
+        // START
         requestAnimationFrame(loop);
 
     </script>
