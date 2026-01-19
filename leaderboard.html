@@ -293,13 +293,13 @@
     </div>
 
     <div class="floating-bar">
-        <button class="arena-btn" onclick="openRegisterModal()">ENTER THE ARENA</button>
+        <button class="arena-btn" onclick="openRegisterModal(false)">ENTER THE ARENA</button>
     </div>
 
     <div id="register-modal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
-            <h2 style="color:var(--accent);">Identity Check</h2>
-            <p>Enter your details. Use the same PIN to update your score later.</p>
+            <h2 id="reg-title" style="color:var(--accent);">Identity Check</h2>
+            <p id="reg-desc">Enter your details. Use the same PIN to update your score later.</p>
             <input type="text" id="p-name" placeholder="Your Name (e.g. Tenzin)">
             <input type="text" id="p-loc" placeholder="Location (e.g. Dharamshala)">
             <input type="number" id="p-pin" placeholder="4-Digit Secret PIN" oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);">
@@ -338,7 +338,6 @@
                 <button class="ctrl-btn" onmousedown="event.preventDefault(); adjustFontSize(5)">A+</button>
                 <div style="flex-grow:1;"></div> 
                 <button class="ctrl-btn restart" onclick="launchGame()">RESTART</button>
-                <button class="arena-btn" style="padding: 10px 30px; font-size: 1rem;" onclick="finishGame()">SUBMIT NOW</button>
             </div>
         </div>
     </div>
@@ -647,6 +646,10 @@
         }
 
         function finishGame() {
+            if (currentStackIndex < targetStacks.length) {
+                return; // Silently fail if text isn't finished
+            }
+
             clearInterval(timerInterval);
             const endTime = new Date();
             let timeSeconds = (endTime - startTime) / 1000;
@@ -671,7 +674,33 @@
         }
 
         function focusInput() { document.getElementById('hidden-input').focus(); }
-        function openRegisterModal() { document.getElementById('register-modal').style.display = 'flex'; clearError('reg-error'); }
+        
+        // --- CHANGED: Now takes a parameter to know if we are updating ---
+        function openRegisterModal(isUpdateMode = false) { 
+            const title = document.getElementById('reg-title');
+            const desc = document.getElementById('reg-desc');
+            const nameField = document.getElementById('p-name');
+            const locField = document.getElementById('p-loc');
+            const pinField = document.getElementById('p-pin');
+
+            if (isUpdateMode) {
+                title.innerText = "Confirm Your Details";
+                title.style.color = "var(--green)";
+                desc.innerHTML = "You can <b>edit</b> your Name, Location, or PIN below if you want to change them.";
+            } else {
+                title.innerText = "Identity Check";
+                title.style.color = "var(--accent)";
+                desc.innerText = "Enter your details. Use the same PIN to update your score later.";
+                // Clear fields if it's a new user
+                nameField.value = "";
+                locField.value = "";
+                pinField.value = "";
+            }
+
+            document.getElementById('register-modal').style.display = 'flex'; 
+            clearError('reg-error'); 
+        }
+
         function openVerifyModal(index) {
             selectedPlayer = allPlayers[index];
             document.getElementById('verify-msg').innerText = `Welcome back, ${selectedPlayer.name}. Enter PIN.`;
@@ -704,10 +733,16 @@
         function verifyPin() {
             clearError('verify-error');
             if(String(document.getElementById('v-pin').value) === String(selectedPlayer.pin)) {
+                
+                // Populate the fields
                 document.getElementById('p-name').value = selectedPlayer.name;
                 document.getElementById('p-loc').value = selectedPlayer.location;
                 document.getElementById('p-pin').value = selectedPlayer.pin;
-                closeModal('verify-modal'); launchGame();
+                
+                closeModal('verify-modal'); 
+                
+                // --- CHANGED: Pass TRUE so the modal knows we are updating ---
+                openRegisterModal(true); 
             } else showError('verify-error', "Wrong PIN");
         }
         function uploadScore() {
