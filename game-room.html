@@ -1,418 +1,665 @@
 <!DOCTYPE html>
-<html lang="bo">
+<html lang="en">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ62DL1S2M"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-WQ62DL1S2M');
-    </script>
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TibetanKeys | Windhorse Run</title>
-    <link rel="icon" type="image/png" href="og.png">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TibetanKeys: Stickman Yak</title>
     <style>
-        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
-        
-        :root { --text: #ffffff; }
+        /* 1. FONT LOADING */
+        @font-face {
+            font-family: 'OuChan2';
+            src: url('Monlam Uni OuChan2.ttf') format('truetype');
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700;900&display=swap');
 
-        body, html { 
-            margin: 0; padding: 0; 
-            font-family: 'Segoe UI', sans-serif; 
-            height: 100vh; width: 100vw;
-            overflow: hidden; user-select: none;
-            background: #000;
+        /* 2. GLOBAL SETTINGS */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #050505; overflow: hidden;
+            font-family: 'Segoe UI', sans-serif; user-select: none;
         }
 
-        /* --- HUD --- */
-        .hud { 
-            position: absolute; top: 20px; left: 40px; 
-            z-index: 100; font-family: 'Courier New', monospace;
-            text-shadow: 0 2px 0 rgba(0,0,0,0.5);
+        /* 3. HUD LAYOUT */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 20; padding: 30px; box-sizing: border-box;
+        }
+        .top-row { display: flex; justify-content: space-between; align-items: flex-start; }
+        
+        .score-val { 
+            font-family: 'Roboto Mono', monospace; font-size: 60px; color: #fff; 
+            line-height: 1; text-shadow: 0 0 15px #00ffcc; margin-bottom: 5px; 
+        }
+        .score-lbl { 
+            font-size: 14px; color: #00ffcc; letter-spacing: 3px; font-weight: bold; 
+        }
+        .lives { font-size: 40px; filter: drop-shadow(0 0 5px #ff0055); }
+
+        /* Power Up Bar */
+        .power-bar {
+            position: absolute; top: 120px; left: 50%; transform: translateX(-50%);
+            width: 400px; opacity: 0; transition: opacity 0.3s; text-align: center;
+        }
+        .power-bar.active { opacity: 1; }
+        .p-name { 
+            color: #ffd700; font-family: 'Roboto Mono'; font-size: 24px; 
+            text-shadow: 0 0 10px #ffd700; margin-bottom: 5px; 
+        }
+        .p-track { 
+            width: 100%; height: 8px; background: rgba(255,255,255,0.2); 
+            border: 1px solid #333; border-radius: 4px; overflow: hidden; 
+        }
+        .p-fill { 
+            height: 100%; width: 100%; background: #ffd700; 
+            box-shadow: 0 0 15px #ffd700; transition: width 0.1s linear; 
+        }
+
+        /* Slow Motion FX */
+        #slow-fx {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 150, 255, 0.2); pointer-events: none; opacity: 0; 
+            transition: opacity 0.5s; z-index: 10; mix-blend-mode: overlay;
+        }
+
+        /* Start / End Screens */
+        #screens {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+            display: none; /* Hidden by default */
         }
         
-        .distance-display { font-size: 48px; font-weight: 900; color: #fff; letter-spacing: -2px; }
-        .distance-label { font-size: 14px; opacity: 0.7; color: #fff; letter-spacing: 4px; text-transform: uppercase; }
+        /* Default Box */
+        .box {
+            text-align: center; border: 2px solid #00ffcc; padding: 60px 100px;
+            background: linear-gradient(145deg, #111, #000);
+            box-shadow: 0 0 60px rgba(0, 255, 204, 0.2); border-radius: 12px;
+        }
+        h1 { color: #fff; font-family: 'Roboto Mono'; font-size: 50px; margin: 0 0 15px 0; }
+        p { color: #888; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 40px; }
+        
+        /* Tilted End Card */
+        #end-box {
+            background: #ffffff;
+            transform: rotate(-2deg);
+            padding: 50px 60px;
+            border-radius: 4px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            border: none;
+            text-align: center;
+            min-width: 400px;
+        }
+        #end-box h1 { 
+            color: #333; font-family: 'Roboto Mono', monospace; font-size: 20px; 
+            letter-spacing: 4px; margin: 0 0 10px 0; text-transform: uppercase; font-weight: 900;
+        }
+        #end-box #final-score {
+            color: #000; font-family: 'Roboto Mono', monospace; font-size: 100px; 
+            margin: 0 0 40px 0; line-height: 1; font-weight: 900;
+        }
 
-        /* --- CANVAS --- */
-        #game-canvas { display: block; width: 100%; height: 100%; }
+        /* Buttons */
+        .btn-black {
+            display: block; width: 100%; background: #000; color: #fff; border: none;
+            padding: 20px 0; font-size: 18px; font-weight: bold; font-family: 'Roboto Mono';
+            cursor: pointer; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;
+            transition: transform 0.1s;
+        }
+        .btn-black:hover { transform: scale(1.02); }
+        .btn-white {
+            display: block; width: 100%; background: #fff; color: #666; border: 2px solid #ddd;
+            padding: 18px 0; font-size: 16px; font-weight: bold; font-family: 'Roboto Mono';
+            cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s;
+        }
+        .btn-white:hover { border-color: #333; color: #000; }
 
-        /* --- MODAL --- */
-        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .result-box { background: #fff; padding: 40px 60px; text-align: center; border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); transform: rotate(-2deg); }
-        .res-title { font-size: 24px; font-weight: 900; color: #333; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        .res-score { font-size: 80px; color: #000; font-weight: 900; margin-bottom: 20px; line-height: 1; }
-        .res-btn { background: #000; color: #fff; border: none; padding: 15px 40px; font-weight: bold; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        .res-btn:hover { background: #333; transform: scale(1.05); }
-        .res-btn-sec { background: transparent; color: #555; border: 2px solid #ddd; margin-top: 10px; }
-        .res-btn-sec:hover { border-color: #000; color: #000; background: transparent; }
+        /* Generic neon button */
+        .neon-btn {
+            background: #00ffcc; color: #000; border: none; padding: 20px 60px;
+            font-size: 20px; font-weight: 900; letter-spacing: 2px; cursor: pointer;
+            font-family: 'Roboto Mono'; transition: 0.2s;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+        .neon-btn:hover { background: #fff; transform: scale(1.05); box-shadow: 0 0 40px #00ffcc; }
 
-        .back-btn { position: fixed; bottom: 20px; left: 20px; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 11px; letter-spacing: 2px; z-index: 200; text-transform: uppercase; font-weight: bold; mix-blend-mode: difference; }
+        /* Initial Click Overlay - HIDDEN */
+        #click-start {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 200;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+            display: none;
+        }
+        .blink { animation: blink 1.5s infinite; color: #00ffcc; font-family: 'Roboto Mono'; font-size: 24px; font-weight: bold; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
-    <div class="hud">
-        <div class="distance-display"><span id="dist">0</span>m</div>
-        <div class="distance-label">Distance Traveled</div>
+    <div id="slow-fx"></div>
+
+    <div id="ui-layer">
+        <div class="top-row">
+            <div>
+                <div class="score-val" id="score">0</div>
+                <div class="score-lbl">METERS</div>
+            </div>
+            <div class="lives" id="lives">❤️❤️❤️</div>
+        </div>
+        <div class="power-bar" id="power-ui">
+            <div class="p-name" id="p-name">SPEED</div>
+            <div class="p-track"><div class="p-fill" id="p-fill"></div></div>
+        </div>
+    </div>
+
+    <div id="click-start" onclick="Game.start()">
+        <div class="blink">[ CLICK TO START ]</div>
+    </div>
+
+    <div id="screens">
+        <div class="box" id="start-box" style="display:none;">
+            <h1>STICK YAK</h1>
+            <p>Type characters to shoot arrows</p>
+            <button class="neon-btn" onclick="Game.start()">START</button>
+        </div>
+        
+        <div id="end-box" style="display:none;">
+            <h1>RUN ENDED</h1>
+            <div id="final-score">0m</div>
+            <button class="btn-black" onclick="location.reload()">RUN AGAIN</button>
+            <button class="btn-white" onclick="location.reload()">RETURN</button>
+        </div>
     </div>
 
     <canvas id="game-canvas"></canvas>
 
-    <div id="result-modal">
-        <div class="result-box">
-            <div class="res-title">Run Ended</div>
-            <div class="res-score"><span id="final-dist">0</span>m</div>
-            <button class="res-btn" onclick="location.reload()">Run Again</button><br>
-            <button class="res-btn res-btn-sec" onclick="window.location.href='lessons.html'">Return</button>
-        </div>
-    </div>
+<script>
+/**
+ * ==========================================================
+ * THE YAK LEGEND: MASTER EDITION
+ * ==========================================================
+ */
 
-    <a href="lessons.html" class="back-btn">← End Run</a>
+// --- 1. CONFIGURATION ---
+const KEY_MAP = {
+    'k': 'ཀ', 'K': 'ཁ', 'g': 'ག', 'f': 'ང',
+    'c': 'ཅ', 'C': 'ཆ', 'j': 'ཇ', 'N': 'ཉ',
+    't': 'ཏ', 'T': 'ཐ', 'd': 'ད', 'n': 'ན',
+    'p': 'པ', 'P': 'ཕ', 'b': 'བ', 'm': 'མ',
+    'x': 'ཙ', 'X': 'ཚ', 'D': 'ཛ', 'w': 'ཝ',
+    'z': 'ཟ', 'Z': 'ཞ', '\'': 'འ', 'y': 'ཡ', 
+    'r': 'ར', 'l': 'ལ', 'S': 'ཤ', 's': 'ས',
+    'h': 'ཧ', 'A': 'ཨ'
+};
 
-    <script>
-        // --- DATA ---
-        const NORMAL_MAP = { 'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':' ' };
-        const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ' };
+const CHAR_POOL = Object.keys(KEY_MAP);
+const POWERS = { NONE: 0, LEVITATE: 1, DOUBLE: 2, SPEED: 3, LIFE: 4, SLOW: 5 };
 
-        // --- CONTENT LOADER ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const levelIndex = parseInt(urlParams.get('level') || "18");
+const C = {
+    GRAVITY: 0.5,
+    ARROW_SPEED: 60, 
+    YAK_X: 180,
+    GROUND_H: 140, 
+    POWER_TIME: 600
+};
+
+// --- 2. AUDIO (SFX Only) ---
+const Sfx = {
+    ctx: null,
+    
+    init: function() { 
+        if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+    },
+    
+    play: function(type, f1, f2, dur, vol) {
+        if(!this.ctx) return;
+        const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+        o.type = type; o.frequency.setValueAtTime(f1, this.ctx.currentTime);
+        if(f2) o.frequency.exponentialRampToValueAtTime(f2, this.ctx.currentTime+dur);
+        g.gain.setValueAtTime(vol, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime+dur);
+        o.connect(g); g.connect(this.ctx.destination);
+        o.start(); o.stop(this.ctx.currentTime+dur);
+    },
+    
+    shoot: () => Sfx.play('triangle', 600, 100, 0.1, 0.1),
+    hit: () => Sfx.play('square', 150, 50, 0.1, 0.2),
+    power: () => Sfx.play('sine', 400, 800, 0.5, 0.2),
+    damage: () => Sfx.play('sawtooth', 100, 20, 0.3, 0.3),
+};
+
+// --- 3. GAME ENGINE ---
+const Game = {
+    canvas: null, ctx: null, width: 0, height: 0,
+    active: false, frame: 0,
+    
+    // Stats
+    lives: 3, score: 0, speed: 4,
+    
+    // Powerups
+    powerType: 0, powerTimer: 0, timeScale: 1.0,
+    
+    // Entities
+    yak: { y: 0, targetY: 0, bowDraw: 0 },
+    arrows: [], obs: [], sky: [], particles: [], mountains: [],
+    
+    // Logic
+    flyTimer: 0, lastObsX: 0, shake: 0,
+
+    init: function() {
+        this.canvas = document.getElementById('game-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('keypress', (e) => this.input(e));
         
-        let gameChars = [];
-        if (levelIndex >= 1) gameChars.push(...'ཀཁགང'.split(''));
-        if (levelIndex >= 2) gameChars.push(...'ཅཆཇཉ'.split(''));
-        if (levelIndex >= 5) gameChars.push(...'ཏཐདན'.split(''));
-        if (levelIndex >= 6) gameChars.push(...'པཕབམ'.split(''));
-        if (levelIndex >= 9) gameChars.push(...'ཙཚཛཝ'.split(''));
-        if (levelIndex >= 10) gameChars.push(...'ཞཟའཡ'.split(''));
-        if (levelIndex >= 13) gameChars.push(...'རལཤས'.split(''));
-        if (levelIndex >= 14) gameChars.push(...'ཧཨ'.split(''));
-        if(gameChars.length === 0) gameChars = 'ཀཁགང'.split('');
-
-        // --- ENGINE SETUP ---
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-
-        function resize() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // --- GAME STATE ---
-        let active = true;
-        let frame = 0;
-        let distance = 0;
-        let speed = 6; // Base Scroll Speed
-        let skyCycle = 0; // 0 to 1 (Day/Night)
-
-        // --- ENTITIES ---
-        // The Runner (Windhorse)
-        const player = {
-            x: 100,
-            y: 0, // Calculated dynamically relative to ground
-            width: 50,
-            height: 50,
-            yVel: 0,
-            isJumping: false,
-            color: '#fff'
-        };
-
-        let obstacles = []; // { x, char, width, height, type }
-        let particles = []; // { x, y, vx, vy, life, color }
-        let mountains = []; // Background parallax layers
-
-        // Initialize Mountains
-        for(let i=0; i<3; i++) {
+        // Init Background
+        for(let i=0; i<4; i++) {
             let pts = [];
-            let x = 0;
-            while(x < width * 2) {
-                pts.push({x: x, y: height - 100 - (i*100) - Math.random()*150});
-                x += Math.random() * 100 + 50;
+            for(let x=0; x < 4000; x+=100) {
+                pts.push({x: x, y: 100 + Math.random()*150});
             }
-            mountains.push({ points: pts, speed: (i+1) * 0.5, color: `rgba(20, 20, 30, ${0.3 + (i*0.2)})` });
+            this.mountains.push({pts: pts, color: i});
         }
+        
+        // AUTO START
+        this.active = true;
+        Sfx.init();
+        
+        requestAnimationFrame(() => this.loop());
+    },
 
-        // --- LOOP ---
-        function loop() {
-            if (!active) return;
-            
-            // 1. Logic
-            frame++;
-            distance += (speed / 10);
-            document.getElementById('dist').innerText = Math.floor(distance);
-            
-            // Increase Speed slowly
-            if(frame % 600 === 0) speed += 0.5;
+    resize: function() {
+        this.width = window.innerWidth; this.height = window.innerHeight;
+        this.canvas.width = this.width; this.canvas.height = this.height;
+    },
 
-            // Sky Cycle
-            skyCycle += 0.0005;
-            if(skyCycle > 1) skyCycle = 0;
+    start: function() {
+        Sfx.init();
+        document.getElementById('click-start').style.display = 'none';
+        this.active = true;
+    },
 
-            // Spawn Obstacles
-            // Minimum gap logic to prevent unfair overlap
-            let lastObsX = obstacles.length > 0 ? obstacles[obstacles.length-1].x : 0;
-            if (width - lastObsX > 300) { // Ensure gap
-                if (Math.random() < 0.02 + (speed * 0.001)) { // Spawn chance
-                    spawnObstacle();
-                }
-            } else if (obstacles.length === 0) {
-                if (Math.random() < 0.05) spawnObstacle();
-            }
+    // --- MAIN LOOP ---
+    loop: function() {
+        requestAnimationFrame(() => this.loop());
+        if(!this.active) return;
 
-            // 2. Draw Sky (Gradient based on cycle)
-            let skyTop, skyBot;
-            if (skyCycle < 0.5) { // Morning -> Day
-                skyTop = `hsl(200, 60%, ${20 + skyCycle*60}%)`; 
-                skyBot = `hsl(30, 80%, ${30 + skyCycle*40}%)`;
-            } else { // Day -> Night
-                skyTop = `hsl(200, 60%, ${80 - (skyCycle-0.5)*140}%)`; 
-                skyBot = `hsl(30, 80%, ${70 - (skyCycle-0.5)*120}%)`;
-            }
-            
-            let grad = ctx.createLinearGradient(0, 0, 0, height);
-            grad.addColorStop(0, skyTop);
-            grad.addColorStop(1, skyBot);
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, width, height);
+        this.frame++;
+        this.update();
+        this.draw();
+    },
 
-            // 3. Draw Sun/Moon
-            const celestialY = height/2 + Math.sin((skyCycle + 0.75) * Math.PI * 2) * (height/1.5);
-            const celestialX = width/2 + Math.cos((skyCycle + 0.75) * Math.PI * 2) * (width/1.5);
-            ctx.fillStyle = skyCycle < 0.5 ? '#ffd700' : '#fff';
-            ctx.shadowBlur = 40;
-            ctx.shadowColor = ctx.fillStyle;
-            ctx.beginPath();
-            ctx.arc(celestialX, celestialY, 40, 0, Math.PI*2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
+    update: function() {
+        if(this.frame % 900 === 0 && this.speed < 14) this.speed += 0.5;
 
-            // 4. Parallax Mountains
-            mountains.forEach(m => {
-                ctx.fillStyle = m.color;
-                ctx.beginPath();
-                ctx.moveTo(0, height);
-                m.points.forEach(p => {
-                    p.x -= m.speed + (speed * 0.1); // Move parallax
-                    ctx.lineTo(p.x, p.y);
-                });
-                ctx.lineTo(width, height);
-                ctx.fill();
+        let modSpeed = this.speed;
+        this.timeScale = 1.0;
 
-                // Endless recycle
-                if(m.points[0].x < -200) {
-                    let first = m.points.shift();
-                    let lastX = m.points[m.points.length-1].x;
-                    first.x = lastX + Math.random() * 100 + 50;
-                    first.y = height - 100 - (Math.random()*150);
-                    m.points.push(first);
-                }
-            });
-
-            // 5. Draw Ground
-            const groundY = height - 100;
-            ctx.fillStyle = '#111';
-            ctx.fillRect(0, groundY, width, 100);
-            
-            // Ground stripes for speed illusion
-            ctx.fillStyle = '#222';
-            const stripeOffset = (frame * speed) % 100;
-            for(let i=0; i<width+100; i+=100) {
-                ctx.beginPath();
-                ctx.moveTo(i - stripeOffset, groundY);
-                ctx.lineTo(i - stripeOffset + 40, groundY);
-                ctx.lineTo(i - stripeOffset - 20, height);
-                ctx.lineTo(i - stripeOffset - 60, height);
-                ctx.fill();
-            }
-
-            // 6. Logic & Draw Obstacles
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                let obs = obstacles[i];
-                obs.x -= speed;
-
-                // Draw "Stone" Body
-                ctx.fillStyle = '#222';
-                // Simple shape
-                ctx.beginPath();
-                ctx.moveTo(obs.x, groundY);
-                ctx.lineTo(obs.x + obs.width/2, groundY - obs.height);
-                ctx.lineTo(obs.x + obs.width, groundY);
-                ctx.fill();
-
-                // Draw Text Aura
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = '#00e676'; // Green aura target
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 40px OuChan2';
-                ctx.fillText(obs.char, obs.x + obs.width/2, groundY - obs.height/2 + 5);
-                ctx.shadowBlur = 0;
-
-                // Collision
-                // Simple box check. Player is at player.x (100).
-                if (obs.x < player.x + player.width && obs.x + obs.width > player.x) {
-                    // CRASH!
-                    gameOver();
-                }
-
-                // Cleanup offscreen
-                if (obs.x < -100) {
-                    obstacles.splice(i, 1);
-                }
-            }
-
-            // 7. Draw Player (Windhorse / Runner)
-            // Jump physics visual
-            if (player.isJumping) {
-                player.yVel += 1; // Gravity
-                player.y += player.yVel;
-                if (player.y >= 0) {
-                    player.y = 0;
-                    player.isJumping = false;
-                }
-            }
-            
-            // Running bobbing
-            let runBob = player.isJumping ? 0 : Math.sin(frame * 0.3) * 5;
-            
-            ctx.save();
-            ctx.translate(player.x, groundY - 40 + player.y - runBob);
-            
-            // Simple bright avatar (The Windhorse Spirit)
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#fff';
-            ctx.fillStyle = '#fff';
-            
-            // Draw Horse-like shape (Stylized)
-            ctx.beginPath();
-            ctx.ellipse(20, 10, 25, 15, 0, 0, Math.PI*2); // Body
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(35, -5, 12, 0, Math.PI*2); // Head
-            ctx.fill();
-            
-            // Legs (animated)
-            if(!player.isJumping) {
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(10, 20); ctx.lineTo(10 - Math.sin(frame*0.3)*10, 40); // Back leg
-                ctx.moveTo(30, 20); ctx.lineTo(30 + Math.sin(frame*0.3)*10, 40); // Front leg
-                ctx.stroke();
-            }
-            ctx.restore();
-
-            // 8. Particles
-            updateParticles();
-
-            requestAnimationFrame(loop);
+        if (this.powerType === POWERS.SPEED) {
+            modSpeed = 20; this.score += 2;
+        } else if (this.powerType === POWERS.SLOW) {
+            this.timeScale = 0.4; modSpeed *= 0.4;
+            document.getElementById('slow-fx').style.opacity = 1;
+        } else {
+            document.getElementById('slow-fx').style.opacity = 0;
+            this.score += modSpeed / 20;
         }
+        document.getElementById('score').innerText = Math.floor(this.score);
 
-        // --- GAME LOGIC ---
-        function spawnObstacle() {
-            const char = gameChars[Math.floor(Math.random() * gameChars.length)];
-            obstacles.push({
-                char: char,
-                x: width + 50,
-                width: 60,
-                height: 80
-            });
-        }
+        // Timer Logic
+        if (this.powerTimer > 0) {
+            this.powerTimer--;
+            let pct = (this.powerTimer / C.POWER_TIME) * 100;
+            document.getElementById('p-fill').style.width = pct + "%";
+            
+            // --- SMART LANDING: CLEAR ONLY OBSTACLES UNDER THE YAK ---
+            // Trigger 20 frames before landing
+            if (this.powerTimer < 20 && (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED)) {
+                 this.clearLanding();
+            }
 
-        function destroyClosest(char) {
-            // Find the closest obstacle that matches the char
-            let bestDist = 99999;
-            let bestIdx = -1;
-
-            obstacles.forEach((obs, i) => {
-                if (obs.char === char) {
-                    if (obs.x < bestDist) {
-                        bestDist = obs.x;
-                        bestIdx = i;
-                    }
-                }
-            });
-
-            if (bestIdx !== -1) {
-                // SUCCESS
-                let target = obstacles[bestIdx];
-                spawnParticles(target.x + target.width/2, height - 100 - target.height/2);
-                obstacles.splice(bestIdx, 1);
-                
-                // Jump Effect
-                if(!player.isJumping) {
-                    player.yVel = -12;
-                    player.isJumping = true;
-                }
-            } else {
-                // Penalty? Slow down? 
-                // For now, no penalty, just keep running.
+            if (this.powerTimer <= 0) {
+                this.powerType = 0;
+                document.getElementById('power-ui').classList.remove('active');
+                this.yak.targetY = 0;
             }
         }
 
-        function gameOver() {
-            active = false;
-            document.getElementById('final-dist').innerText = Math.floor(distance);
-            document.getElementById('result-modal').style.display = 'flex';
+        // Yak Physics
+        if (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED) this.yak.targetY = -220;
+        else this.yak.targetY = 0;
+        
+        this.yak.y += (this.yak.targetY - this.yak.y) * 0.05;
+        if(this.yak.bowDraw > 0) this.yak.bowDraw *= 0.8;
+
+        // --- SPAWNING ---
+        let gap = this.width - this.lastObsX;
+        let spawnRate = (this.powerType === POWERS.SPEED) ? 0.3 : 0.02;
+        
+        // Stop spawning ONLY if about to land very soon
+        let isLanding = (this.powerTimer > 0 && this.powerTimer < 60 && (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED));
+        
+        if (gap > 400 && Math.random() < spawnRate && !isLanding) this.spawnObs();
+
+        if (this.flyTimer > 0) this.flyTimer--;
+        else if (Math.random() < 0.01) {
+            this.spawnFly();
+            if (Math.random() < 0.2) setTimeout(() => this.spawnFly(), 600); 
+            this.flyTimer = 400 + Math.random() * 400; 
         }
 
-        // --- VISUALS ---
-        function spawnParticles(x, y) {
-            for(let i=0; i<10; i++) {
-                particles.push({
-                    x: x, y: y,
-                    vx: (Math.random() - 0.5) * 10,
-                    vy: (Math.random() - 0.5) * 10,
-                    life: 1.0,
-                    color: `hsl(${Math.random()*60 + 10}, 100%, 50%)` // Fire colors
-                });
+        this.updateEntities(modSpeed);
+    },
+
+    updateEntities: function(speed) {
+        this.mountains.forEach((m, idx) => {
+            m.pts.forEach(p => { p.x -= (speed * 0.1 * (idx+1)) * this.timeScale; });
+            if(m.pts[0].x < -150) {
+                let p = m.pts.shift(); p.x = m.pts[m.pts.length-1].x + 100; p.y = 100 + Math.random()*150; m.pts.push(p);
             }
-        }
-
-        function updateParticles() {
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life -= 0.05;
-                
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = p.life;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
-
-                if (p.life <= 0) particles.splice(i, 1);
-            }
-        }
-
-        // --- INPUT ---
-        window.addEventListener('keydown', (e) => {
-            if (!active) return;
-            if (e.key === "Shift" || e.key === "Tab") return;
-
-            const physicalKey = e.key.toLowerCase();
-            let typedChar = (e.shiftKey ? SHIFT_MAP[physicalKey] : NORMAL_MAP[physicalKey]) || "";
-            if (e.code === "Space") typedChar = " ";
-
-            destroyClosest(typedChar);
         });
 
-        // START
-        requestAnimationFrame(loop);
+        for(let i=this.arrows.length-1; i>=0; i--) {
+            let a = this.arrows[i];
+            a.vy += C.GRAVITY * this.timeScale; a.x += a.vx * this.timeScale; a.y += a.vy * this.timeScale;
 
-    </script>
+            if(a.target) {
+                let tx = a.target.x + 30; 
+                let ty = a.target.type==='FLY' ? a.target.y : (this.height - 150);
+                
+                if(Math.hypot(a.x - tx, a.y - ty) < 60) {
+                    if(a.target.type==='FLY') {
+                        this.activatePower(a.target.pId);
+                        let idx = this.sky.indexOf(a.target);
+                        if(idx > -1) this.sky.splice(idx, 1);
+                    } else {
+                        a.target.dead = true; 
+                        Sfx.hit();
+                    }
+                    this.spawnBoom(tx, ty, '#fff');
+                    this.arrows.splice(i, 1);
+                    continue;
+                }
+            }
+            if(a.y > this.height || a.x > this.width) this.arrows.splice(i, 1);
+        }
+
+        for(let i=this.obs.length-1; i>=0; i--) {
+            let o = this.obs[i];
+            if(o.dead) { this.obs.splice(i,1); continue; }
+            o.x -= speed;
+
+            let safe = (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED);
+            if (!safe) {
+                if(o.x < C.YAK_X + 60 && o.x > C.YAK_X - 20) {
+                    if(this.yak.y > -50) { this.takeDamage(); o.dead = true; }
+                }
+            }
+            if(o.x < -100) this.obs.splice(i,1);
+        }
+        if(this.obs.length > 0) this.lastObsX = Math.max(...this.obs.map(o=>o.x)); else this.lastObsX = 0;
+
+        for(let i=this.sky.length-1; i>=0; i--) {
+            this.sky[i].x -= speed * 1.2;
+            if(this.sky[i].x < -100) this.sky.splice(i,1);
+        }
+
+        for(let i=this.particles.length-1; i>=0; i--) {
+            let p = this.particles[i];
+            p.x += p.vx * this.timeScale; p.y += p.vy * this.timeScale; p.life-=0.05;
+            if(p.life <= 0) this.particles.splice(i,1);
+        }
+    },
+
+    // --- DRAWING ---
+    draw: function() {
+        let sx = (Math.random()-0.5) * this.shake;
+        let sy = (Math.random()-0.5) * this.shake;
+        if(this.shake > 0) this.shake *= 0.9;
+
+        this.ctx.clearRect(0,0,this.width, this.height);
+        let grad = this.ctx.createLinearGradient(0,0,0,this.height);
+        grad.addColorStop(0, '#0a1020'); grad.addColorStop(1, '#1b2735');
+        this.ctx.fillStyle = grad; this.ctx.fillRect(0,0,this.width,this.height);
+
+        this.ctx.save();
+        this.ctx.translate(sx, sy);
+
+        this.mountains.forEach((m, idx) => {
+            let light = 15 + idx*5;
+            this.ctx.fillStyle = `hsl(210, 20%, ${light}%)`;
+            this.ctx.beginPath(); this.ctx.moveTo(0, this.height);
+            m.pts.forEach(p => this.ctx.lineTo(p.x, this.height - p.y));
+            this.ctx.lineTo(this.width, this.height); this.ctx.fill();
+        });
+
+        this.ctx.fillStyle = '#050505'; 
+        this.ctx.fillRect(0, this.height - C.GROUND_H, this.width, C.GROUND_H);
+        this.ctx.strokeStyle = '#00ffff'; this.ctx.lineWidth = 2;
+        this.ctx.shadowBlur = 10; this.ctx.shadowColor = '#00ffff';
+        this.ctx.beginPath(); 
+        this.ctx.moveTo(0, this.height - C.GROUND_H); 
+        this.ctx.lineTo(this.width, this.height - C.GROUND_H); 
+        this.ctx.stroke();
+        this.ctx.shadowBlur = 0;
+
+        this.drawStickYak();
+
+        this.ctx.fillStyle = '#ffd700';
+        this.arrows.forEach(a => {
+            this.ctx.save();
+            this.ctx.translate(a.x, a.y);
+            this.ctx.rotate(Math.atan2(a.vy, a.vx));
+            this.ctx.fillRect(0, -2, 40, 4);
+            this.ctx.restore();
+        });
+
+        this.obs.forEach(o => {
+            let y = this.height - 150;
+            this.ctx.shadowBlur = 20; this.ctx.shadowColor = '#ff0055';
+            this.ctx.strokeStyle = '#ff0055'; this.ctx.lineWidth = 4;
+            // INCREASED RADIUS to 60 (from 40)
+            this.ctx.beginPath(); this.ctx.arc(o.x+30, y, 60, 0, Math.PI*2); this.ctx.stroke();
+            this.ctx.shadowBlur = 0;
+            
+            this.ctx.fillStyle = '#fff'; this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle';
+            // Increased Font Size Here
+            this.ctx.font = 'bold 70px "OuChan2"'; 
+            
+            // Outline
+            this.ctx.strokeStyle = '#000';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeText(KEY_MAP[o.key] || o.key, o.x+30, y-5);
+
+            this.ctx.fillText(KEY_MAP[o.key] || o.key, o.x+30, y-5);
+        });
+
+        this.sky.forEach(b => {
+            let y = b.y + Math.sin(this.frame * 0.1) * 15;
+            this.ctx.save(); this.ctx.translate(b.x, y);
+            // Bigger wings
+            let wing = Math.abs(Math.sin(this.frame*0.2)) * 15;
+            this.ctx.fillStyle = b.color; this.ctx.shadowBlur=20; this.ctx.shadowColor=b.color;
+            this.ctx.beginPath(); this.ctx.ellipse(-5, -wing, 30, 15, -0.5, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.ellipse(5, -wing, 30, 15, 0.5, 0, Math.PI*2); this.ctx.fill();
+            
+            this.ctx.shadowBlur=0; this.ctx.fillStyle='#fff';
+            // Increased Font Size Here
+            this.ctx.font = 'bold 45px "OuChan2"';
+            
+            // Outline
+            this.ctx.strokeStyle = '#000'; this.ctx.lineWidth = 3;
+            this.ctx.strokeText(KEY_MAP[b.key] || b.key, 0, 40);
+
+            this.ctx.fillText(KEY_MAP[b.key] || b.key, 0, 40);
+            
+            this.ctx.font = '16px "Roboto Mono"';
+            let names = ["", "FLOAT", "DOUBLE", "SPEED", "LIFE", "SLOW"];
+            this.ctx.fillText(names[b.pId], 0, -30);
+            this.ctx.restore();
+        });
+
+        this.ctx.fillStyle = '#fff';
+        this.particles.forEach(p => {
+            this.ctx.globalAlpha = p.life;
+            this.ctx.fillRect(p.x, p.y, 4, 4);
+        });
+        this.ctx.globalAlpha = 1;
+        this.ctx.restore();
+    },
+
+    // --- ART: STICKMAN YAK ---
+    drawStickYak: function() {
+        const x = C.YAK_X;
+        const y = this.height - C.GROUND_H + this.yak.y;
+        this.ctx.save(); this.ctx.translate(x, y); this.ctx.scale(0.7, 0.7);
+
+        let t = this.frame * 0.35 * this.timeScale;
+        let pA = Math.sin(t); let pB = Math.sin(t + Math.PI);
+        let bounce = Math.abs(pA) * 6; let tilt = pA * 0.05;
+
+        if (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED) { bounce=0; tilt=0.1; }
+
+        this.ctx.translate(0, -bounce); this.ctx.rotate(tilt);
+        this.ctx.strokeStyle = '#ffffff'; this.ctx.lineWidth = 5; 
+        this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round';
+        this.ctx.shadowBlur = 10; this.ctx.shadowColor = 'rgba(255,255,255,0.5)';
+
+        this.drawLeg(-20, 0, pB); this.drawLeg(50, 0, pB);
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(-40, -10); this.ctx.lineTo(70, -10); 
+        this.ctx.lineTo(70, 25); this.ctx.lineTo(-40, 25); this.ctx.closePath(); this.ctx.stroke();
+        
+        this.ctx.beginPath(); this.ctx.moveTo(-30, -10); this.ctx.lineTo(-10, -35); this.ctx.lineTo(10, -10); this.ctx.stroke();
+
+        this.ctx.save(); this.ctx.translate(80, -20); this.ctx.rotate(pA * 0.1);
+        this.ctx.strokeRect(-12, -12, 25, 25);
+        this.ctx.beginPath(); this.ctx.moveTo(0, -12); this.ctx.lineTo(-15, -35); this.ctx.stroke();
+        this.ctx.beginPath(); this.ctx.moveTo(0, -12); this.ctx.lineTo(15, -35); this.ctx.stroke();
+        this.ctx.restore();
+
+        this.ctx.save(); this.ctx.translate(10, -10); this.ctx.rotate(-tilt);
+        this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0,-45); this.ctx.stroke();
+        this.ctx.beginPath(); this.ctx.arc(0,-55, 12, 0, Math.PI*2); this.ctx.stroke();
+        let aimX = 35; let aimY = -35;
+        this.ctx.beginPath(); this.ctx.moveTo(0, -35); this.ctx.lineTo(aimX, aimY); this.ctx.stroke();
+        this.ctx.translate(aimX, aimY);
+        this.ctx.strokeStyle = '#00ffcc';
+        this.ctx.beginPath(); this.ctx.arc(0, 0, 25, -1.0, 1.0, false); this.ctx.stroke();
+        this.ctx.strokeStyle = '#fff'; this.ctx.lineWidth=1;
+        let pull = this.yak.bowDraw * 15;
+        this.ctx.beginPath(); this.ctx.moveTo(13, -21); this.ctx.lineTo(-pull, 0); this.ctx.lineTo(13, 21); this.ctx.stroke();
+        this.ctx.restore(); this.ctx.restore();
+
+        this.drawLeg(50, 0, pA); this.drawLeg(-20, 0, pA);
+        this.ctx.restore();
+    },
+
+    drawLeg: function(x, y, cycle) {
+        let thigh = Math.sin(cycle) * 0.6; let knee = cycle < 0 ? Math.abs(cycle)*1.5 : 0;
+        this.ctx.save(); this.ctx.translate(x, y+20); this.ctx.rotate(thigh);
+        this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, 30); this.ctx.stroke();
+        this.ctx.translate(0, 30); this.ctx.rotate(knee);
+        this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, 30); this.ctx.stroke();
+        this.ctx.restore();
+    },
+
+    spawnObs: function() {
+        let key = CHAR_POOL[Math.floor(Math.random()*CHAR_POOL.length)];
+        this.obs.push({ x: this.width, key: key, dead: false, isTargeted: false });
+        this.lastObsX = this.width;
+    },
+
+    spawnFly: function() {
+        let ground = this.obs.map(o=>o.key);
+        let safe = CHAR_POOL.filter(k => !ground.includes(k));
+        if(safe.length === 0) return;
+        let key = safe[Math.floor(Math.random()*safe.length)];
+        let p = [1, 2, 3, 4, 5][Math.floor(Math.random()*5)];
+        let color = p===3?'#00ffff':(p===4?'#ff00ff':'#ffd700');
+        this.sky.push({ x: this.width, y: 150+Math.random()*150, key: key, pId: p, color: color, type: 'FLY' });
+    },
+
+    // --- UPDATED CLEAR LANDING LOGIC ---
+    clearLanding: function() {
+        // Only clear obstacles within a certain range to ensure safe landing without emptying the whole screen
+        this.obs.forEach(o => { 
+            // If obstacle is near the yak's x position (Yak is typically at 180)
+            if (o.x > 100 && o.x < 300 && !o.dead) {
+                o.dead = true; 
+                this.spawnBoom(o.x, this.height-150, '#fff'); 
+            }
+        });
+    },
+
+    fire: function(target) {
+        Sfx.shoot();
+        this.yak.bowDraw = 1.0;
+        let startX = C.YAK_X + 50; let startY = this.height - C.GROUND_H + this.yak.y - 45;
+        let tx = target.x + 30; let ty = target.type === 'FLY' ? target.y : (this.height - 150);
+        let dx = tx - startX; let t = dx / C.ARROW_SPEED;
+        let vy = (ty - startY)/t - (0.5 * C.GRAVITY * t);
+        this.arrows.push({ x: startX, y: startY, vx: C.ARROW_SPEED, vy: vy, target: target });
+    },
+
+    activatePower: function(p) {
+        Sfx.power();
+        this.powerType = p; this.powerTimer = C.POWER_TIME;
+        let names = ["", "LEVITATION", "DOUBLE ARROW", "SPEED", "LIFE", "SLOW"];
+        if(p===4) { 
+            // --- UPDATED LIFE LOGIC: STACK LIVES INDEFINITELY ---
+            this.lives++; 
+            this.powerType=0; 
+        } else {
+            document.getElementById('p-name').innerText = names[p];
+            document.getElementById('power-ui').classList.add('active');
+        }
+        this.updateLives();
+    },
+
+    spawnBoom: function(x, y, c) {
+        for(let i=0; i<10; i++) this.particles.push({x,y,vx:(Math.random()-0.5)*10,vy:(Math.random()-0.5)*10,life:1,c});
+    },
+
+    takeDamage: function() {
+        Sfx.damage();
+        this.lives--; this.shake = 20; this.updateLives();
+        if(this.lives <= 0) {
+            this.active = false;
+            document.getElementById('final-score').innerText = Math.floor(this.score) + "m"; // Added "m" suffix
+            document.getElementById('screens').style.display = 'flex';
+            document.getElementById('end-box').style.display = 'block';
+        }
+    },
+
+    updateLives: function() { document.getElementById('lives').innerHTML = "❤️".repeat(this.lives); },
+
+    input: function(e) {
+        if(!this.active) return;
+        let k = e.key; 
+        
+        let fly = this.sky.find(b => b.key === k || KEY_MAP[k] === b.key);
+        if(fly) { this.fire(fly); return; }
+
+        let targets = this.obs.filter(o => !o.dead && !o.isTargeted && (o.key === k || KEY_MAP[k] === o.key)).sort((a,b)=>a.x-b.x);
+        
+        if(targets.length > 0) {
+            let t = targets[0];
+            this.fire(t); 
+            t.isTargeted = true; 
+            
+            if(this.powerType === 2) { 
+                let t2 = this.obs.find(o => !o.dead && !o.isTargeted && o !== t);
+                if(t2) { this.fire(t2); t2.isTargeted = true; }
+            }
+        }
+    }
+};
+
+Game.init();
+</script>
 </body>
 </html>
