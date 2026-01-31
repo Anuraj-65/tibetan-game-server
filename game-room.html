@@ -69,7 +69,7 @@
             display: none; /* Hidden by default */
         }
         
-        /* Default Box */
+        /* Box Style */
         .box {
             text-align: center; border: 2px solid #00ffcc; padding: 60px 100px;
             background: linear-gradient(145deg, #111, #000);
@@ -205,7 +205,7 @@ const C = {
     POWER_TIME: 600
 };
 
-// --- 2. AUDIO (SFX Only) ---
+// --- 2. AUDIO (SFX Only - Music Removed) ---
 const Sfx = {
     ctx: null,
     
@@ -314,8 +314,7 @@ const Game = {
             let pct = (this.powerTimer / C.POWER_TIME) * 100;
             document.getElementById('p-fill').style.width = pct + "%";
             
-            // --- SMART LANDING: CLEAR ONLY OBSTACLES UNDER THE YAK ---
-            // Trigger 20 frames before landing
+            // Safe Landing Check (last 0.3s)
             if (this.powerTimer < 20 && (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED)) {
                  this.clearLanding();
             }
@@ -328,8 +327,12 @@ const Game = {
         }
 
         // Yak Physics
-        if (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED) this.yak.targetY = -220;
-        else this.yak.targetY = 0;
+        // --- RESTORED ORIGINAL JUMP HEIGHT ---
+        if (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED) {
+             this.yak.targetY = -220; 
+        } else {
+             this.yak.targetY = 0;
+        }
         
         this.yak.y += (this.yak.targetY - this.yak.y) * 0.05;
         if(this.yak.bowDraw > 0) this.yak.bowDraw *= 0.8;
@@ -445,7 +448,19 @@ const Game = {
         this.ctx.stroke();
         this.ctx.shadowBlur = 0;
 
+        // --- NEW: CLIPPING MASK ---
+        // This ensures the Yak is NOT drawn in the top-left score area.
+        this.ctx.save();
+        this.ctx.beginPath();
+        // Define the whole screen
+        this.ctx.rect(0, 0, this.width, this.height);
+        // "Subtract" the score area (Counter-Clockwise rectangle)
+        this.ctx.rect(200, 0, -200, 120); 
+        this.ctx.clip("evenodd"); 
+
         this.drawStickYak();
+        this.ctx.restore(); 
+        // -------------------------
 
         this.ctx.fillStyle = '#ffd700';
         this.arrows.forEach(a => {

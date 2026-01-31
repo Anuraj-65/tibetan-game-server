@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="bo">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ62DL1S2M"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-WQ62DL1S2M');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TibetanKeys | Select Mode</title>
+    <link rel="icon" type="image/png" href="og.png">
+
+    <style>
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
+        
+        body, html {
+            margin: 0; padding: 0;
+            height: 100vh; width: 100vw;
+            font-family: 'Segoe UI', sans-serif;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* --- SPLIT LAYOUT --- */
+        .split {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* LEFT: SOLO */
+        .solo {
+            background: linear-gradient(135deg, #0b1624, #1a237e);
+        }
+        .solo:hover {
+            flex: 1.5; /* Grow effect */
+            background: linear-gradient(135deg, #0d1b2e, #283593);
+        }
+        .solo::before {
+            content: '☁️'; /* Windhorse/Cloud Theme */
+            font-size: 300px;
+            position: absolute;
+            opacity: 0.05;
+            filter: blur(5px);
+        }
+
+        /* RIGHT: MULTI */
+        .multi {
+            background: linear-gradient(135deg, #1b0000, #3e0000);
+        }
+        .multi:hover {
+            flex: 1.5;
+            background: linear-gradient(135deg, #2b0000, #550000);
+        }
+        .multi::before {
+            content: '⚔️'; /* Battle Theme */
+            font-size: 300px;
+            position: absolute;
+            opacity: 0.05;
+            filter: blur(5px);
+        }
+
+        /* TEXT STYLES */
+        h1 {
+            font-size: 40px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+            z-index: 10;
+            text-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        p {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            z-index: 10;
+        }
+
+        .btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-radius: 30px;
+            font-size: 12px;
+            transition: 0.3s;
+            z-index: 10;
+        }
+
+        .solo .btn { background: rgba(0, 230, 118, 0.1); color: #00e676; border-color: #00e676; }
+        .solo:hover .btn { background: #00e676; color: #000; box-shadow: 0 0 30px #00e676; }
+
+        .multi .btn { background: rgba(255, 64, 129, 0.1); color: #ff4081; border-color: #ff4081; }
+        .multi:hover .btn { background: #ff4081; color: #fff; box-shadow: 0 0 30px #ff4081; }
+
+        .back-btn { 
+            position: fixed; top: 20px; left: 20px; 
+            color: rgba(255,255,255,0.3); text-decoration: none; 
+            font-size: 11px; letter-spacing: 2px; z-index: 100; 
+            text-transform: uppercase; font-weight: bold;
+        }
+        .back-btn:hover { color: #fff; }
+
+        /* VS Separator */
+        .vs {
+            position: absolute; left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            background: #000; color: #fff;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-style: italic;
+            border: 2px solid #333;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <a href="lessons.html" class="back-btn">← Back to Map</a>
+
+    <a href="game-room.html?level=18" class="split solo">
+        <h1>Windhorse</h1>
+        <p>Solo Ascent</p>
+        <div class="btn">Play Alone</div>
+    </a>
+
+    <div class="vs">VS</div>
+
+    <a href="multiplayerlobby.html" class="split multi">
+        <h1>Live Arena</h1>
+        <p>Class Competition</p>
+        <div class="btn">Enter Lobby</div>
+    </a>
+
+</body>
+</html>

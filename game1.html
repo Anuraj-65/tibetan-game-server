@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TibetanKeys | Game 1</title>
+</head>
+<body>
+    <script>
+        // ======================================================
+        // CONFIGURATION: LESSON 1 & 2 CHARACTERS
+        // ======================================================
+        const CHARS = "['ཀ', 'ཁ', 'ག', 'ང', 'ཅ', 'ཆ', 'ཇ', 'ཉ']";
+
+        // ======================================================
+        // GAME 1: STICKMAN YAK
+        // ======================================================
+        const YAK_GAME = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TibetanKeys: Stickman Yak</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ62DL1S2M"><\\/script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-WQ62DL1S2M');<\\/script>
+    <link rel="icon" type="image/png" href="og.png">
+    <style>
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf') format('truetype'); }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700;900&display=swap');
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #050505; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; padding: 30px; box-sizing: border-box; }
+        .top-row { display: flex; justify-content: space-between; align-items: flex-start; }
+        .score-val { font-family: 'Roboto Mono', monospace; font-size: 60px; color: #fff; line-height: 1; text-shadow: 0 0 15px #00ffcc; margin-bottom: 5px; }
+        .score-lbl { font-size: 14px; color: #00ffcc; letter-spacing: 3px; font-weight: bold; }
+        .lives { font-size: 40px; filter: drop-shadow(0 0 5px #ff0055); }
+        .power-bar { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); width: 400px; opacity: 0; transition: opacity 0.3s; text-align: center; }
+        .power-bar.active { opacity: 1; }
+        .p-name { color: #ffd700; font-family: 'Roboto Mono'; font-size: 24px; text-shadow: 0 0 10px #ffd700; margin-bottom: 5px; }
+        .p-track { width: 100%; height: 8px; background: rgba(255,255,255,0.2); border: 1px solid #333; border-radius: 4px; overflow: hidden; }
+        .p-fill { height: 100%; width: 100%; background: #ffd700; box-shadow: 0 0 15px #ffd700; transition: width 0.1s linear; }
+        #slow-fx { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 150, 255, 0.2); pointer-events: none; opacity: 0; transition: opacity 0.5s; z-index: 10; mix-blend-mode: overlay; }
+        #screens { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; display: flex; justify-content: center; align-items: center; display: none; }
+        .box { text-align: center; border: 2px solid #00ffcc; padding: 60px 100px; background: linear-gradient(145deg, #111, #000); box-shadow: 0 0 60px rgba(0, 255, 204, 0.2); border-radius: 12px; }
+        h1 { color: #fff; font-family: 'Roboto Mono'; font-size: 50px; margin: 0 0 15px 0; }
+        p { color: #888; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 40px; }
+        #end-box { background: #ffffff; transform: rotate(-2deg); padding: 50px 60px; border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); border: none; text-align: center; min-width: 400px; }
+        #end-box h1 { color: #333; font-family: 'Roboto Mono', monospace; font-size: 20px; letter-spacing: 4px; margin: 0 0 10px 0; text-transform: uppercase; font-weight: 900; }
+        #end-box #final-score { color: #000; font-family: 'Roboto Mono', monospace; font-size: 100px; margin: 0 0 40px 0; line-height: 1; font-weight: 900; }
+        .btn-black { display: block; width: 100%; background: #000; color: #fff; border: none; padding: 20px 0; font-size: 18px; font-weight: bold; font-family: 'Roboto Mono'; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; transition: transform 0.1s; }
+        .btn-black:hover { transform: scale(1.02); }
+        .btn-white { display: block; width: 100%; background: #fff; color: #666; border: 2px solid #ddd; padding: 18px 0; font-size: 16px; font-weight: bold; font-family: 'Roboto Mono'; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s; }
+        .btn-white:hover { border-color: #333; color: #000; }
+        .neon-btn { background: #00ffcc; color: #000; border: none; padding: 20px 60px; font-size: 20px; font-weight: 900; letter-spacing: 2px; cursor: pointer; font-family: 'Roboto Mono'; transition: 0.2s; clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%); }
+        .neon-btn:hover { background: #fff; transform: scale(1.05); box-shadow: 0 0 40px #00ffcc; }
+        #click-start { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; justify-content: center; align-items: center; cursor: pointer; display: none; }
+        .blink { animation: blink 1.5s infinite; color: #00ffcc; font-family: 'Roboto Mono'; font-size: 24px; font-weight: bold; }
+        @keyframes blink { 50% { opacity: 0; } }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <div id="slow-fx"></div>
+    <div id="ui-layer">
+        <div class="top-row">
+            <div><div class="score-val" id="score">0</div><div class="score-lbl">METERS</div></div>
+            <div class="lives" id="lives">❤️❤️❤️</div>
+        </div>
+        <div class="power-bar" id="power-ui"><div class="p-name" id="p-name">SPEED</div><div class="p-track"><div class="p-fill" id="p-fill"></div></div></div>
+    </div>
+    <div id="click-start" onclick="Game.start()"><div class="blink">[ CLICK TO START ]</div></div>
+    <div id="screens">
+        <div class="box" id="start-box" style="display:none;"><h1>STICK YAK</h1><p>Type characters to shoot arrows</p><button class="neon-btn" onclick="Game.start()">START</button></div>
+        <div id="end-box" style="display:none;"><h1>RUN ENDED</h1><div id="final-score">0m</div><button class="btn-black" onclick="location.reload()">RUN AGAIN</button><button class="btn-white" onclick="location.reload()">RETURN</button></div>
+    </div>
+    <canvas id="game-canvas"></canvas>
+<script>
+const KEY_MAP = { 'k': 'ཀ', 'K': 'ཁ', 'g': 'ག', 'f': 'ང', 'c': 'ཅ', 'C': 'ཆ', 'j': 'ཇ', 'N': 'ཉ', 't': 'ཏ', 'T': 'ཐ', 'd': 'ད', 'n': 'ན', 'p': 'པ', 'P': 'ཕ', 'b': 'བ', 'm': 'མ', 'x': 'ཙ', 'X': 'ཚ', 'D': 'ཛ', 'w': 'ཝ', 'z': 'ཟ', 'Z': 'ཞ', '\\'': 'འ', 'y': 'ཡ', 'r': 'ར', 'l': 'ལ', 'S': 'ཤ', 's': 'ས', 'h': 'ཧ', 'A': 'ཨ' };
+const CHAR_POOL = ${CHARS};
+const POWERS = { NONE: 0, LEVITATE: 1, DOUBLE: 2, SPEED: 3, LIFE: 4, SLOW: 5 };
+const C = { GRAVITY: 0.5, ARROW_SPEED: 60, YAK_X: 180, GROUND_H: 140, POWER_TIME: 600 };
+const Sfx = {
+    ctx: null, init: function() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    play: function(type, f1, f2, dur, vol) { if(!this.ctx) return; const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f1, this.ctx.currentTime); if(f2) o.frequency.exponentialRampToValueAtTime(f2, this.ctx.currentTime+dur); g.gain.setValueAtTime(vol, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime+dur); o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime+dur); },
+    shoot: () => Sfx.play('triangle', 600, 100, 0.1, 0.1), hit: () => Sfx.play('square', 150, 50, 0.1, 0.2), power: () => Sfx.play('sine', 400, 800, 0.5, 0.2), damage: () => Sfx.play('sawtooth', 100, 20, 0.3, 0.3),
+};
+const Game = {
+    canvas: null, ctx: null, width: 0, height: 0, active: false, frame: 0,
+    lives: 3, score: 0, speed: 4, powerType: 0, powerTimer: 0, timeScale: 1.0,
+    yak: { y: 0, targetY: 0, bowDraw: 0 }, arrows: [], obs: [], sky: [], particles: [], mountains: [], flyTimer: 0, lastObsX: 0, shake: 0,
+    init: function() { this.canvas = document.getElementById('game-canvas'); this.ctx = this.canvas.getContext('2d'); this.resize(); window.addEventListener('resize', () => this.resize()); window.addEventListener('keypress', (e) => this.input(e)); for(let i=0; i<4; i++) { let pts = []; for(let x=0; x < 4000; x+=100) { pts.push({x: x, y: 100 + Math.random()*150}); } this.mountains.push({pts: pts, color: i}); } this.active = true; Sfx.init(); requestAnimationFrame(() => this.loop()); },
+    resize: function() { this.width = window.innerWidth; this.height = window.innerHeight; this.canvas.width = this.width; this.canvas.height = this.height; },
+    start: function() { Sfx.init(); document.getElementById('click-start').style.display = 'none'; this.active = true; },
+    loop: function() { requestAnimationFrame(() => this.loop()); if(!this.active) return; this.frame++; this.update(); this.draw(); },
+    update: function() {
+        if(this.frame % 900 === 0 && this.speed < 14) this.speed += 0.5;
+        let modSpeed = this.speed; this.timeScale = 1.0;
+        if (this.powerType === POWERS.SPEED) { modSpeed = 20; this.score += 2; } else if (this.powerType === POWERS.SLOW) { this.timeScale = 0.4; modSpeed *= 0.4; document.getElementById('slow-fx').style.opacity = 1; } else { document.getElementById('slow-fx').style.opacity = 0; this.score += modSpeed / 20; }
+        document.getElementById('score').innerText = Math.floor(this.score);
+        if (this.powerTimer > 0) { this.powerTimer--; let pct = (this.powerTimer / C.POWER_TIME) * 100; document.getElementById('p-fill').style.width = pct + "%"; if (this.powerTimer < 20 && (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED)) { this.clearLanding(); } if (this.powerTimer <= 0) { this.powerType = 0; document.getElementById('power-ui').classList.remove('active'); this.yak.targetY = 0; } }
+        if (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED) { this.yak.targetY = -220; } else { this.yak.targetY = 0; }
+        this.yak.y += (this.yak.targetY - this.yak.y) * 0.05; if(this.yak.bowDraw > 0) this.yak.bowDraw *= 0.8;
+        let gap = this.width - this.lastObsX; let spawnRate = (this.powerType === POWERS.SPEED) ? 0.3 : 0.02;
+        let isLanding = (this.powerTimer > 0 && this.powerTimer < 60 && (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED));
+        if (gap > 400 && Math.random() < spawnRate && !isLanding) this.spawnObs();
+        if (this.flyTimer > 0) this.flyTimer--; else if (Math.random() < 0.01) { this.spawnFly(); if (Math.random() < 0.2) setTimeout(() => this.spawnFly(), 600); this.flyTimer = 400 + Math.random() * 400; }
+        this.updateEntities(modSpeed);
+    },
+    updateEntities: function(speed) {
+        this.mountains.forEach((m, idx) => { m.pts.forEach(p => { p.x -= (speed * 0.1 * (idx+1)) * this.timeScale; }); if(m.pts[0].x < -150) { let p = m.pts.shift(); p.x = m.pts[m.pts.length-1].x + 100; p.y = 100 + Math.random()*150; m.pts.push(p); } });
+        for(let i=this.arrows.length-1; i>=0; i--) { let a = this.arrows[i]; a.vy += C.GRAVITY * this.timeScale; a.x += a.vx * this.timeScale; a.y += a.vy * this.timeScale; if(a.target) { let tx = a.target.x + 30; let ty = a.target.type==='FLY' ? a.target.y : (this.height - 150); if(Math.hypot(a.x - tx, a.y - ty) < 60) { if(a.target.type==='FLY') { this.activatePower(a.target.pId); let idx = this.sky.indexOf(a.target); if(idx > -1) this.sky.splice(idx, 1); } else { a.target.dead = true; Sfx.hit(); } this.spawnBoom(tx, ty, '#fff'); this.arrows.splice(i, 1); continue; } } if(a.y > this.height || a.x > this.width) this.arrows.splice(i, 1); }
+        for(let i=this.obs.length-1; i>=0; i--) { let o = this.obs[i]; if(o.dead) { this.obs.splice(i,1); continue; } o.x -= speed; let safe = (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED); if (!safe) { if(o.x < C.YAK_X + 60 && o.x > C.YAK_X - 20) { if(this.yak.y > -50) { this.takeDamage(); o.dead = true; } } } if(o.x < -100) this.obs.splice(i,1); }
+        if(this.obs.length > 0) this.lastObsX = Math.max(...this.obs.map(o=>o.x)); else this.lastObsX = 0;
+        for(let i=this.sky.length-1; i>=0; i--) { this.sky[i].x -= speed * 1.2; if(this.sky[i].x < -100) this.sky.splice(i,1); }
+        for(let i=this.particles.length-1; i>=0; i--) { let p = this.particles[i]; p.x += p.vx * this.timeScale; p.y += p.vy * this.timeScale; p.life-=0.05; if(p.life <= 0) this.particles.splice(i,1); }
+    },
+    draw: function() {
+        let sx = (Math.random()-0.5) * this.shake; let sy = (Math.random()-0.5) * this.shake; if(this.shake > 0) this.shake *= 0.9;
+        this.ctx.clearRect(0,0,this.width, this.height);
+        let grad = this.ctx.createLinearGradient(0,0,0,this.height); grad.addColorStop(0, '#0a1020'); grad.addColorStop(1, '#1b2735'); this.ctx.fillStyle = grad; this.ctx.fillRect(0,0,this.width,this.height);
+        this.ctx.save(); this.ctx.translate(sx, sy);
+        this.mountains.forEach((m, idx) => { let light = 15 + idx*5; this.ctx.fillStyle = \`hsl(210, 20%, \${light}%)\`; this.ctx.beginPath(); this.ctx.moveTo(0, this.height); m.pts.forEach(p => this.ctx.lineTo(p.x, this.height - p.y)); this.ctx.lineTo(this.width, this.height); this.ctx.fill(); });
+        this.ctx.fillStyle = '#050505'; this.ctx.fillRect(0, this.height - C.GROUND_H, this.width, C.GROUND_H); this.ctx.strokeStyle = '#00ffff'; this.ctx.lineWidth = 2; this.ctx.shadowBlur = 10; this.ctx.shadowColor = '#00ffff'; this.ctx.beginPath(); this.ctx.moveTo(0, this.height - C.GROUND_H); this.ctx.lineTo(this.width, this.height - C.GROUND_H); this.ctx.stroke(); this.ctx.shadowBlur = 0;
+        
+        // --- SCORE PROTECTION MASK ---
+        this.ctx.save(); 
+        this.ctx.beginPath(); 
+        this.ctx.rect(0, 0, this.width, this.height); 
+        this.ctx.rect(0, 0, 350, 150); // Cut out top left
+        this.ctx.clip("evenodd"); 
+        this.drawStickYak(); 
+        this.ctx.restore();
+
+        this.ctx.fillStyle = '#ffd700'; this.arrows.forEach(a => { this.ctx.save(); this.ctx.translate(a.x, a.y); this.ctx.rotate(Math.atan2(a.vy, a.vx)); this.ctx.fillRect(0, -2, 40, 4); this.ctx.restore(); });
+        this.obs.forEach(o => { let y = this.height - 150; this.ctx.shadowBlur = 20; this.ctx.shadowColor = '#ff0055'; this.ctx.strokeStyle = '#ff0055'; this.ctx.lineWidth = 4; this.ctx.beginPath(); this.ctx.arc(o.x+30, y, 60, 0, Math.PI*2); this.ctx.stroke(); this.ctx.shadowBlur = 0; this.ctx.fillStyle = '#fff'; this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle'; this.ctx.font = 'bold 70px "OuChan2"'; this.ctx.strokeStyle = '#000'; this.ctx.lineWidth = 3; this.ctx.strokeText(KEY_MAP[o.key] || o.key, o.x+30, y-5); this.ctx.fillText(KEY_MAP[o.key] || o.key, o.x+30, y-5); });
+        this.sky.forEach(b => { let y = b.y + Math.sin(this.frame * 0.1) * 15; this.ctx.save(); this.ctx.translate(b.x, y); let wing = Math.abs(Math.sin(this.frame*0.2)) * 15; let grad = this.ctx.createLinearGradient(-10, -10, 10, 10); grad.addColorStop(0, '#00ffff'); grad.addColorStop(0.5, '#ff00ff'); grad.addColorStop(1, '#ffff00'); this.ctx.fillStyle = grad; this.ctx.shadowBlur = 20 + Math.sin(this.frame * 0.1) * 10; this.ctx.shadowColor = '#ffffff'; this.ctx.beginPath(); this.ctx.ellipse(-8, -wing, 35, 20, -0.5, 0, Math.PI*2); this.ctx.fill(); this.ctx.beginPath(); this.ctx.ellipse(8, -wing, 35, 20, 0.5, 0, Math.PI*2); this.ctx.fill(); this.ctx.shadowBlur=0; this.ctx.fillStyle='#fff'; this.ctx.font = 'bold 45px "OuChan2"'; this.ctx.strokeStyle = '#000'; this.ctx.lineWidth = 3; this.ctx.strokeText(KEY_MAP[b.key] || b.key, 0, 40); this.ctx.fillText(KEY_MAP[b.key] || b.key, 0, 40); this.ctx.font = '16px "Roboto Mono"'; let names = ["", "FLOAT", "DOUBLE", "SPEED", "LIFE", "SLOW"]; this.ctx.fillText(names[b.pId], 0, -30); this.ctx.restore(); });
+        this.ctx.fillStyle = '#fff'; this.particles.forEach(p => { this.ctx.globalAlpha = p.life; this.ctx.fillRect(p.x, p.y, 4, 4); }); this.ctx.globalAlpha = 1; this.ctx.restore();
+    },
+    drawStickYak: function() {
+        const x = C.YAK_X; const y = this.height - C.GROUND_H + this.yak.y; this.ctx.save(); this.ctx.translate(x, y); this.ctx.scale(0.7, 0.7); let t = this.frame * 0.35 * this.timeScale; let pA = Math.sin(t); let pB = Math.sin(t + Math.PI); let bounce = Math.abs(pA) * 6; let tilt = pA * 0.05; if (this.powerType === POWERS.LEVITATE || this.powerType === POWERS.SPEED) { bounce=0; tilt=0.1; } this.ctx.translate(0, -bounce); this.ctx.rotate(tilt); this.ctx.strokeStyle = '#ffffff'; this.ctx.lineWidth = 5; this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round'; this.ctx.shadowBlur = 10; this.ctx.shadowColor = 'rgba(255,255,255,0.5)';
+        this.drawLeg(-20, 0, pB); this.drawLeg(50, 0, pB); this.ctx.beginPath(); this.ctx.moveTo(-40, -10); this.ctx.lineTo(70, -10); this.ctx.lineTo(70, 25); this.ctx.lineTo(-40, 25); this.ctx.closePath(); this.ctx.stroke(); this.ctx.beginPath(); this.ctx.moveTo(-30, -10); this.ctx.lineTo(-10, -35); this.ctx.lineTo(10, -10); this.ctx.stroke();
+        this.ctx.save(); this.ctx.translate(80, -20); this.ctx.rotate(pA * 0.1); this.ctx.strokeRect(-12, -12, 25, 25); this.ctx.beginPath(); this.ctx.moveTo(0, -12); this.ctx.lineTo(-15, -35); this.ctx.stroke(); this.ctx.beginPath(); this.ctx.moveTo(0, -12); this.ctx.lineTo(15, -35); this.ctx.stroke(); this.ctx.restore();
+        this.ctx.save(); this.ctx.translate(10, -10); this.ctx.rotate(-tilt); this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0,-45); this.ctx.stroke(); this.ctx.beginPath(); this.ctx.arc(0,-55, 12, 0, Math.PI*2); this.ctx.stroke(); let aimX = 35; let aimY = -35; this.ctx.beginPath(); this.ctx.moveTo(0, -35); this.ctx.lineTo(aimX, aimY); this.ctx.stroke(); this.ctx.translate(aimX, aimY); this.ctx.strokeStyle = '#00ffcc'; this.ctx.beginPath(); this.ctx.arc(0, 0, 25, -1.0, 1.0, false); this.ctx.stroke(); this.ctx.strokeStyle = '#fff'; this.ctx.lineWidth=1; let pull = this.yak.bowDraw * 15; this.ctx.beginPath(); this.ctx.moveTo(13, -21); this.ctx.lineTo(-pull, 0); this.ctx.lineTo(13, 21); this.ctx.stroke(); this.ctx.restore(); this.ctx.restore();
+        this.drawLeg(50, 0, pA); this.drawLeg(-20, 0, pA); this.ctx.restore();
+    },
+    drawLeg: function(x, y, cycle) { let thigh = Math.sin(cycle) * 0.6; let knee = cycle < 0 ? Math.abs(cycle)*1.5 : 0; this.ctx.save(); this.ctx.translate(x, y+20); this.ctx.rotate(thigh); this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, 30); this.ctx.stroke(); this.ctx.translate(0, 30); this.ctx.rotate(knee); this.ctx.beginPath(); this.ctx.moveTo(0,0); this.ctx.lineTo(0, 30); this.ctx.stroke(); this.ctx.restore(); },
+    spawnObs: function() { let key = CHAR_POOL[Math.floor(Math.random()*CHAR_POOL.length)]; this.obs.push({ x: this.width, key: key, dead: false, isTargeted: false }); this.lastObsX = this.width; },
+    spawnFly: function() { let ground = this.obs.map(o=>o.key); let safe = CHAR_POOL.filter(k => !ground.includes(k)); if(safe.length === 0) return; let key = safe[Math.floor(Math.random()*safe.length)]; let p = [1, 2, 3, 4, 5][Math.floor(Math.random()*5)]; let color = p===3?'#00ffff':(p===4?'#ff00ff':'#ffd700'); this.sky.push({ x: this.width, y: 150+Math.random()*150, key: key, pId: p, color: color, type: 'FLY' }); },
+    clearLanding: function() { this.obs.forEach(o => { if (o.x > 100 && o.x < 300 && !o.dead) { o.dead = true; this.spawnBoom(o.x, this.height-150, '#fff'); } }); },
+    fire: function(target) { Sfx.shoot(); this.yak.bowDraw = 1.0; let startX = C.YAK_X + 50; let startY = this.height - C.GROUND_H + this.yak.y - 45; let tx = target.x + 30; let ty = target.type === 'FLY' ? target.y : (this.height - 150); let dx = tx - startX; let t = dx / C.ARROW_SPEED; let vy = (ty - startY)/t - (0.5 * C.GRAVITY * t); this.arrows.push({ x: startX, y: startY, vx: C.ARROW_SPEED, vy: vy, target: target }); },
+    activatePower: function(p) { Sfx.power(); this.powerType = p; this.powerTimer = C.POWER_TIME; let names = ["", "LEVITATION", "DOUBLE ARROW", "SPEED", "LIFE", "SLOW"]; if(p===4) { this.lives++; this.powerType=0; } else { document.getElementById('p-name').innerText = names[p]; document.getElementById('power-ui').classList.add('active'); } this.updateLives(); },
+    spawnBoom: function(x, y, c) { for(let i=0; i<10; i++) this.particles.push({x,y,vx:(Math.random()-0.5)*10,vy:(Math.random()-0.5)*10,life:1,c}); },
+    takeDamage: function() { Sfx.damage(); this.lives--; this.shake = 20; this.updateLives(); if(this.lives <= 0) { this.active = false; document.getElementById('final-score').innerText = Math.floor(this.score) + "m"; document.getElementById('screens').style.display = 'flex'; document.getElementById('end-box').style.display = 'block'; } },
+    updateLives: function() { document.getElementById('lives').innerHTML = "❤️".repeat(this.lives); },
+    input: function(e) { if(!this.active) return; let k = e.key; let fly = this.sky.find(b => b.key === k || KEY_MAP[k] === b.key); if(fly) { this.fire(fly); return; } let targets = this.obs.filter(o => !o.dead && !o.isTargeted && (o.key === k || KEY_MAP[k] === o.key)).sort((a,b)=>a.x-b.x); if(targets.length > 0) { let t = targets[0]; this.fire(t); t.isTargeted = true; if(this.powerType === 2) { let t2 = this.obs.find(o => !o.dead && !o.isTargeted && o !== t); if(t2) { this.fire(t2); t2.isTargeted = true; } } } }
+};
+Game.init();
+<\\/script>
+</body>
+</html>
+`;
+
+        // ======================================================
+        // GAME 2: JUNGLE RHYTHM (ESCAPED BACKTICKS FIX)
+        // ======================================================
+        const MONKEY_GAME = `
+<!DOCTYPE html>
+<html lang="bo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TibetanKeys | Jungle Rhythm</title>
+    ${HEAD_TAGS}
+    <style>
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
+        body, html { margin: 0; padding: 0; background: #020b0f; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; height: 100vh; }
+        .hud { position: absolute; top: 20px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; box-sizing: border-box; z-index: 10; pointer-events: none; }
+        .score-box { text-align: center; color: #fff; background: rgba(0,0,0,0.4); padding: 10px 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .score-val { font-size: 2.5rem; font-weight: 900; color: #00e676; }
+        .score-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.8; }
+        #music-toggle { display:none; }
+        #game-canvas { display: block; width: 100%; height: 100%; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-card { background: #1a262f; border: 3px solid; padding: 40px; border-radius: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); max-width: 450px; width: 90%; }
+        #game-over-modal .modal-card { border-color: #ff4444; }
+        .death-msg { color: #ff4444; font-size: 2rem; margin-bottom: 10px; font-weight: 900; }
+        #victory-modal .modal-card { border-color: #ffd700; background: linear-gradient(135deg, #1a262f, #2d1a00); }
+        .win-msg { color: #ffd700; font-size: 2.5rem; font-weight: 900; }
+        .action-btn { border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.2s; text-transform: uppercase; margin-top: 20px; }
+        .btn-retry { background: #ff4444; color: #fff; }
+        .btn-retry:hover { transform: scale(1.05); box-shadow: 0 0 20px #ff4444; }
+        #tutorial { position: absolute; bottom: 15%; width: 100%; text-align: center; color: #ffd700; font-size: 1.4rem; pointer-events: none; text-shadow: 0 2px 10px rgba(0,0,0,0.8); font-weight: bold; }
+        
+        /* START BUTTON */
+        #monkey-start { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .start-btn { background: #00e676; color: #000; border: none; padding: 20px 60px; font-size: 24px; font-weight: 900; letter-spacing: 2px; border-radius: 50px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(0, 230, 118, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); } }
+    </style>
+</head>
+<body>
+    <div id="monkey-start" onclick="startGame()"><button class="start-btn">START JUNGLE</button></div>
+    <div class="hud">
+        <div class="score-box"><div class="score-label">Current Step</div><div class="score-val" id="score">0</div></div>
+        <div class="score-box" style="border-bottom: 3px solid #ffd700;"><div class="score-label" style="color:#ffd700;">Banana At</div><div class="score-val" style="color: #ffd700;" id="banana-dist">30</div></div>
+    </div>
+    <canvas id="game-canvas"></canvas>
+    <div id="tutorial">Type the <span style="color:#00e676">SAFE</span> character to jump!</div>
+    <div id="game-over-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="death-msg">🐍 BITTEN!</div><div style="color:#ccc; margin-bottom:10px;">Watch out for awake snakes!</div>
+            <button class="action-btn btn-retry" onclick="location.reload()">Try Again</button>
+        </div>
+    </div>
+    <div id="victory-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="win-msg">VICTORY! 🍌</div><div style="font-size: 60px;">🐒</div>
+            <button class="action-btn" style="background:#ffd700;" onclick="location.reload()">Replay</button>
+        </div>
+    </div>
+<script>
+const sfx = { ctx: null, isMuted: false, isPlayingMusic: false, nextNoteTime: 0, noteQueue: [], init: function() { if(!this.ctx) { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } if(this.ctx.state === 'suspended') { this.ctx.resume(); } }, toggleMute: function() { this.isMuted = !this.isMuted; }, playOsc: function(freq, type, duration, vol, time) { if(this.isMuted) return; const t = time || this.ctx.currentTime; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.type = type; osc.frequency.setValueAtTime(freq, t); gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(vol, t + 0.01); gain.gain.exponentialRampToValueAtTime(0.001, t + duration); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + duration); }, playNoise: function(duration, vol, time) { if(this.isMuted) return; const t = time || this.ctx.currentTime; const bufferSize = this.ctx.sampleRate * duration; const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate); const data = buffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1; const noise = this.ctx.createBufferSource(); noise.buffer = buffer; const gain = this.ctx.createGain(); const filter = this.ctx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 2000; gain.gain.setValueAtTime(vol, t); gain.gain.linearRampToValueAtTime(0, t + duration); noise.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination); noise.start(t); }, playJump: function() { if(!this.ctx || this.isMuted) return; const t = this.ctx.currentTime; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.frequency.setValueAtTime(200, t); osc.frequency.linearRampToValueAtTime(600, t + 0.1); gain.gain.setValueAtTime(0.1, t); gain.gain.linearRampToValueAtTime(0, t + 0.1); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.1); }, playLand: function() { this.playOsc(100, 'triangle', 0.1, 0.05); }, playError: function() { if(!this.ctx || this.isMuted) return; const t = this.ctx.currentTime; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, t); osc.frequency.linearRampToValueAtTime(50, t + 0.2); gain.gain.setValueAtTime(0.1, t); gain.gain.linearRampToValueAtTime(0, t + 0.2); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.2); }, playHiss: function() { this.playNoise(0.2, 0.05); }, playWin: function() { if(!this.ctx || this.isMuted) return; const t = this.ctx.currentTime; this.playOsc(523.25, 'sine', 0.2, 0.1, t); this.playOsc(659.25, 'sine', 0.2, 0.1, t+0.1); this.playOsc(783.99, 'sine', 0.2, 0.1, t+0.2); this.playOsc(1046.50, 'sine', 0.4, 0.1, t+0.3); }, playLose: function() { if(!this.ctx || this.isMuted) return; const t = this.ctx.currentTime; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(400, t); osc.frequency.exponentialRampToValueAtTime(50, t + 0.5); gain.gain.setValueAtTime(0.2, t); gain.gain.linearRampToValueAtTime(0, t + 0.5); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.5); } };
+const NORMAL_MAP = { 'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':' ' };
+const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ' };
+const GAME_POOL = ${CHARS};
+const canvas = document.getElementById('game-canvas'); const ctx = canvas.getContext('2d'); let width, height; const STEP_X = 300; const BANANA_STEP = 30; let steps = []; let currentStepIdx = 0; let gameState = 'paused'; let frame = 0; let cameraX = 0; let targetCameraX = 0; const monkey = { x: 0, y: 0, startX: 0, startY: 0, targetX: 0, targetY: 0, jumpTime: 0, isJumping: false }; let particles = []; let zzzParticles = []; let fireflies = [];
+function resize() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; monkey.y = height / 2; initFireflies(); } window.addEventListener('resize', resize);
+function initFireflies() { fireflies = []; for(let i=0; i<50; i++) { fireflies.push({ x: Math.random() * width, y: Math.random() * height, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5, offset: Math.random() * Math.PI * 2 }); } }
+function createStep(index) { const baseY = height / 2; let paths = []; let forceSafe = false; if (steps.length > 0) { const prevStep = steps[steps.length - 1]; if (prevStep.paths.length > 1) { forceSafe = true; } } let pathCount = 1; if (!forceSafe) { if (index > 5) pathCount = 2; if (index > 15) pathCount = 3; } if (index === BANANA_STEP) pathCount = 1; let usedChars = []; let offsets = [0]; if(pathCount === 2) offsets = [-80, 80]; if(pathCount === 3) offsets = [-120, 0, 120]; let canSnakesJump = false; if(pathCount > 1) { canSnakesJump = Math.random() < 0.3; } for(let i=0; i<pathCount; i++) { let char = GAME_POOL[Math.floor(Math.random()*GAME_POOL.length)]; while(usedChars.includes(char)) char = GAME_POOL[Math.floor(Math.random()*GAME_POOL.length)]; usedChars.push(char); if(index === 0 || index === BANANA_STEP) { char = ""; } let hasSnake = false; if(pathCount === 2 && i === 0) hasSnake = Math.random() > 0.5; if(pathCount === 2 && i === 1 && !paths[0].hasSnake) hasSnake = true; if(pathCount === 3) { hasSnake = Math.random() > 0.33; } if(index === BANANA_STEP || index === 0) hasSnake = false; let foliage = []; let count = 8 + Math.floor(Math.random() * 6); for(let l=0; l<count; l++) { let isFlower = Math.random() > 0.65; let hasButterfly = isFlower && Math.random() > 0.6; foliage.push({ lx: (Math.random()-0.5)*100, ly: (Math.random()-0.5)*35, rot: Math.random() * Math.PI, scale: 0.5 + Math.random() * 0.8, color: isFlower ? ['#ff4081','#e040fb','#7c4dff','#536dfe','#ffd740','#ff6e40'][Math.floor(Math.random()*6)] : (Math.random() > 0.5 ? '#2e7d32' : '#43a047'), type: ['round', 'long', 'fern', 'star'][Math.floor(Math.random()*4)], isFlower: isFlower, hasButterfly: hasButterfly, butterflyOffset: Math.random(), butterflyColor: ['#29b6f6', '#ffeb3b', '#ff5252'][Math.floor(Math.random()*3)] }); } paths.push({ char: char, offset: offsets[i], hasSnake: hasSnake, snakeY: offsets[i], snakeTargetY: offsets[i], snakeOpacity: 1.0, snakeGhostTarget: 1.0, foliage: foliage }); } if(pathCount > 1) { let snakeCount = paths.filter(p => p.hasSnake).length; if(snakeCount === pathCount) { let safeIndex = Math.floor(Math.random() * pathCount); paths[safeIndex].hasSnake = false; } } return { index: index, x: 200 + (index * STEP_X), y: baseY, paths: paths, canSnakesJump: canSnakesJump, mechanicTimer: Math.random() * 100 }; }
+function initGame() { steps = []; for(let i=0; i<=BANANA_STEP; i++) { steps.push(createStep(i)); } currentStepIdx = 0; gameState = 'paused'; monkey.x = steps[0].x; monkey.y = steps[0].y; monkey.targetX = monkey.x; monkey.targetY = monkey.y; cameraX = monkey.x - 200; targetCameraX = cameraX; document.getElementById('score').innerText = 0; document.getElementById('banana-dist').innerText = BANANA_STEP; document.getElementById('game-over-modal').style.display = 'none'; document.getElementById('victory-modal').style.display = 'none'; document.getElementById('tutorial').style.display = 'block'; }
+window.addEventListener('keydown', (e) => { if (gameState !== 'playing' || monkey.isJumping) return; const physicalKey = e.key.toLowerCase(); const typedChar = (e.shiftKey ? SHIFT_MAP[physicalKey] : NORMAL_MAP[physicalKey]) || ""; if(!typedChar) return; const nextStep = steps[currentStepIdx + 1]; if(!nextStep) return; const match = nextStep.paths.find(p => p.char === typedChar); if(match) { sfx.playJump(); if(match.hasSnake && match.snakeOpacity > 0.3) { doJump(nextStep.x, nextStep.y + match.offset, true); } else { doJump(nextStep.x, nextStep.y + match.offset, false); } } else { sfx.playError(); cameraX += (Math.random() * 20) - 10; } });
+function doJump(tx, ty, isDeathJump) { monkey.isJumping = true; monkey.jumpTime = 0; monkey.startX = monkey.x; monkey.startY = monkey.y; monkey.targetX = tx; monkey.targetY = ty; if(isDeathJump) { setTimeout(() => { gameState = 'dead'; gameOver(); }, 600); } else { currentStepIdx++; document.getElementById('score').innerText = currentStepIdx; document.getElementById('banana-dist').innerText = BANANA_STEP - currentStepIdx; if(currentStepIdx > 0) document.getElementById('tutorial').style.display = 'none'; if(currentStepIdx === BANANA_STEP - 1) { setTimeout(() => { const bananaStep = steps[BANANA_STEP]; sfx.playJump(); doJump(bananaStep.x, bananaStep.y + bananaStep.paths[0].offset, false); }, 400); } if(currentStepIdx === BANANA_STEP) { setTimeout(() => { gameWin(); }, 600); } } }
+function updatePhysics() { if(monkey.isJumping) { monkey.jumpTime += 0.03; if(monkey.jumpTime >= 1) { monkey.jumpTime = 1; monkey.isJumping = false; monkey.x = monkey.targetX; monkey.y = monkey.targetY; sfx.playLand(); spawnParticles(monkey.x, monkey.y, '#00e676', 10); } else { const t = monkey.jumpTime; const easeT = t * (2 - t); monkey.x = monkey.startX + (monkey.targetX - monkey.startX) * easeT; const linearY = monkey.startY + (monkey.targetY - monkey.startY) * easeT; const jumpHeight = 150; const arc = Math.sin(t * Math.PI); monkey.y = linearY - (arc * jumpHeight); } } else { monkey.y = monkey.targetY + Math.sin(frame * 0.1) * 5; } targetCameraX = monkey.x - 250; cameraX += (targetCameraX - cameraX) * 0.08; for(let i = currentStepIdx + 1; i < Math.min(steps.length, currentStepIdx + 5); i++) { let step = steps[i]; if(step.index === BANANA_STEP) continue; step.mechanicTimer++; if(step.canSnakesJump && step.paths.length >= 2 && step.mechanicTimer > 240) { step.mechanicTimer = 0; let snakeIndices = []; step.paths.forEach((p, idx) => { if(p.hasSnake) snakeIndices.push(idx); }); step.paths.forEach(p => p.hasSnake = false); snakeIndices.forEach(oldIdx => { let newIdx = (oldIdx + 1) % step.paths.length; step.paths[newIdx].hasSnake = true; step.paths[newIdx].snakeY = step.paths[oldIdx].offset; step.paths[newIdx].snakeTargetY = step.paths[newIdx].offset; }); sfx.playHiss(); spawnParticles(step.x, step.y, '#ff4444', 10); } step.paths.forEach(path => { if(Math.abs(path.snakeY - path.snakeTargetY) > 0.1) { path.snakeY += (path.snakeTargetY - path.snakeY) * 0.15; } if(!path.hasSnake) return; if(frame % 60 === 0) { path.snakeGhostTarget = Math.random() > 0.3 ? 1.0 : 0.05; } path.snakeOpacity += (path.snakeGhostTarget - path.snakeOpacity) * 0.05; if(path.snakeOpacity < 0.3 && frame % 40 === 0) { spawnZZZ(step.x + 15, step.y + path.snakeY - 35); } }); } fireflies.forEach(f => { f.x += f.vx; f.y += f.vy; let relX = (f.x - cameraX) % width; if (relX < 0) relX += width; f.drawX = cameraX + relX; if(f.y < 0) f.y = height; if(f.y > height) f.y = 0; }); }
+function loop() { frame++; updatePhysics(); let bgGrad = ctx.createLinearGradient(0, 0, 0, height); bgGrad.addColorStop(0, '#050a14'); bgGrad.addColorStop(1, '#132f20'); ctx.fillStyle = bgGrad; ctx.fillRect(0,0,width,height); drawMovingFireflies(); ctx.save(); ctx.translate(-cameraX, 0); drawVines(); steps.forEach(step => { if(step.x < cameraX - 200 || step.x > cameraX + width + 200) return; if(step.index === BANANA_STEP) { drawBanana(step.x, step.y); return; } step.paths.forEach(path => { const px = step.x; const py = step.y + path.offset; path.foliage.forEach(leaf => { ctx.save(); ctx.translate(px + leaf.lx, py + leaf.ly + 5); ctx.rotate(leaf.rot + Math.sin(frame*0.05)*0.1); ctx.scale(leaf.scale, leaf.scale); if(leaf.isFlower) { drawAttractiveFlower(0,0, leaf.color); if(leaf.hasButterfly) { drawButterfly(0, -10, leaf.butterflyOffset, leaf.butterflyColor); } } else { drawLeafShape(0,0, leaf.type, leaf.color); } ctx.restore(); }); ctx.fillStyle = '#5d4037'; ctx.beginPath(); ctx.ellipse(px, py+10, 50, 15, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#2e7d32'; ctx.beginPath(); ctx.ellipse(px, py+6, 40, 8, 0, 0, Math.PI*2); ctx.fill(); if(path.hasSnake || Math.abs(path.snakeY - path.offset) > 1) { let visualY = step.y + path.snakeY; let opacity = path.hasSnake ? path.snakeOpacity : 1.0; if(!path.hasSnake) opacity = 1.0 - (Math.abs(path.snakeY - path.snakeTargetY)/100); drawSnake(px, visualY - 10, opacity); } if(path.char !== "") { ctx.fillStyle = '#ffffff'; ctx.font = 'bold 55px OuChan2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 8; ctx.fillText(path.char, px, py - 5); ctx.shadowBlur = 0; } }); }); drawMonkey(); updateParticles(); updateZZZ(); ctx.restore(); requestAnimationFrame(loop); }
+function drawMovingFireflies() { ctx.fillStyle = '#cddc39'; fireflies.forEach(f => { ctx.globalAlpha = 0.3 + Math.abs(Math.sin(frame * 0.05 + f.offset)) * 0.7; ctx.fillRect(f.drawX, f.y, 4, 4); }); ctx.globalAlpha = 1; }
+function drawAttractiveFlower(x, y, color) { ctx.fillStyle = color; for(let i=0; i<8; i++){ ctx.beginPath(); ctx.ellipse(x + Math.cos(i*Math.PI/4)*12, y + Math.sin(i*Math.PI/4)*12, 10, 5, i*Math.PI/4, 0, Math.PI*2); ctx.fill(); } ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.6; for(let i=0; i<8; i++){ ctx.beginPath(); ctx.ellipse(x + Math.cos(i*Math.PI/4)*7, y + Math.sin(i*Math.PI/4)*7, 6, 3, i*Math.PI/4, 0, Math.PI*2); ctx.fill(); } ctx.globalAlpha = 1; ctx.fillStyle = '#ffeb3b'; ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI*2); ctx.fill(); }
+function drawButterfly(x, y, offset, color) { ctx.save(); ctx.translate(x, y); let flap = Math.sin(frame * 0.2 + offset); let wingWidth = 12 * Math.abs(flap); ctx.fillStyle = color; ctx.beginPath(); ctx.ellipse(-6, 0, wingWidth, 10, -Math.PI/6, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(6, 0, wingWidth, 10, Math.PI/6, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#212121'; ctx.beginPath(); ctx.ellipse(0, 0, 2, 8, 0, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+function drawLeafShape(x, y, type, color) { ctx.fillStyle = color; ctx.beginPath(); if(type === 'round') { ctx.ellipse(x, y, 15, 8, 0, 0, Math.PI*2); } else if (type === 'long') { ctx.ellipse(x, y, 20, 4, 0, 0, Math.PI*2); } else if (type === 'fern') { ctx.moveTo(x-15, y); ctx.lineTo(x, y-5); ctx.lineTo(x+15, y); ctx.lineTo(x, y+5); ctx.closePath(); } else if (type === 'star') { for(let i=0; i<5; i++) { ctx.lineTo(x + Math.cos(i*Math.PI*2/5)*15, y + Math.sin(i*Math.PI*2/5)*15); ctx.lineTo(x + Math.cos((i+0.5)*Math.PI*2/5)*6, y + Math.sin((i+0.5)*Math.PI*2/5)*6); } ctx.closePath(); } ctx.fill(); }
+function drawSnake(x, y, opacity) { ctx.save(); ctx.globalAlpha = opacity; ctx.strokeStyle = '#e53935'; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); const sway = Math.sin(frame * 0.15) * 5; ctx.moveTo(x + 15, y + 15); ctx.bezierCurveTo(x + 30, y + 15, x - 10, y + 5, x, y + sway); ctx.bezierCurveTo(x + 10, y + sway - 5, x + 20, y - 20 + sway, x + 5, y - 25 + sway); ctx.stroke(); const hx = x + 5; const hy = y - 25 + sway; ctx.fillStyle = '#c62828'; ctx.beginPath(); ctx.arc(hx, hy, 10, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ffea00'; ctx.beginPath(); ctx.arc(hx-4, hy-2, 3, 0, Math.PI*2); ctx.arc(hx+4, hy-2, 3, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(hx-4, hy-2, 1, 0, Math.PI*2); ctx.arc(hx+4, hy-2, 1, 0, Math.PI*2); ctx.fill(); if(opacity > 0.5) { const tongueTick = Math.sin(frame * 0.5); if(tongueTick > 0.8) { ctx.strokeStyle = '#ff1744'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(hx, hy-8); ctx.lineTo(hx, hy-18); ctx.lineTo(hx-3, hy-22); ctx.moveTo(hx, hy-18); ctx.lineTo(hx+3, hy-22); ctx.stroke(); } } ctx.restore(); }
+function drawMonkey() { const x = monkey.x; const y = monkey.y - 30; const isJump = monkey.isJumping; const sway = isJump ? 0 : Math.sin(frame * 0.2) * 3; const legSwing = isJump ? 0 : Math.sin(frame * 0.3) * 10; ctx.fillStyle = '#ffb300'; ctx.strokeStyle = '#ffb300'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x-10, y+10); ctx.quadraticCurveTo(x-40, y+Math.sin(frame*0.2)*20, x-30, y-20); ctx.strokeStyle = '#ff6f00'; ctx.lineWidth = 6; ctx.stroke(); ctx.strokeStyle = '#ffb300'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(x-10, y-5); ctx.lineTo(x-20 + legSwing, y+15); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x-8, y+15); ctx.lineTo(x-15 - legSwing, y+35); ctx.stroke(); ctx.beginPath(); ctx.ellipse(x, y, 22, 18, 0, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(x, y-25, 18, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(x-18, y-25, 6, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(x+18, y-25, 6, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ffe0b2'; ctx.beginPath(); ctx.arc(x-18, y-25, 3, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(x+18, y-25, 3, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ffecb3'; ctx.beginPath(); ctx.ellipse(x, y-22, 14, 12, 0, 0, Math.PI*2); ctx.fill(); if(gameState === 'dead') { ctx.strokeStyle = '#000'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x-5, y-25); ctx.lineTo(x-1, y-21); ctx.moveTo(x-1, y-25); ctx.lineTo(x-5, y-21); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x+1, y-25); ctx.lineTo(x+5, y-21); ctx.moveTo(x+5, y-25); ctx.lineTo(x+1, y-21); ctx.stroke(); } else { ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x-4, y-25, 2.5, 0, Math.PI*2); ctx.arc(x+4, y-25, 2.5, 0, Math.PI*2); ctx.fill(); } ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.beginPath(); if(gameState === 'dead') ctx.arc(x, y-15, 4, Math.PI, 0); else ctx.arc(x, y-18, 4, 0, Math.PI); ctx.stroke(); ctx.strokeStyle = '#ffb300'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(x+10, y-5); ctx.lineTo(x+20 - legSwing, y+15); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x+8, y+15); ctx.lineTo(x+15 + legSwing, y+35); ctx.stroke(); }
+function drawVines() { ctx.strokeStyle = '#4e342e'; ctx.lineWidth = 4; ctx.beginPath(); for(let i=0; i<steps.length-1; i++) { if(steps[i].x < cameraX - 200 || steps[i].x > cameraX + width) continue; const s1 = steps[i]; const s2 = steps[i+1]; ctx.moveTo(s1.x, s1.y); ctx.bezierCurveTo(s1.x+100, s1.y, s2.x-100, s2.y, s2.x, s2.y); } ctx.stroke(); }
+function drawBanana(x, y) { ctx.save(); ctx.translate(x, y); const bounce = Math.sin(frame * 0.05) * 10; ctx.translate(0, bounce); ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 40; ctx.fillStyle = '#ffeb3b'; ctx.beginPath(); ctx.arc(0, 0, 40, 0, Math.PI*2); ctx.fill(); ctx.font = '40px serif'; ctx.textAlign = 'center'; ctx.textBaseline='middle'; ctx.fillText('🍌', 0, 0); ctx.restore(); }
+function spawnParticles(x, y, color, count) { for(let i=0; i<count; i++) { particles.push({ x:x, y:y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, life: 1.0, color: color }); } }
+function spawnZZZ(x, y) { zzzParticles.push({ x: x + (Math.random()-0.5)*5, y: y, vx: (Math.random()-0.5) * 0.5, vy: -1 - Math.random(), life: 1.0, size: 12 + Math.random()*8 }); }
+function updateParticles() { for(let i=particles.length-1; i>=0; i--) { let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.05; ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill(); if(p.life<=0) particles.splice(i,1); } ctx.globalAlpha = 1; }
+function updateZZZ() { ctx.fillStyle = '#fff'; ctx.shadowColor = '#000'; ctx.shadowBlur = 2; for(let i=zzzParticles.length-1; i>=0; i--) { let z = zzzParticles[i]; z.x += z.vx; z.y += z.vy; z.life -= 0.01; ctx.globalAlpha = z.life; ctx.font = \`bold \${z.size}px sans-serif\`; ctx.fillText('Z', z.x, z.y); if(z.life<=0) zzzParticles.splice(i,1); } ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
+function gameOver() { sfx.playLose(); document.getElementById('game-over-modal').style.display = 'flex'; }
+function gameWin() { sfx.playWin(); document.getElementById('victory-modal').style.display = 'flex'; }
+
+// START FUNCTION
+window.startGame = function() {
+    sfx.init();
+    document.getElementById('monkey-start').style.display = 'none';
+    gameState = 'playing';
+}
+
+resize();
+initGame();
+loop();
+<\\/script>
+</body>
+</html>
+`;
+
+        // ======================================================
+        // RENDERER
+        // ======================================================
+        if (Math.random() > 0.5) {
+            document.open();
+            document.write(YAK_GAME);
+            document.close();
+        } else {
+            document.open();
+            document.write(MONKEY_GAME);
+            document.close();
+        }
+    </script>
+</body>
+</html>

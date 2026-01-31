@@ -329,15 +329,20 @@
                     }
                 }
 
-                // --- THE SMART ROUTER ---
+                // --- THE SMART ROUTER (UPDATED LINKS) ---
                 card.onclick = () => {
                     // 1. Level 0 (Calibration)
                     if (levelId === 0) {
                         window.location.href = `level0.html`;
                     }
-                    // 2. Games (Any card labeled "GAME")
+                    // 2. Games (UPDATED LINKS HERE)
                     else if (cat.data && typeof cat.data[i] === 'object' && cat.data[i].type === "special" && cat.data[i].text.includes("GAME")) {
-                        window.location.href = `game-select.html?level=${levelId}`;
+                        const txt = cat.data[i].text;
+                        if (txt === "GAME I") window.location.href = "game1.html";
+                        else if (txt === "GAME II") window.location.href = "game2.html";
+                        else if (txt === "GAME III") window.location.href = "game3.html";
+                        else if (txt === "GAME IV") window.location.href = "game4.html";
+                        else window.location.href = "game.html"; // For "GAME" (final)
                     }
                     // 3. Tests (Any card labeled "TEST" or "FINAL") -> Send to Basic Room with Test Mode
                     else if (cat.data && typeof cat.data[i] === 'object' && cat.data[i].type === "special" && (cat.data[i].text.includes("TEST") || cat.data[i].text.includes("FINAL"))) {
