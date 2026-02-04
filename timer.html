@@ -6,79 +6,68 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-WQ62DL1S2M');
     </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <link rel="icon" type="image/png" href="og.png">
-
-    <title>TibetanKeys | Timer </title> 
+    <title>TibetanKeys | Timer</title> 
     
     <style>
         @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
         @font-face { font-family: 'BodYig'; src: url('Monlam BodYig.ttf'); }
 
         :root {
-            --bg: #010a16;
+            /* FOCUS MODE PALETTE */
+            --bg: #000000;
             --panel: rgba(255, 255, 255, 0.05);
-            --accent: #00e676; /* Green for Timer Mode */
-            --gold: #d4af37;
+            --accent: #d4af37; 
+            --green: #00e676;  
+            --red: #ff4444;    
             --text: #ffffff;
-            --red: #ff4444; 
         }
 
         /* --- GLOBAL SCROLLBAR KILLER --- */
         ::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; }
+        html, body { -ms-overflow-style: none; scrollbar-width: none; }
 
         body {
             margin: 0; padding: 0;
             background: var(--bg); color: var(--text);
             font-family: 'Segoe UI', sans-serif;
-            overflow: hidden; /* Prevent Page Scroll */
+            overflow: hidden; 
             height: 100vh;
             display: flex; flex-direction: column;
             user-select: none;
-            position: relative; /* Needed for absolute positioning of nav */
+            position: relative; 
         }
 
-        /* --- OPTION 2: MINIMALIST NAV --- */
+        /* --- REMOVE SPINNERS --- */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* --- NAV --- */
         .minimal-nav {
-            position: absolute;
-            top: 30px;
-            left: 40px;
-            font-size: 16px;
-            font-weight: 800;
-            color: rgba(255, 255, 255, 0.4); /* Subtle by default so it doesn't distract */
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            z-index: 5000;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            position: absolute; top: 30px; left: 40px;
+            font-size: 16px; font-weight: 800;
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none; text-transform: uppercase; letter-spacing: 2px;
+            z-index: 5000; transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
         }
-
         .minimal-nav:hover {
-            color: var(--accent); /* Lights up Green on hover */
-            opacity: 1;
-            text-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
-            transform: translateX(-5px); /* Subtle slide animation */
+            color: var(--accent); opacity: 1;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            transform: translateX(-5px);
         }
 
         /* --- MAIN LAYOUT --- */
         .container {
-            flex-grow: 1; 
-            display: flex; flex-direction: column;
+            flex-grow: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             width: 100%; max-width: 1200px;
-            margin: 0 auto; padding: 10px;
-            box-sizing: border-box;
-            /* Removed large top padding since nav is gone */
+            margin: 0 auto; padding: 10px; box-sizing: border-box;
         }
 
         /* --- SETUP PANEL --- */
@@ -96,7 +85,7 @@
         }
         .time-btn:hover, .time-btn.selected {
             background: var(--accent); color: #000; border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
         }
 
         .custom-time-box {
@@ -114,17 +103,14 @@
             background: var(--accent); color: #000; border: none;
             padding: 12px 50px; font-size: 1.2rem; font-weight: 900;
             border-radius: 50px; cursor: pointer; 
-            box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
             transition: 0.3s; animation: pulse-btn 2s infinite;
         }
-        .start-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 230, 118, 0.6); }
-        @keyframes pulse-btn { 0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(0, 230, 118, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); } }
+        .start-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(212, 175, 55, 0.6); }
+        @keyframes pulse-btn { 0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); } 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
 
         /* --- GAME ARENA --- */
-        #game-arena { 
-            display: none; width: 100%; max-width: 1000px;
-            text-align: center;
-        }
+        #game-arena { display: none; width: 100%; max-width: 1400px; text-align: center; }
 
         .timer-box { 
             font-size: 3rem; font-weight: 900; color: var(--accent); 
@@ -132,37 +118,40 @@
         }
 
         .game-display-area {
-            font-family: 'OuChan2', serif; 
-            line-height: 2.2; 
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: #555; 
-            padding: 30px 50px; 
-            border-radius: 20px;
-            margin-bottom: 15px; 
-            text-align: left;
-            position: relative; 
-            cursor: text;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.6);
+            font-family: 'OuChan2', serif; line-height: 2.2; 
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 30px 50px; border-radius: 20px;
+            margin-bottom: 15px; text-align: left;
+            position: relative; cursor: text;
             height: 350px; 
-            overflow: hidden; 
+            /* FIX: Allow scrolling but hide scrollbar globally */
+            overflow-y: auto; 
             scroll-behavior: smooth;
             word-break: normal; white-space: normal;
         }
 
         .tibetan-word { display: inline-block; white-space: nowrap; margin-right: 2px; vertical-align: bottom; }
-        .stack { display: inline-block; position: relative; margin-right: 1px; vertical-align: bottom; }
+        .stack { display: inline-block; position: relative; margin-right: 1px; vertical-align: bottom; color: #555; }
         
+        /* GHOST TEXT */
         .stack .ghost-text {
             position: absolute; left: 0; bottom: 0; width: 100%; text-align: center;
-            color: var(--gold); text-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+            color: var(--accent); /* Yellow */
             font-family: 'OuChan2', serif; font-size: inherit; line-height: inherit; 
             white-space: nowrap; pointer-events: none; background: transparent;
         }
-        .stack .ghost-text.error { color: var(--red); text-shadow: 0 0 10px rgba(255, 68, 68, 0.8); }
-        .stack.current-target { background: rgba(255, 255, 255, 0.05); border-radius: 8px; }
-        .correct { color: #fff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.5); } 
+        .stack .ghost-text.error { color: var(--red); }
+        
+        /* GLASSY GUIDE BOX */
+        .stack.current-target { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .correct { color: var(--green); text-shadow: 0 0 15px rgba(0, 230, 118, 0.6); } 
 
         #hidden-input { position: absolute; opacity: 0; top: 0; left: 0; height: 0; width: 0; }
 
@@ -175,13 +164,24 @@
         .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
         .ctrl-btn.restart:hover { border-color: var(--red); color: var(--red); }
 
+        /* SOUND BUTTON */
+        .sound-btn {
+            background: none; border: none; color: var(--accent);
+            cursor: pointer; width: 40px; height: 40px;
+            display: flex; justify-content: center; align-items: center;
+            transition: 0.2s; opacity: 0.7; margin-right: 10px;
+        }
+        .sound-btn:hover { opacity: 1; transform: scale(1.1); }
+        .sound-btn svg { width: 24px; height: 24px; fill: currentColor; }
+        .sound-btn.muted { color: var(--red); opacity: 0.5; }
+
         /* MODAL */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 6000; justify-content: center; align-items: center; }
         .modal-content { background: #0b1624; border: 1px solid var(--accent); padding: 40px; border-radius: 20px; width: 90%; max-width: 500px; text-align: center; }
 
         @media (max-width: 900px) {
             .container { padding: 5px; }
-            .minimal-nav { top: 15px; left: 15px; font-size: 14px; } /* Adjust nav for mobile */
+            .minimal-nav { top: 15px; left: 15px; font-size: 14px; } 
             .game-display-area { font-size: 28px; padding: 15px; height: 280px; }
             .timer-box { font-size: 2.5rem; }
         }
@@ -195,7 +195,7 @@
 
     <div class="container">
         <div id="setup-panel">
-            <h2 style="color:#00e676; margin-bottom:20px; text-transform:uppercase; letter-spacing:2px;">Set Timer</h2>
+            <h2 style="color:var(--accent); margin-bottom:20px; text-transform:uppercase; letter-spacing:2px;">Set Timer</h2>
             <div class="time-presets">
                 <button class="time-btn" onclick="selectTime(30)">30s</button>
                 <button class="time-btn" onclick="selectTime(60)">1m</button>
@@ -221,6 +221,10 @@
             <input type="text" id="hidden-input" autocomplete="off">
 
             <div class="controls-bar">
+                <button id="sound-btn" class="sound-btn" onclick="sfx.toggle()" onmousedown="event.preventDefault()" title="Toggle Sound">
+                    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </button>
+
                 <button class="ctrl-btn" onmousedown="event.preventDefault(); adjustFontSize(-5)">A-</button>
                 <button class="ctrl-btn" onmousedown="event.preventDefault(); adjustFontSize(5)">A+</button>
                 <div style="flex-grow:1;"></div> 
@@ -234,24 +238,54 @@
         <div class="modal-content">
             <h2 style="color:var(--accent);">TIME'S UP!</h2>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; text-align: left;">
-                <div>Raw WPM:</div> <div id="res-wpm" style="color:var(--gold); font-weight:bold;">0</div>
-                <div>Accuracy:</div> <div id="res-acc" style="color:var(--gold); font-weight:bold;">0%</div>
+                <div>Raw WPM:</div> <div id="res-wpm" style="color:var(--accent); font-weight:bold;">0</div>
+                <div>Accuracy:</div> <div id="res-acc" style="color:var(--accent); font-weight:bold;">0%</div>
             </div>
             <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
                 <div style="font-size: 0.9rem; color:#888;">FINAL SCORE</div>
-                <div id="res-score" style="font-size: 3rem; font-weight:900; color:var(--accent);">0</div>
+                <div id="res-score" style="font-size: 3rem; font-weight:900; color:var(--green);">0</div>
             </div>
             <button class="start-btn" style="font-size:1rem; padding:10px 30px;" onclick="location.reload()">TRY AGAIN</button>
         </div>
     </div>
 
     <script>
-        // CONFIG
         const NORMAL_MAP = { 'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':'་' };
         const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ', '>': 'ླ' };
         const SUBJOINED_MAP = { 'k':'ྐ', 'g':'ྒ', 'b':'ྦ', 't':'ྟ', 'd':'ྡ', 'z':'ྯ', 'p':'ྤ', 'm':'ྨ', 'n':'ྣ', 'l':'ླ', 's':'ྶ', 'h':'ྷ', 'j':'ྗ', 'c':'ྕ', 'x':'ྩ', 'f':'ྔ', 'q':'ྚ', 'v':'ྜ', 'w':'ྭ', 'r':'ྲ', 'y':'ྱ', '\'':'ཱ' };
 
-        // RANDOM TEXT DATABASE
+        const sfx = {
+            ctx: null, muted: false,
+            init: function() { if(!this.ctx) { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } if(this.ctx.state === 'suspended') { this.ctx.resume(); } },
+            toggle: function() {
+                this.muted = !this.muted;
+                const btn = document.getElementById('sound-btn');
+                if(this.muted) {
+                    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>';
+                    btn.classList.add('muted');
+                } else {
+                    this.init();
+                    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+                    btn.classList.remove('muted');
+                }
+                btn.blur();
+            },
+            playClick: function() {
+                if(this.muted || !this.ctx) return;
+                const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.08);
+            },
+            playError: function() {
+                if(this.muted || !this.ctx) return;
+                const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, this.ctx.currentTime); osc.frequency.linearRampToValueAtTime(100, this.ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.1);
+                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.1);
+            }
+        };
+
         const TEXT_DB = [
             "འཛམ་གླིང་གི་ཡང་ཐོག་ཏུ་ཆགས་པའི་ང་ཚོའི་ཕ་ཡུལ་བོད་ལྗོངས་ནི་རི་མཐོ་ས་གཙང་དང་གངས་རི་ར་བས་བསྐོར་བའི་ཡུལ་གྲུ་ཞིག་ཡིན། འདི་ནི་ང་ཚོའི་སྐྱེ་གནས་དང་འཚོ་གནས་ཀྱི་གཞི་རྟེན་ཡིན།",
             "བོད་ཀྱི་སྐད་ཡིག་ནི་ལོ་རྒྱུས་ཡུན་རིང་ལྡན་པའི་རིག་གནས་ཤིག་ཡིན་ལ། ང་ཚོའི་མེས་པོ་ཚོས་བཞག་པའི་རྩ་ཆེའི་ནོར་བུ་ཞིག་ཀྱང་ཡིན། དེ་ནི་ང་ཚོའི་ངོ་བོ་དང་ལ་རྒྱ་མཚོན་བྱེད་ཀྱི་མེ་ལོང་ལྟ་བུ་རེད།",
@@ -297,6 +331,7 @@
         }
 
         function startGame(rawText) {
+            sfx.init(); 
             if(timerInterval) clearInterval(timerInterval);
             targetStacks = tokenizeTibetan(rawText);
             
@@ -357,11 +392,23 @@
         }
 
         function handleKeydown(e) {
+            sfx.init(); 
             if (e.ctrlKey || e.metaKey || e.key === 'Tab' || e.key === 'Enter') { e.preventDefault(); return; }
+            
             if (e.key === 'Backspace') {
-                if (currentTyped.length > 0) { currentTyped = currentTyped.slice(0, -1); isStackingMode = false; updateGhostText(false); }
+                if (currentTyped.length > 0) { 
+                    currentTyped = currentTyped.slice(0, -1); 
+                    isStackingMode = false; 
+                    const targetStack = targetStacks[currentStackIndex];
+                    if (targetStack.startsWith(currentTyped)) {
+                        updateGhostText(false); 
+                    } else {
+                        updateGhostText(true);
+                    }
+                }
                 return;
             }
+
             if (!isPlaying) { isPlaying = true; timerInterval = setInterval(gameLoop, 1000); }
 
             const lookupKey = e.key.toLowerCase();
@@ -379,7 +426,21 @@
 
             if (tibetanChar) {
                 e.preventDefault();
-                currentTyped += tibetanChar; totalTypedChars++; checkInput();
+                
+                const targetStack = targetStacks[currentStackIndex];
+                const prospectiveTyped = currentTyped + tibetanChar;
+
+                if (targetStack.startsWith(prospectiveTyped)) {
+                    sfx.playClick();
+                    currentTyped += tibetanChar; 
+                    totalTypedChars++; 
+                    checkInput();
+                } else {
+                    sfx.playError();
+                    currentTyped += tibetanChar; 
+                    totalTypedChars++;
+                    updateGhostText(true);
+                }
             }
         }
 
@@ -400,8 +461,7 @@
                         newGhost.className = 'ghost-text'; newGhost.id = 'current-ghost';
                         nextSpan.appendChild(newGhost);
                         
-                        const container = document.getElementById('game-display');
-                        nextSpan.scrollIntoView({block: "center", behavior: "smooth"});
+                        checkAutoScroll(nextSpan);
 
                         currentTyped = ""; isStackingMode = false; updateGhostText(false);
                     } else {
@@ -411,9 +471,20 @@
             } else { updateGhostText(true); }
         }
 
+        function checkAutoScroll(activeElement) {
+            const container = document.getElementById('game-display');
+            if (activeElement.offsetTop > container.scrollTop + container.offsetHeight - 80) {
+                activeElement.scrollIntoView({block: "center", behavior: "smooth"});
+            }
+        }
+
         function updateGhostText(isError) {
             const ghost = document.getElementById('current-ghost');
-            if(ghost) { ghost.innerText = currentTyped; if(isError) ghost.classList.add('error'); else ghost.classList.remove('error'); }
+            if(ghost) { 
+                ghost.innerText = currentTyped; 
+                if(isError) ghost.classList.add('error'); 
+                else ghost.classList.remove('error'); 
+            }
         }
 
         function gameLoop() {

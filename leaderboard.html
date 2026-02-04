@@ -19,13 +19,12 @@
         @font-face { font-family: 'BodYig'; src: url('Monlam BodYig.ttf'); }
 
         :root {
-            /* FOCUS MODE COLORS */
             --bg: #000000; 
             --panel: rgba(255, 255, 255, 0.05);
-            --accent: #d4af37; /* Yellow for Construction */
+            --accent: #d4af37; 
             --text: #ffffff; 
-            --green: #00e676; /* Glowing Green for Correct */
-            --red: #ff4444;   /* Red for Error */
+            --green: #00e676; 
+            --red: #ff4444; 
             --glass-bg: rgba(1, 10, 22, 0.75); 
         }
 
@@ -46,7 +45,7 @@
             transition: background-color 5000s ease-in-out 0s;
         }
 
-        /* --- CHAMPION BAR (Glassy) --- */
+        /* --- CHAMPION BAR --- */
         .champion-bar {
             position: fixed; top: 0; width: 100%; min-height: 40px; 
             background: var(--glass-bg); 
@@ -114,7 +113,11 @@
             background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,255,255,0.05); 
             padding: 40px 60px; border-radius: 20px; margin-bottom: 20px; 
-            text-align: left; height: 400px; overflow: hidden; scroll-behavior: smooth; 
+            text-align: left; height: 400px; 
+            
+            /* FIXED: Allow scroll behavior */
+            overflow-y: auto; 
+            scroll-behavior: smooth; 
         }
         
         .tibetan-word { display: inline-block; white-space: nowrap; margin-right: 2px; vertical-align: bottom; }
@@ -123,18 +126,20 @@
         /* GHOST TEXT */
         .ghost-text { 
             position: absolute; left: 0; bottom: 0; width: 100%; text-align: center; 
-            color: var(--accent); /* Yellow = Valid Construction */
+            color: var(--accent); /* Yellow */
             font-family: 'OuChan2'; pointer-events: none; 
         }
-        .ghost-text.error { color: var(--red) !important; } /* Red = Error */
+        .ghost-text.error { color: var(--red) !important; } 
         
-        .stack.current-target { background: transparent; }
-        
-        /* GLOWING GREEN FOR CORRECT */
-        .correct { 
-            color: var(--green); 
-            text-shadow: 0 0 15px rgba(0, 230, 118, 0.6); 
+        /* THE GLASSY BOX RESTORED */
+        .stack.current-target { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
         }
+        
+        .correct { color: #00e676; text-shadow: 0 0 15px rgba(0, 230, 118, 0.6); }
         
         #hidden-input { position: absolute; opacity: 0; top: 0; }
         .timer-box { font-size: 2rem; font-weight: bold; color: var(--accent); margin-bottom: 20px; }
@@ -270,7 +275,6 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbzTibWZkMtbsx29dR8DzIMW-JdgF3hGBbbgxqu1HNjKmPIyZhFYGrhE-Fa-snqAg_l_nQ/exec";
         const BAD_WORDS = ["fuck", "shit", "bitch", "ass", "idiot", "stupid", "hell", "damn"];
 
-        // --- AUDIO ENGINE ---
         const sfx = {
             ctx: null, muted: false,
             init: function() { if(!this.ctx) { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } if(this.ctx.state === 'suspended') { this.ctx.resume(); } },
@@ -304,7 +308,7 @@
         };
 
         const NORMAL_MAP = { 'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':'་' };
-        const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ' };
+        const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ', '>': 'ླ' };
         const SUBJOINED_MAP = { 'k':'ྐ', 'g':'ྒ', 'b':'ྦ', 't':'ྟ', 'd':'ྡ', 'z':'ྯ', 'p':'ྤ', 'm':'ྨ', 'n':'ྣ', 'l':'ླ', 's':'ྶ', 'h':'ྷ', 'j':'ྗ', 'c':'ྕ', 'x':'ྩ', 'f':'ྔ', 'q':'ྚ', 'v':'ྜ', 'w':'ྭ', 'r':'ྲ', 'y':'ྱ', '\'':'ཱ' };
 
         let allPlayers = []; let selectedPlayer = null;
