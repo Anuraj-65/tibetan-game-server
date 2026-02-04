@@ -504,8 +504,8 @@
             const minutes = timeSpent / 60;
             const wpm = minutes > 0 ? Math.round((totalTypedChars / 5) / minutes) : 0;
             const accuracy = totalTypedChars > 0 ? Math.round((correctKeystrokes / totalTypedChars) * 100) : 0;
-            const score = Math.round(wpm * (accuracy / 100));
-
+            // Returns "61.8" (Fixed to 1 decimal place)
+            const score = (wpm * (accuracy / 100)).toFixed(1);
             document.getElementById('res-wpm').innerText = wpm;
             document.getElementById('res-acc').innerText = accuracy + "%";
             document.getElementById('res-score').innerText = score;

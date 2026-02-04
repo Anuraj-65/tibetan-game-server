@@ -91,6 +91,17 @@
         .retry-btn { background: none; border: 1px solid #444; color: #888; border-radius: 5px; cursor: pointer; padding: 5px 10px; font-size: 1.2rem; transition: 0.3s; }
         .retry-btn:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.1); }
 
+        /* --- TOOLTIP STYLE (ADDED) --- */
+        .tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.9); color: var(--accent);
+            padding: 5px 10px; border-radius: 5px; font-size: 12px; white-space: nowrap;
+            border: 1px solid var(--accent); z-index: 200; pointer-events: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
         /* --- MODAL --- */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 6000; justify-content: center; align-items: center; }
         .modal-content { background: #0b1624; border: 1px solid var(--accent); padding: 40px; border-radius: 20px; width: 95%; max-width: 500px; text-align: center; }
@@ -114,10 +125,7 @@
             border: 1px solid rgba(255,255,255,0.05); 
             padding: 40px 60px; border-radius: 20px; margin-bottom: 20px; 
             text-align: left; height: 400px; 
-            
-            /* FIXED: Allow scroll behavior */
-            overflow-y: auto; 
-            scroll-behavior: smooth; 
+            overflow-y: auto; scroll-behavior: smooth; 
         }
         
         .tibetan-word { display: inline-block; white-space: nowrap; margin-right: 2px; vertical-align: bottom; }
@@ -131,7 +139,6 @@
         }
         .ghost-text.error { color: var(--red) !important; } 
         
-        /* THE GLASSY BOX RESTORED */
         .stack.current-target { 
             background: rgba(255, 255, 255, 0.1); 
             border-radius: 8px; 
@@ -192,7 +199,9 @@
                         <th width="12%" class="detail-col">Time</th>
                         <th width="12%" class="detail-col">WPM</th>
                         <th width="12%" class="detail-col">Accuracy</th>
-                        <th width="12%">Score</th>
+                        <th width="12%">
+                            <span class="tooltip" data-tip="Formula: WPM × (Accuracy/100)">Score</span>
+                        </th>
                         <th width="10%">Retry</th>
                     </tr>
                 </thead>
@@ -495,7 +504,8 @@
             const fullText = targetStacks.join("");
             const wpm = Math.round((fullText.length / 5) / (timeSeconds / 60));
             const accuracy = totalTypedChars > 0 ? Math.round((correctKeystrokes / totalTypedChars) * 100) : 0;
-            const score = Math.round(wpm * (accuracy / 100));
+            // Returns "61.8" (Fixed to 1 decimal place)
+            const score = (wpm * (accuracy / 100)).toFixed(1);
             finalData = {
                 name: document.getElementById('p-name').value, location: document.getElementById('p-loc').value, pin: document.getElementById('p-pin').value,
                 score: score, wpm: wpm, accuracy: accuracy + "%", time: document.getElementById('timer').innerText,
