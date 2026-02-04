@@ -18,7 +18,6 @@
     <title>TibetanKeys Leaderboard | The Hall of Masters</title>
     
     <style>
-    /* ... your existing CSS starts here ... */
         @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
         @font-face { font-family: 'BodYig'; src: url('Monlam BodYig.ttf'); }
 
@@ -35,47 +34,87 @@
             margin: 0; padding: 0;
             background: var(--bg); color: var(--text);
             font-family: 'Segoe UI', sans-serif;
-            overflow-x: hidden; /* Prevent horizontal scroll only */
+            overflow-x: hidden;
             min-height: 100vh;
             user-select: none;
         }
 
-        /* --- NAVIGATION (FIXED TOP) --- */
-        nav {
-            position: fixed; top: 0; width: 100%; display: flex; 
-            justify-content: center; gap: 40px; padding: 15px 0;
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(25px); 
-            z-index: 5000; border-bottom: 1px solid rgba(212, 175, 55, 0.15);
-            flex-wrap: wrap;
+        /* --- STATIC CHAMPION BAR (FIXED TOP) --- */
+        .champion-bar {
+            position: fixed; top: 0; width: 100%;
+            min-height: 40px; 
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            z-index: 5000;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            flex-wrap: wrap; 
+            padding: 5px 0;
+            gap: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
         }
-        nav a { 
-            color: rgba(255, 255, 255, 0.8); 
-            text-decoration: none; 
-            font-size: 14px; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            cursor: pointer; 
-            transition: 0.3s ease;
+
+        .champ-label {
+            color: var(--green); font-weight: 900; 
+            text-transform: uppercase; font-size: 13px;
+            letter-spacing: 1px;
+            margin-right: 10px;
+            border-right: 2px solid #555; padding-right: 15px;
+        }
+
+        .champ-item {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 13px; color: #ddd; font-weight: 600;
+        }
+
+        .champ-item b { color: var(--accent); }
+
+        /* --- MEDAL ANIMATION --- */
+        .medal-icon {
             display: inline-block;
-        }
-        nav a:hover { 
-            color: var(--accent); 
-            transform: scale(1.15);
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            font-size: 16px;
+            animation: bounce-glow 2s infinite ease-in-out;
         }
         
-        /* Active State for Leaderboard */
-        nav a.active { 
-            color: var(--green); 
-            border-bottom: 2px solid var(--green); 
-            text-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+        .champ-item:nth-child(2) .medal-icon { animation-delay: 0.2s; }
+        .champ-item:nth-child(3) .medal-icon { animation-delay: 0.4s; }
+        .champ-item:nth-child(4) .medal-icon { animation-delay: 0.6s; }
+        .champ-item:nth-child(5) .medal-icon { animation-delay: 0.8s; }
+
+        @keyframes bounce-glow {
+            0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 0 rgba(212,175,55,0)); }
+            50% { transform: translateY(-4px); filter: drop-shadow(0 0 8px rgba(212,175,55,0.6)); }
+        }
+
+        /* --- MINIMALIST EXIT --- */
+        .minimal-nav {
+            position: absolute;
+            top: 60px; /* Below the static bar */
+            left: 40px;
+            font-size: 16px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            z-index: 4000;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .minimal-nav:hover {
+            color: var(--accent);
+            opacity: 1;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            transform: translateX(-5px);
         }
 
         /* --- MAIN LAYOUT --- */
         .container {
             max-width: 1200px;
-            margin: 120px auto 100px; /* Top margin accounts for Fixed Nav */
+            margin: 100px auto 100px;
             padding: 20px; text-align: center;
         }
 
@@ -95,22 +134,21 @@
         }
         .weekly-notice b { color: var(--accent); }
 
-        /* --- LEADERBOARD TABLE (SCROLLS WITH PAGE) --- */
+        /* --- LEADERBOARD TABLE --- */
         .table-wrapper {
             border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2);
             box-shadow: 0 10px 40px rgba(0,0,0,0.5); background: var(--panel);
-            /* Removed fixed height/overflow so it expands naturally */
         }
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        
         th { 
-            position: sticky; top: 60px; /* Sticks below the Nav bar */
+            position: sticky; top: 40px; 
             z-index: 100; 
             background: #0b1624; color: var(--accent); 
             font-weight: 600; letter-spacing: 1px;
             padding: 20px 15px; text-align: left;
             border-bottom: 2px solid rgba(212, 175, 55, 0.3);
         }
-        /* Corner radius for header */
         th:first-child { border-top-left-radius: 20px; }
         th:last-child { border-top-right-radius: 20px; }
 
@@ -119,6 +157,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
             background: rgba(255, 255, 255, 0.01); 
         }
+        
         .rank-badge { 
             display: inline-block; width: 30px; height: 30px; line-height: 30px; 
             text-align: center; border-radius: 50%; font-weight: bold; font-size: 14px;
@@ -181,7 +220,6 @@
         
         .game-display-area {
             font-family: 'OuChan2', serif; 
-            /* Font size set by JS now */
             line-height: 2.2; 
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -201,22 +239,9 @@
             white-space: normal;
         }
 
-        /* WORD WRAPPER */
-        .tibetan-word {
-            display: inline-block;
-            white-space: nowrap;
-            margin-right: 2px;
-            vertical-align: bottom;
-        }
-
-        .stack { 
-            display: inline-block; 
-            position: relative; 
-            margin-right: 1px;
-            vertical-align: bottom;
-        }
+        .tibetan-word { display: inline-block; white-space: nowrap; margin-right: 2px; vertical-align: bottom; }
+        .stack { display: inline-block; position: relative; margin-right: 1px; vertical-align: bottom; }
         
-        /* GHOST OVERLAY */
         .stack .ghost-text {
             position: absolute; left: 0; bottom: 0; width: 100%; text-align: center;
             color: var(--accent); text-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
@@ -237,13 +262,16 @@
         .ctrl-btn.restart:hover { border-color: var(--red); color: var(--red); }
 
         /* --- RESPONSIVE --- */
-        @media (max-width: 768px) {
-            nav { gap: 15px; padding: 15px 10px; overflow-x: auto; justify-content: flex-start; }
+        @media (max-width: 900px) {
+            .champion-bar { padding: 10px; gap: 10px; }
+            .champ-label { width: 100%; text-align: center; border: none; margin: 0; padding: 0; margin-bottom: 5px; }
+            .minimal-nav { top: 100px; left: 15px; font-size: 14px; } 
+            th { top: 80px; } 
             .detail-col { display: none; } 
-            h1 { font-size: 1.5rem; }
+            h1 { font-size: 1.5rem; margin-top: 40px; }
             .floating-bar { bottom: 20px; width: 90%; }
             .arena-btn { width: 100%; }
-            th { top: 60px; padding: 10px; font-size: 12px; }
+            th { padding: 10px; font-size: 12px; }
             td { padding: 10px; font-size: 12px; }
             .game-display-area { padding: 20px; height: 300px; }
             .controls-bar { flex-wrap: wrap; justify-content: center; }
@@ -252,18 +280,16 @@
 </head>
 <body>
 
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="index.html#about">About</a>
-        <a href="lessons.html">Lessons</a>
-        <a href="paper.html">Paper</a> 
-        <a href="leaderboard.html" class="active">Leaderboard</a>
-        <a href="timer.html">Timer</a>
-        <a href="index.html#Install">Install</a>
-        <a href="index.html#contact">Contact</a>
-        <a href="index.html#credits">Credits</a>
-        <a href="index.html#donate">Donate</a>
-    </nav>
+    <div class="champion-bar" id="champion-bar">
+        <div class="champ-label">🏆 WEEKLY PROS:</div>
+        <div id="champ-list" style="display:flex; flex-wrap:wrap; justify-content:center; gap:15px;">
+            <span style="color:#777; font-size:12px;">Loading Masters...</span>
+        </div>
+    </div>
+
+    <a href="index.html" class="minimal-nav">
+        <span>←</span> TibetanKeys
+    </a>
 
     <div class="container">
         <h1>Hall of Masters</h1>
@@ -304,7 +330,11 @@
             <input type="text" id="p-loc" placeholder="Location (e.g. Dharamshala)">
             <input type="number" id="p-pin" placeholder="4-Digit Secret PIN" oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);">
             <div id="reg-error" class="error-text"></div>
+            
             <button class="arena-btn" style="width:100%; margin-top:20px; border-radius:10px;" onclick="startGameSetup()">START CHALLENGE</button>
+            
+            <button id="save-btn" class="arena-btn" style="width:100%; margin-top:15px; border-radius:10px; background: var(--green); display:none;" onclick="saveDirectUpdate()">SAVE CHANGES</button>
+            
             <button onclick="closeModal('register-modal')" style="background:none; border:none; color:#555; margin-top:15px; cursor:pointer;">Cancel</button>
         </div>
     </div>
@@ -325,7 +355,7 @@
             <div class="timer-box" id="timer">00:00</div>
             
             <div id="game-display" class="game-display-area" onclick="focusInput()">
-                </div>
+            </div>
 
             <input type="text" id="hidden-input" autocomplete="off">
             
@@ -366,17 +396,15 @@
         const NORMAL_MAP = { 
             'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ',
             'z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ',
-            'r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',
-            ',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦',
-            '7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':'་' 
+            'r':'ར','y':'ཡ','u':'ཱུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',
+            '7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':'་', ',':'ྱ','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦'
         };
         const SHIFT_MAP = { 
             'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ',
             'z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ',
             'r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',
-            ',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈',
-            '7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ',
-            '>': 'ླ' 
+            '7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ', '>': 'ླ',
+            ',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈'
         };
         const SUBJOINED_MAP = {
             'k':'ྐ', 'g':'ྒ', 'b':'ྦ', 't':'ྟ', 'd':'ྡ', 'z':'ྯ',
@@ -396,23 +424,50 @@
         let currentTyped = ""; 
         let totalTypedChars = 0;
         let correctKeystrokes = 0;
-        
         let isStackingMode = false;
         let currentFontSize = 48; 
 
         window.onload = function() {
-            fetch(API_URL).then(res => res.json()).then(data => { allPlayers = data; renderTable(data); })
-                .catch(err => { document.getElementById('table-body').innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">Archives Offline (Try Refreshing)</td></tr>`; });
+            fetch(API_URL).then(res => res.json()).then(data => { 
+                allPlayers = data; 
+                renderTable(data);
+                updateChampions(data); 
+            })
+            .catch(err => { 
+                document.getElementById('table-body').innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">Archives Offline (Try Refreshing)</td></tr>`; 
+                document.getElementById('champ-list').innerHTML = `<span style="color:red;">Offline</span>`;
+            });
             
             const ghost = document.getElementById('hidden-input');
             ghost.addEventListener('keydown', handleKeydown);
-            
-            adjustFontSize(0); // Init size
+            adjustFontSize(0);
         };
+
+        function updateChampions(data) {
+            const container = document.getElementById('champ-list');
+            if(data.length === 0) {
+                container.innerHTML = `<span style="color:#777;">No records yet this week.</span>`;
+                return;
+            }
+            const sorted = [...data].sort((a, b) => b.score - a.score);
+            const top5 = sorted.slice(0, 5); 
+
+            let html = "";
+            const medals = ['🥇', '🥈', '🥉', '🎖️', '🎖️'];
+
+            top5.forEach((p, i) => {
+                let medal = medals[i] || '•';
+                html += `<div class="champ-item"><span class="medal-icon">${medal}</span> <b>${p.name}</b> (${p.score})</div>`;
+            });
+
+            container.innerHTML = html;
+        }
 
         function renderTable(data) {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
+            data.sort((a, b) => b.score - a.score);
+
             if(data.length === 0) { tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No Masters Yet. Be the First!</td></tr>`; return; }
 
             data.forEach((player, index) => {
@@ -420,10 +475,12 @@
                 if(index === 0) rankClass = 'rank-1';
                 if(index === 1) rankClass = 'rank-2';
                 if(index === 2) rankClass = 'rank-3';
+                
                 let accDisplay = player.accuracy;
                 if (accDisplay == 1) { accDisplay = "100%"; }
                 else if (!isNaN(accDisplay) && accDisplay < 1 && accDisplay > 0) { accDisplay = Math.round(accDisplay * 100) + "%"; }
                 else if (!isNaN(accDisplay) && String(accDisplay).indexOf('%') === -1) { accDisplay = accDisplay + "%"; }
+                
                 let timeDisplay = player.time || '-';
                 if(timeDisplay !== '-' && timeDisplay.includes(':')) {
                     if(timeDisplay.includes('1899')) {
@@ -445,45 +502,33 @@
             currentFontSize += delta;
             if(currentFontSize < 20) currentFontSize = 20; 
             if(currentFontSize > 80) currentFontSize = 80; 
-            
             const display = document.getElementById('game-display');
             display.style.fontSize = currentFontSize + "px";
-            
             focusInput(); 
         }
 
         function launchGame() {
             if(timerInterval) clearInterval(timerInterval);
-            
             document.getElementById('game-modal').style.display = 'flex';
             const rawText = document.getElementById('challenge-source').innerText.trim();
             targetStacks = tokenizeTibetan(rawText);
             
             const display = document.getElementById('game-display');
-            display.innerHTML = ''; 
-            display.scrollTop = 0; 
+            display.innerHTML = ''; display.scrollTop = 0; 
             
-            // --- WORD GROUPING LOGIC ---
             let currentWordDiv = document.createElement('span');
             currentWordDiv.className = 'tibetan-word';
             
             targetStacks.forEach((s, i) => {
                 let span = document.createElement('span');
-                span.innerText = s;
-                span.classList.add('stack');
-                span.id = `stack-${i}`;
-                
+                span.innerText = s; span.classList.add('stack'); span.id = `stack-${i}`;
                 if (i === 0) {
                     span.classList.add('current-target'); 
                     let ghost = document.createElement('span');
-                    ghost.className = 'ghost-text';
-                    ghost.id = 'current-ghost';
+                    ghost.className = 'ghost-text'; ghost.id = 'current-ghost';
                     span.appendChild(ghost);
                 }
-                
                 currentWordDiv.appendChild(span);
-
-                // Break word at Tseh or Space
                 if (s.includes('་') || s.includes(' ') || i === targetStacks.length - 1) {
                     display.appendChild(currentWordDiv);
                     currentWordDiv = document.createElement('span');
@@ -491,36 +536,23 @@
                 }
             });
 
-            currentStackIndex = 0;
-            currentTyped = "";
-            totalTypedChars = 0;
-            correctKeystrokes = 0;
-            isPlaying = false;
-            isStackingMode = false;
-            
+            currentStackIndex = 0; currentTyped = ""; totalTypedChars = 0; correctKeystrokes = 0;
+            isPlaying = false; isStackingMode = false;
             document.getElementById('timer').innerText = "00:00";
             focusInput();
         }
 
         function tokenizeTibetan(text) {
-            const stacks = [];
-            let current = "";
+            const stacks = []; let current = "";
             const isCombiner = (char) => {
                 const code = char.charCodeAt(0);
-                return (code >= 0x0F71 && code <= 0x0FBC) || 
-                       (code === 0x0F35 || code === 0x0F37 || code === 0x0F39);
+                return (code >= 0x0F71 && code <= 0x0FBC) || (code === 0x0F35 || code === 0x0F37 || code === 0x0F39);
             };
-
             for (let char of text) {
-                if (current.length === 0) {
-                    current += char; 
-                } else {
-                    if (isCombiner(char)) {
-                        current += char; 
-                    } else {
-                        stacks.push(current); 
-                        current = char; 
-                    }
+                if (current.length === 0) { current += char; } 
+                else {
+                    if (isCombiner(char)) { current += char; } 
+                    else { stacks.push(current); current = char; }
                 }
             }
             if(current) stacks.push(current);
@@ -529,96 +561,48 @@
 
         function handleKeydown(e) {
             if (e.ctrlKey || e.metaKey || e.key === 'Tab' || e.key === 'Enter') { e.preventDefault(); return; }
-            
             if (e.key === 'Backspace') {
-                if (currentTyped.length > 0) {
-                    currentTyped = currentTyped.slice(0, -1);
-                    isStackingMode = false; 
-                    updateGhostText(false);
-                }
+                if (currentTyped.length > 0) { currentTyped = currentTyped.slice(0, -1); isStackingMode = false; updateGhostText(false); }
                 return;
             }
-
             const lookupKey = e.key.toLowerCase();
             let tibetanChar = null;
-
-            if (e.key === 'a' && !e.shiftKey) {
-                e.preventDefault();
-                isStackingMode = true;
-                return;
-            }
-
+            if (e.key === 'a' && !e.shiftKey) { e.preventDefault(); isStackingMode = true; return; }
             if (isStackingMode) {
-                if (SUBJOINED_MAP[lookupKey]) {
-                    tibetanChar = SUBJOINED_MAP[lookupKey];
-                    isStackingMode = false;
-                } else {
-                    isStackingMode = false;
-                }
+                if (SUBJOINED_MAP[lookupKey]) { tibetanChar = SUBJOINED_MAP[lookupKey]; isStackingMode = false; } else { isStackingMode = false; }
             }
-
             if (!tibetanChar) {
-                if (e.shiftKey && e.key === '>') { 
-                     tibetanChar = SHIFT_MAP['>'];
-                } 
-                else if (e.shiftKey) {
-                    if (SHIFT_MAP[lookupKey]) tibetanChar = SHIFT_MAP[lookupKey];
-                } else {
-                    if (NORMAL_MAP[lookupKey]) tibetanChar = NORMAL_MAP[lookupKey];
-                }
+                if (e.shiftKey && e.key === '>') { tibetanChar = SHIFT_MAP['>']; } 
+                else if (e.shiftKey) { if (SHIFT_MAP[lookupKey]) tibetanChar = SHIFT_MAP[lookupKey]; } 
+                else { if (NORMAL_MAP[lookupKey]) tibetanChar = NORMAL_MAP[lookupKey]; }
             }
-
             if (tibetanChar) {
                 e.preventDefault();
-                if (!isPlaying) {
-                    isPlaying = true;
-                    startTime = new Date();
-                    timerInterval = setInterval(updateTimer, 1000);
-                }
-
-                currentTyped += tibetanChar;
-                totalTypedChars++;
-                checkInput();
+                if (!isPlaying) { isPlaying = true; startTime = new Date(); timerInterval = setInterval(updateTimer, 1000); }
+                currentTyped += tibetanChar; totalTypedChars++; checkInput();
             }
         }
 
         function checkInput() {
             const targetStack = targetStacks[currentStackIndex];
-            
             if (targetStack.startsWith(currentTyped)) {
-                updateGhostText(false); 
-                correctKeystrokes++;
-
+                updateGhostText(false); correctKeystrokes++;
                 if (currentTyped === targetStack) {
                     const span = document.getElementById(`stack-${currentStackIndex}`);
-                    span.classList.remove('current-target');
-                    span.classList.add('correct');
-                    const oldGhost = document.getElementById('current-ghost');
-                    if(oldGhost) oldGhost.remove();
-
+                    span.classList.remove('current-target'); span.classList.add('correct');
+                    const oldGhost = document.getElementById('current-ghost'); if(oldGhost) oldGhost.remove();
                     currentStackIndex++;
-                    
                     if (currentStackIndex < targetStacks.length) {
                         const nextSpan = document.getElementById(`stack-${currentStackIndex}`);
                         nextSpan.classList.add('current-target');
-                        
                         let newGhost = document.createElement('span');
-                        newGhost.className = 'ghost-text';
-                        newGhost.id = 'current-ghost';
+                        newGhost.className = 'ghost-text'; newGhost.id = 'current-ghost';
                         nextSpan.appendChild(newGhost);
-
                         checkAutoScroll(nextSpan);
-
-                        currentTyped = "";
-                        isStackingMode = false;
-                        updateGhostText(false); 
-                    } else {
-                        finishGame();
-                    }
+                        currentTyped = ""; isStackingMode = false; updateGhostText(false); 
+                    } else { finishGame(); }
                 }
-            } else {
-                updateGhostText(true); 
-            }
+            } else { updateGhostText(true); }
         }
 
         function checkAutoScroll(activeElement) {
@@ -632,8 +616,7 @@
             const ghost = document.getElementById('current-ghost');
             if(ghost) {
                 ghost.innerText = currentTyped;
-                if(isError) ghost.classList.add('error');
-                else ghost.classList.remove('error');
+                if(isError) ghost.classList.add('error'); else ghost.classList.remove('error');
             }
         }
 
@@ -646,10 +629,7 @@
         }
 
         function finishGame() {
-            if (currentStackIndex < targetStacks.length) {
-                return; // Silently fail if text isn't finished
-            }
-
+            if (currentStackIndex < targetStacks.length) return;
             clearInterval(timerInterval);
             const endTime = new Date();
             let timeSeconds = (endTime - startTime) / 1000;
@@ -675,28 +655,24 @@
 
         function focusInput() { document.getElementById('hidden-input').focus(); }
         
-        // --- CHANGED: Now takes a parameter to know if we are updating ---
         function openRegisterModal(isUpdateMode = false) { 
             const title = document.getElementById('reg-title');
             const desc = document.getElementById('reg-desc');
             const nameField = document.getElementById('p-name');
             const locField = document.getElementById('p-loc');
             const pinField = document.getElementById('p-pin');
+            const saveBtn = document.getElementById('save-btn');
 
             if (isUpdateMode) {
-                title.innerText = "Confirm Your Details";
-                title.style.color = "var(--green)";
-                desc.innerHTML = "You can <b>edit</b> your Name, Location, or PIN below if you want to change them.";
+                title.innerText = "Confirm Your Details"; title.style.color = "var(--green)";
+                desc.innerHTML = "You can <b>edit</b> your Name/Location here or click <b>SAVE</b> to update immediately without playing.";
+                saveBtn.style.display = "block"; // Show the new button
             } else {
-                title.innerText = "Identity Check";
-                title.style.color = "var(--accent)";
+                title.innerText = "Identity Check"; title.style.color = "var(--accent)";
                 desc.innerText = "Enter your details. Use the same PIN to update your score later.";
-                // Clear fields if it's a new user
-                nameField.value = "";
-                locField.value = "";
-                pinField.value = "";
+                nameField.value = ""; locField.value = ""; pinField.value = "";
+                saveBtn.style.display = "none"; // Hide it for new players
             }
-
             document.getElementById('register-modal').style.display = 'flex'; 
             clearError('reg-error'); 
         }
@@ -710,38 +686,66 @@
         }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function showError(id, msg) { document.getElementById(id).innerText = msg; document.getElementById(id).classList.add('visible'); }
-        function clearError(id) { 
-            const e = document.getElementById(id); if(e){e.classList.remove('visible'); e.innerText="";} 
-        }
+        function clearError(id) { const e = document.getElementById(id); if(e){e.classList.remove('visible'); e.innerText="";} }
 
         function startGameSetup() {
             clearError('reg-error');
             const name = document.getElementById('p-name').value.trim();
             const pin = document.getElementById('p-pin').value.toString();
-            
             if(!name) return showError('reg-error', "Name required");
-
-            if (!/^[a-zA-Z. ]+$/.test(name)) {
-                return showError('reg-error', "Name: Only letters, spaces, and dots allowed.");
-            }
-
+            if (!/^[a-zA-Z. ]+$/.test(name)) { return showError('reg-error', "Name: Only letters, spaces, and dots allowed."); }
             for(let w of BAD_WORDS) if(name.toLowerCase().includes(w)) return showError('reg-error', "Bad name");
             if(pin.length!==4) return showError('reg-error', "PIN must be 4 digits");
             closeModal('register-modal'); launchGame();
         }
 
+        // --- NEW FUNCTION: SAVE DIRECTLY WITHOUT PLAYING ---
+        function saveDirectUpdate() {
+            clearError('reg-error');
+            const name = document.getElementById('p-name').value.trim();
+            const loc = document.getElementById('p-loc').value.trim();
+            const pin = document.getElementById('p-pin').value.toString();
+
+            // Validate Input
+            if(!name) return showError('reg-error', "Name required");
+            if (!/^[a-zA-Z. ]+$/.test(name)) return showError('reg-error', "Name: Only letters, spaces, and dots allowed.");
+            for(let w of BAD_WORDS) if(name.toLowerCase().includes(w)) return showError('reg-error', "Bad name");
+            if(pin.length!==4) return showError('reg-error', "PIN must be 4 digits");
+
+            // Construct Data using OLD score but NEW details
+            finalData = {
+                name: name,
+                location: loc,
+                pin: pin,
+                score: selectedPlayer.score,
+                wpm: selectedPlayer.wpm,
+                accuracy: selectedPlayer.accuracy,
+                time: selectedPlayer.time
+            };
+
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true; btn.innerText = "SAVING..."; 
+            
+            // Send to Google Sheet
+            fetch(API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(finalData) })
+            .then(() => { 
+                btn.innerText = "SAVED!";
+                setTimeout(() => { location.reload(); }, 1500); 
+            })
+            .catch(() => { 
+                btn.innerText = "ERROR"; 
+                btn.disabled = false; 
+                showError('reg-error', "Connection Failed. Try again.");
+            });
+        }
+
         function verifyPin() {
             clearError('verify-error');
             if(String(document.getElementById('v-pin').value) === String(selectedPlayer.pin)) {
-                
-                // Populate the fields
                 document.getElementById('p-name').value = selectedPlayer.name;
                 document.getElementById('p-loc').value = selectedPlayer.location;
                 document.getElementById('p-pin').value = selectedPlayer.pin;
-                
                 closeModal('verify-modal'); 
-                
-                // --- CHANGED: Pass TRUE so the modal knows we are updating ---
                 openRegisterModal(true); 
             } else showError('verify-error', "Wrong PIN");
         }
