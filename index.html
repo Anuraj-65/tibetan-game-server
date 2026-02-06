@@ -55,6 +55,36 @@
             font-family: 'Segoe UI', sans-serif; overflow: hidden; 
         }
 
+        /* --- PRELOADER STYLES (NEW) --- */
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 20000; /* Highest Layer */
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .loader-dots { display: flex; gap: 12px; }
+        
+        .dot {
+            width: 15px; height: 15px; 
+            background-color: var(--accent);
+            border-radius: 50%; 
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        .dot:nth-child(3) { animation-delay: 0s; }
+        .dot:nth-child(4) { animation-delay: 0.16s; }
+        .dot:nth-child(5) { animation-delay: 0.32s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+            40% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 20px var(--accent); }
+        }
+
         /* ATMOSPHERE LAYER */
         #atmosphere { position: fixed; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
         .font-star { 
@@ -133,7 +163,7 @@
         .pillar-content b { color: var(--accent); }
 
         /* CONTACT CARD */
-        #contact { padding-top: 80px; justify-content: center; } /* Vertical Center */
+        #contact { padding-top: 80px; justify-content: center; } 
         .contact-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(212, 175, 55, 0.2); padding: 40px; border-radius: 20px; max-width: 650px; width: 90%; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
         .contact-card h2 { color: var(--accent); text-align: center; margin-top: 0; letter-spacing: 4px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 15px; margin-bottom: 25px; }
         .contact-item { margin-bottom: 20px; }
@@ -149,69 +179,26 @@
         .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         .monlam-download-zone { width: 100%; text-align: center; padding: 30px; background: rgba(212, 175, 55, 0.05); border-radius: 25px; border: 1px dashed var(--accent); margin-bottom: 20px; }
 
-        /* --- FIXED CREDITS SECTION (Wide & Non-Scrolling) --- */
-        #credits { 
-            padding-top: 80px; 
-            justify-content: center; /* Center Vertically */
-            overflow: hidden; /* No Scroll */
-        }
-        
-        .credits-grid { 
-            display: grid; 
-            /* CHANGE: 4 Columns (1 Row) instead of 2x2 */
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 20px; 
-            /* CHANGE: Much Wider */
-            max-width: 1400px; 
-            width: 95%; 
-            padding: 20px; 
-        }
-        
-        .credit-card { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(212, 175, 55, 0.2); 
-            padding: 25px; /* Slightly Reduced Padding */
-            border-radius: 20px; 
-            transition: 0.4s ease; 
-            text-align: left; 
-        }
-        
+        /* CREDITS SECTION */
+        #credits { padding-top: 80px; justify-content: center; overflow: hidden; }
+        .credits-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1400px; width: 95%; padding: 20px; }
+        .credit-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(212, 175, 55, 0.2); padding: 25px; border-radius: 20px; transition: 0.4s ease; text-align: left; }
         .credit-card h3 { color: var(--accent); margin-top: 0; letter-spacing: 2px; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
         .credit-card p { color: #eee; font-size: 0.95rem; line-height: 1.5; margin-bottom: 0; }
         .credit-card:hover { border-color: var(--accent); transform: scale(1.02); background: rgba(255,255,255,0.08); }
 
-        /* --- FIXED DONATE SECTION (Wide & Non-Scrolling) --- */
-        #donate { 
-            padding-top: 80px; 
-            justify-content: center; /* Center Vertically */
-            overflow: hidden; 
-        }
-        
-        .donate-container { 
-            /* CHANGE: Wider Container */
-            max-width: 1000px; 
-            width: 90%;
-            padding: 40px; 
-            background: rgba(255, 255, 255, 0.05); 
-            border-radius: 25px; 
-            border: 1px solid rgba(212, 175, 55, 0.3); 
-            backdrop-filter: blur(15px); 
-            text-align: center; 
-        }
-        
+        /* DONATE SECTION */
+        #donate { padding-top: 80px; justify-content: center; overflow: hidden; }
+        .donate-container { max-width: 1000px; width: 90%; padding: 40px; background: rgba(255, 255, 255, 0.05); border-radius: 25px; border: 1px solid rgba(212, 175, 55, 0.3); backdrop-filter: blur(15px); text-align: center; }
         .donate-container h1 { color: var(--accent); margin-top: 0; font-size: 2.2rem; letter-spacing: 3px; margin-bottom: 10px; }
         .support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
         .support-box { background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; position: relative; }
         .support-box:hover { border-color: var(--accent); background: rgba(255,255,255,0.05); }
         .qr-trigger-area { width: 140px; height: 140px; margin: 15px auto; position: relative; z-index: 10; }
         .qr-image { width: 100%; height: 100%; border-radius: 12px; display: block; border: 4px solid #fff; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); background: #fff; }
-        
         .qr-trigger-area:hover { cursor: none; }
         .qr-trigger-area:hover .qr-image { transform: scale(2.2); box-shadow: 0 0 150px rgba(0,0,0,1), 0 0 50px var(--bg); z-index: 9999; position: relative; }
-        .support-box:has(.qr-trigger-area:hover) p, 
-        .support-box:has(.qr-trigger-area:hover) h3 { opacity: 0; }
-        
+        .support-box:has(.qr-trigger-area:hover) p, .support-box:has(.qr-trigger-area:hover) h3 { opacity: 0; }
         .paypal-glow-btn:hover { background: #005ea6 !important; box-shadow: 0 0 20px rgba(0, 112, 186, 0.6) !important; transform: translateY(-2px); }
 
         /* MINI FOOTER */
@@ -222,98 +209,36 @@
         .footer-middle { text-align: center; font-weight: 600; letter-spacing: 1px; }
         .footer-right { text-align: right; }
 
-        /* =========================================
-           🌍 GLOBAL AUTO-FIT PATCH (MOBILE & TABLET)
-           ========================================= */
-
-        .tagline {
-            font-size: clamp(10px, 2.5vw, 16px) !important;
-            width: 90%;
-            margin: 15px auto;
-        }
-
-        /* 2. RESPONSIVE NAVIGATION BAR */
+        /* RESPONSIVE CSS */
+        .tagline { font-size: clamp(10px, 2.5vw, 16px) !important; width: 90%; margin: 15px auto; }
         @media (max-width: 900px) {
-            nav {
-                gap: 15px; /* Shrink gap between links */
-                padding: 15px 10px;
-                flex-wrap: wrap; /* Allow wrapping if screen is very small */
-            }
-            
-            nav a {
-                font-size: 11px; /* Smaller text for mobile */
-                letter-spacing: 1px;
-            }
-        }
-
-        /* 3. STACKABLE SECTIONS & SCROLLING ON MOBILE */
-        @media (max-width: 900px) {
-            /* On Tablets/Phones, we MUST allow scrolling because 4 columns won't fit */
+            nav { gap: 15px; padding: 15px 10px; flex-wrap: wrap; }
+            nav a { font-size: 11px; letter-spacing: 1px; }
             body, html { overflow-y: auto !important; height: auto !important; }
             #credits, #donate { overflow-y: auto !important; height: auto !important; display: flex; padding-bottom: 100px; }
-            
-            /* Stack Credits back to 2 columns or 1 column */
             .credits-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            
             .donate-container { width: 95%; padding: 20px; }
             .support-grid { grid-template-columns: 1fr; gap: 20px; }
         }
-
-        @media (max-width: 600px) {
-            .credits-grid { grid-template-columns: 1fr; } /* 1 Column on tiny phones */
-        }
-
-        /* 3. STACKABLE SECTIONS (Like 'About') */
+        @media (max-width: 600px) { .credits-grid { grid-template-columns: 1fr; } }
         @media (max-width: 768px) {
-            #about {
-                flex-direction: column; /* Stack columns vertically */
-                height: auto; /* Let it grow naturally */
-            }
-
-            .about-pillar {
-                width: 100%;
-                height: 200px; /* Fixed height for stacked pillars */
-                border-right: none;
-                border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-            }
-            
-            .about-pillar:hover {
-                flex: none; /* Disable the expansion effect on mobile to prevent glitches */
-                height: 300px; 
-            }
-            
-            .pillar-title {
-                transform: translateY(0) !important; /* Keep title visible */
-            }
+            #about { flex-direction: column; height: auto; }
+            .about-pillar { width: 100%; height: 200px; border-right: none; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+            .about-pillar:hover { flex: none; height: 300px; }
+            .pillar-title { transform: translateY(0) !important; }
+            .mini-footer { position: relative; display: flex; flex-direction: column; gap: 15px; padding: 20px; text-align: center; margin-top: 50px; }
+            .footer-left, .footer-middle, .footer-right { text-align: center; width: 100%; justify-content: center; }
+            #atmosphere { display: none; } 
         }
-
-        /* 4. RESPONSIVE FOOTER */
-        @media (max-width: 768px) {
-            .mini-footer {
-                position: relative; /* Unstick from bottom on mobile */
-                display: flex;
-                flex-direction: column; /* Stack items vertically */
-                gap: 15px;
-                padding: 20px;
-                text-align: center;
-                margin-top: 50px;
-            }
-
-            .footer-left, .footer-middle, .footer-right {
-                text-align: center;
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        /* 5. MOBILE OPTIMIZATIONS */
-        @media (max-width: 768px) { 
-            #atmosphere { display: none; } /* Save battery on phones */
-        }
-
     </style>
 </head>
 <body>
+
+    <div id="preloader">
+        <div class="loader-dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+    </div>
 
     <div id="atmosphere"></div>
 
@@ -462,22 +387,13 @@
             }
         }
 
-        /* --- SESSION VISITOR COUNTER (Hit Counter) --- */
         function initCounter() {
             const counterDisplay = document.getElementById('visitor-count');
             if(!counterDisplay) return;
-
-            // We use a specific key: 'test_flight'
-            // Every time this runs, it adds +1
             fetch('https://api.counterapi.dev/v1/tibetankeys/test_flight/up')
                 .then(response => response.json())
-                .then(data => {
-                    counterDisplay.innerText = data.count;
-                })
-                .catch(err => {
-                    console.log("Counter Error:", err);
-                    counterDisplay.innerText = "1"; 
-                });
+                .then(data => { counterDisplay.innerText = data.count; })
+                .catch(err => { console.log("Counter Error:", err); counterDisplay.innerText = "1"; });
         }
 
         let charIdx = 0, fontIdx = 0, isDeleting = false;
@@ -498,7 +414,24 @@
             document.getElementById(id).classList.add('active');
             document.getElementById('atmosphere').style.display = (id === 'lessons') ? 'none' : 'block';
         }
-        window.onload = () => { initAtmosphere(); typeEffect(); initCounter(); };
+
+        // --- PRELOADER LOGIC ---
+        window.addEventListener('load', () => {
+            // Wait for fonts to load
+            document.fonts.ready.then(() => {
+                const preloader = document.getElementById('preloader');
+                // Start Fade Out
+                preloader.style.opacity = '0';
+                
+                // After fade out, remove from view and start main animations
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                    initAtmosphere(); 
+                    typeEffect(); 
+                    initCounter();
+                }, 800);
+            });
+        });
     </script>
 </body>
 </html>

@@ -12,306 +12,426 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TibetanKeys | Calibration</title>
-    
     <link rel="icon" type="image/png" href="og.png">
 
     <style>
-        :root { --bg: #010a16; --accent: #d4af37; --text: #ffffff; --error: #ff4d4d; --success: #00e676; }
+        @font-face { font-family: 'OuChan2'; src: url('Monlam Uni OuChan2.ttf'); }
+
+        :root { 
+            --bg: #000000; 
+            --accent: #d4af37; /* Gold */
+            --text: #ffffff; 
+            --blue-glow: #00ffff; /* Cyan */
+            --success: #00e676; 
+        }
         
         body, html { 
             margin: 0; padding: 0;
-            background: var(--bg); color: var(--text); 
+            background: var(--bg);
+            color: var(--text); 
             font-family: 'Segoe UI', sans-serif; 
-            height: 100vh; width: 100vw;
-            overflow: hidden; 
+            height: 100vh; width: 100vw; overflow: hidden; 
             display: flex; flex-direction: column; 
             user-select: none;
         }
 
-        /* --- HUD --- */
+        /* --- PRELOADER --- */
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 20000;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .loader-dots { display: flex; gap: 12px; }
+        .dot {
+            width: 15px; height: 15px; background-color: var(--accent);
+            border-radius: 50%; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        .dot:nth-child(3) { animation-delay: 0s; }
+        .dot:nth-child(4) { animation-delay: 0.16s; }
+        .dot:nth-child(5) { animation-delay: 0.32s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+            40% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 20px var(--accent); }
+        }
+
+        /* --- INTRO SCREEN --- */
+        #intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+        }
+        .intro-text {
+            font-family: 'OuChan2', serif; font-size: 80px; font-weight: bold;
+            background: linear-gradient(110deg, #8a6e03 10%, #ffd700 30%, #ffffff 50%, #ffd700 70%, #8a6e03 90%);
+            background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text;
+            letter-spacing: 5px; text-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+        }
+        .animate-intro { animation: shine 2s linear infinite, controlledZoom 3.5s ease-out forwards; }
+        @keyframes shine { to { background-position: 200% center; } }
+        @keyframes controlledZoom {
+            0% { transform: scale(0.1); opacity: 0; }
+            30% { transform: scale(0.8); opacity: 1; }
+            80% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1.0); opacity: 0; }
+        }
+
+        /* --- HUD (UPDATED) --- */
         .hud { 
-            width: 100%; padding: 0 40px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-bottom: 1px solid rgba(212, 175, 55, 0.1); 
-            background: rgba(1, 10, 22, 0.95); box-sizing: border-box; 
-            height: 60px; flex-shrink: 0;
+            width: 100%; padding: 0 40px; display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1); background: rgba(0, 0, 0, 0.3); 
+            height: 70px; flex-shrink: 0; z-index: 50; box-sizing: border-box;
+            opacity: 0; transition: opacity 1s;
         }
-        .level-info h1 { margin: 0; font-size: 14px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; }
+        .level-info h1 { margin: 0; font-size: 14px; letter-spacing: 3px; color: #666; text-transform: uppercase; }
         
-        .phase-indicator { font-size: 12px; letter-spacing: 2px; color: #888; text-transform: uppercase; font-weight: bold; }
+        /* New Instruction Styling in HUD */
+        .hud-instruction {
+            font-size: 20px; color: var(--accent); letter-spacing: 4px; 
+            text-transform: uppercase; font-weight: 900; 
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            position: absolute; left: 50%; transform: translateX(-50%);
+        }
 
-        /* --- STAGE --- */
+        /* --- STAGE (UPDATED) --- */
         .stage { 
-            flex: 1; display: flex; flex-direction: column; 
-            width: 100%; box-sizing: border-box; overflow: hidden; 
+            flex: 1; display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+            width: 100%; position: relative; padding-top: 40px; /* More padding */
         }
 
-        #instruction-text { 
-            color: var(--accent); font-size: 16px; letter-spacing: 4px; text-transform: uppercase; 
-            margin: 20px 0 10px 0; flex-shrink: 0; text-align: center; font-weight: 900;
-        }
-        
+        /* Target Container - BIGGER NOW */
         .target-container {
-            flex: 1; width: 100%;
             display: flex; align-items: center; justify-content: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            min-height: 100px; max-height: 40vh;
+            height: 120px; /* Increased height */
+            margin-bottom: 10px; width: 100%; position: relative; 
         }
 
         .target-text { 
-            font-size: 60px; font-weight: 900; letter-spacing: 15px;
-            text-transform: uppercase; 
-            display: flex; flex-wrap: wrap; justify-content: center; width: 95%;
-            text-shadow: 0 0 30px rgba(0,0,0,0.6);
+            font-family: 'Segoe UI', sans-serif; 
+            font-size: 80px; /* Bigger Text */
+            font-weight: 900; letter-spacing: 20px; text-transform: uppercase; 
+            position: absolute; opacity: 0; transition: opacity 0.3s;
+        }
+        .target-text.active { opacity: 1; }
+
+        #embedded-countdown {
+            font-family: 'Segoe UI', sans-serif; 
+            font-size: 100px; /* Bigger Countdown */
+            font-weight: 900;
+            color: var(--success); text-shadow: 0 0 30px var(--success);
+            display: none; z-index: 100;
         }
 
-        .char { opacity: 0.2; transition: 0.1s; position: relative; }
-        .char.current { opacity: 1; color: var(--accent); transform: scale(1.2); text-shadow: 0 0 20px var(--accent); }
-        .char.correct { opacity: 1; color: #fff; text-shadow: 0 0 15px #fff; }
-        .char.wrong { opacity: 1; color: var(--error); }
-        .char.space-char { min-width: 20px; }
+        .char { opacity: 0.2; transition: 0.1s; }
+        .char.current { opacity: 1; color: var(--blue-glow); text-shadow: 0 0 30px var(--blue-glow); transform: scale(1.1); }
+        .char.correct { opacity: 1; color: var(--text); text-shadow: 0 0 15px #fff; }
+        .char.space { display: inline-block; width: 30px; }
 
         /* --- KEYBOARD --- */
         #keyboard-wrapper { 
-            width: 98%; max-width: 900px; 
-            margin: auto auto 10px auto; 
-            display: flex; justify-content: center; flex-shrink: 1;
+            position: relative; width: 950px; height: 400px; max-width: 95%; margin: 0 auto;
+            opacity: 0; transform: translateY(50px); transition: opacity 1s, transform 1s ease-out;
         }
-        #keyboard-wrapper svg {
-            width: 100%; height: auto; max-height: 45vh;
-            display: block; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
-        }
+        .keyboard-visible { opacity: 1 !important; transform: translateY(0) !important; }
 
-        /* --- UPDATED KEYBOARD FONTS & ALIGNMENT --- */
-        .st0 { 
-            fill: #d4af37; 
-            font-family: Arial, sans-serif; 
-            font-size: 24px; 
-            font-weight: 700; 
-            pointer-events: none; 
-            
-            /* THIS CENTERS THE TEXT */
-            text-anchor: middle; 
-            dominant-baseline: central; 
-        }
-        
-        .st-func { font-size: 12px; } /* Keep functional keys smaller to fit */
+        #layer-keyboard { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #layer-hands { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 1s; }
+        .hands-visible { opacity: 1 !important; }
 
+        .st2 { fill: transparent; }
+        .st0 { fill: #d4af37; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; pointer-events: none; }
         .st1 { fill: none; opacity: .6; stroke: #d4af37; stroke-width: 1.5px; transition: all 0.1s; }
-        .st2 { fill: #010a16; }
         .bump { fill: #d4af37; opacity: 0.8; }
-        
-        .key-guide { stroke: #fff !important; stroke-width: 3px !important; fill: rgba(255, 255, 255, 0.25) !important; opacity: 1 !important; filter: drop-shadow(0 0 12px rgba(255,255,255,0.9)); animation: breathe 0.8s infinite alternate; }
-        .key-hit { fill: var(--accent) !important; stroke: var(--accent) !important; filter: drop-shadow(0 0 15px var(--accent)); transition: 0.05s; }
-        @keyframes breathe { from { opacity: 0.6; } to { opacity: 1; } }
+
+        .key-active {
+            fill: var(--accent) !important; stroke: var(--accent) !important;
+            fill-opacity: 0.3 !important; stroke-width: 3px !important;
+            filter: drop-shadow(0 0 15px var(--accent));
+        }
+
+        #LH, #RH { fill: rgba(255, 255, 255, 0.05); stroke: rgba(255, 255, 255, 0.3); stroke-width: 1px; }
+        #LP, #LR, #LM, #LI, #T, #RI, #RM, #RR, #RP { fill: none; stroke: none; transition: stroke 0.1s, fill 0.1s; }
+
+        /* --- SUPER FINGER GLOW --- */
+        .finger-active {
+            stroke: none !important; 
+            fill: url(#finger-gradient) !important; 
+            opacity: 1 !important;
+            /* Double Shadow for intense neon effect */
+            filter: drop-shadow(0 0 15px var(--blue-glow)) drop-shadow(0 0 25px var(--blue-glow));
+        }
 
         /* --- MODAL --- */
-        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(15px); }
-        .result-box { background: rgba(0, 230, 118, 0.05); border: 2px solid var(--success); padding: 50px; text-align: center; box-shadow: 0 0 60px rgba(0,230,118,0.3); max-width: 500px; width: 90%; }
-        .res-msg { font-size: 18px; color: #fff; margin-bottom: 30px; letter-spacing: 2px; line-height: 1.8; font-weight: bold; text-transform: uppercase; }
-        .res-btn { background: var(--success); color: #000; border: none; padding: 15px 40px; font-weight: bold; letter-spacing: 3px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        .res-btn:hover { background: #fff; box-shadow: 0 0 30px #fff; transform: translateY(-2px); }
-        
-        .back-btn { position: fixed; bottom: 15px; left: 40px; color: rgba(255,255,255,0.3); text-decoration: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; transition: 0.3s; z-index: 50; }
-        .back-btn:hover { color: var(--accent); }
-
-        @media (max-width: 768px) {
-            .target-text { font-size: 30px; letter-spacing: 5px; }
-            .hud { padding: 0 15px; height: 50px; justify-content: center; }
-            .back-btn { top: 60px; bottom: auto; left: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; }
+        #result-modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; 
+            backdrop-filter: blur(5px);
         }
+        .result-box { 
+            border: 2px solid var(--success); padding: 60px; text-align: center; width: 500px; max-width: 90%; 
+            background: linear-gradient(145deg, rgba(1, 20, 10, 0.95), rgba(0, 10, 5, 0.95)); 
+            box-shadow: 0 0 60px rgba(0, 230, 118, 0.15), inset 0 0 20px rgba(0, 230, 118, 0.05); 
+            border-radius: 40px; display: flex; flex-direction: column; align-items: center; gap: 40px;
+        }
+        .res-msg { font-size: 36px; color: #fff; letter-spacing: 4px; font-weight: 900; text-transform: uppercase; line-height: 1.2; text-shadow: 0 0 30px var(--success); }
+        .res-btn { 
+            background: var(--success); color: #000; border: none; padding: 20px 50px; font-size: 18px;
+            font-weight: 900; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; border-radius: 50px; 
+            transition: all 0.3s ease; box-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
+        }
+        .res-btn:hover { transform: scale(1.05); background: #fff; box-shadow: 0 0 40px #fff; }
+        .back-btn { position: fixed; bottom: 15px; left: 40px; color: rgba(255,255,255,0.3); text-decoration: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; z-index: 50; }
     </style>
 </head>
 <body>
 
-    <div class="hud">
-        <div class="level-info"><h1>LEVEL 0: CALIBRATION</h1></div>
-        <div class="phase-indicator">Guide Keys</div>
+    <div id="preloader">
+        <div class="loader-dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
     </div>
 
+    <div id="intro-overlay">
+        <div class="intro-text" id="tibetan-text">བཀྲ་ཤིས་བདེ་ལེགས་</div>
+    </div>
+
+    <div class="hud" id="main-hud">
+        <div class="level-info"><h1>System Calibration</h1></div>
+        <div class="hud-instruction">ALIGN WITH GUIDE KEYS</div>
+        <div class="level-info"></div> </div>
+
     <div class="stage">
-        <div id="instruction-text">Place fingers on F and J</div>
         
-        <div class="target-container">
-            <div class="target-text" id="target-display"></div>
+        <div class="target-container" id="target-cont">
+            <div id="embedded-countdown">5</div>
+            <div id="target-display" class="target-text"></div>
         </div>
 
         <div id="keyboard-wrapper">
-             <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 400">
+            <svg id="layer-keyboard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 400">
                 <rect class="st2" width="950" height="400"/>
-                <g id="row-1">
-                    <g><rect class="st1" x="20" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(47.5 47.5)">~</text></g>
-                    <g><rect class="st1" x="80" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(107.5 47.5)">1</text></g>
-                    <g><rect class="st1" x="140" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(167.5 47.5)">2</text></g>
-                    <g><rect class="st1" x="200" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(227.5 47.5)">3</text></g>
-                    <g><rect class="st1" x="260" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(287.5 47.5)">4</text></g>
-                    <g><rect class="st1" x="320" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(347.5 47.5)">5</text></g>
-                    <g><rect class="st1" x="380" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(407.5 47.5)">6</text></g>
-                    <g><rect class="st1" x="440" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(467.5 47.5)">7</text></g>
-                    <g><rect class="st1" x="500" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(527.5 47.5)">8</text></g>
-                    <g><rect class="st1" x="560" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(587.5 47.5)">9</text></g>
-                    <g><rect class="st1" x="620" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(647.5 47.5)">0</text></g>
-                    <g><rect class="st1" x="680" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(707.5 47.5)">-</text></g>
-                    <g><rect class="st1" x="740" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(767.5 47.5)">=</text></g>
-                    <g><rect class="st1" x="800" y="20" width="115" height="55" rx="6" ry="6"/><text class="st0 st-func" transform="translate(857.5 47.5)">BACKSPACE</text></g>
-                </g>
-                <g id="row-2">
-                    <g><rect class="st1" x="20" y="85" width="85" height="55" rx="6" ry="6"/><text class="st0 st-func" transform="translate(62.5 112.5)">TAB</text></g>
-                    <g><rect class="st1" x="110" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(137.5 112.5)">Q</text></g>
-                    <g><rect class="st1" x="170" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(197.5 112.5)">W</text></g>
-                    <g><rect class="st1" x="230" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(257.5 112.5)">E</text></g>
-                    <g><rect class="st1" x="290" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(317.5 112.5)">R</text></g>
-                    <g><rect class="st1" x="350" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(377.5 112.5)">T</text></g>
-                    <g><rect class="st1" x="410" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(437.5 112.5)">Y</text></g>
-                    <g><rect class="st1" x="470" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(497.5 112.5)">U</text></g>
-                    <g><rect class="st1" x="530" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(557.5 112.5)">I</text></g>
-                    <g><rect class="st1" x="590" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(617.5 112.5)">O</text></g>
-                    <g><rect class="st1" x="650" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(677.5 112.5)">P</text></g>
-                    <g><rect class="st1" x="710" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(737.5 112.5)">[</text></g>
-                    <g><rect class="st1" x="770" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(797.5 112.5)">]</text></g>
-                    <g><rect class="st1" x="830" y="85" width="85" height="55" rx="6" ry="6"/><text class="st0" transform="translate(872.5 112.5)">\</text></g>
-                </g>
+                <g id="row-1"><g><rect class="st1" x="20" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(43.79 52)">~</text></g><g><rect class="st1" x="80" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(103.94 52)">1</text></g><g><rect class="st1" x="140" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(163.94 52)">2</text></g><g><rect class="st1" x="200" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(223.94 52)">3</text></g><g><rect class="st1" x="260" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(283.94 52)">4</text></g><g><rect class="st1" x="320" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(343.94 52)">5</text></g><g><rect class="st1" x="380" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(403.94 52)">6</text></g><g><rect class="st1" x="440" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(463.94 52)">7</text></g><g><rect class="st1" x="500" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(523.94 52)">8</text></g><g><rect class="st1" x="560" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(583.94 52)">9</text></g><g><rect class="st1" x="620" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(643.94 52)">0</text></g><g><rect class="st1" x="680" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(705.17 52)">-</text></g><g><rect class="st1" x="740" y="20" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(763.79 52)">=</text></g><g><rect class="st1" x="800" y="20" width="115" height="55" rx="6" ry="6"/><text class="st0" transform="translate(822.57 52)">BACKSPACE</text></g></g>
+                <g id="row-2"><g><rect class="st1" x="20" y="85" width="85" height="55" rx="6" ry="6"/><text class="st0" transform="translate(51.1 117)">TAB</text></g><g><rect class="st1" x="110" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(132.72 117)">Q</text></g><g><rect class="st1" x="170" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(191.81 117)">W</text></g><g><rect class="st1" x="230" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(253.33 117)">E</text></g><g><rect class="st1" x="290" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(313.03 117)">R</text></g><g><rect class="st1" x="350" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(373.64 117)">T</text></g><g><rect class="st1" x="410" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(433.33 117)">Y</text></g><g><rect class="st1" x="470" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(493.03 117)">U</text></g><g><rect class="st1" x="530" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(555.47 117)">I</text></g><g><rect class="st1" x="590" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(612.72 117)">O</text></g><g><rect class="st1" x="650" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(673.33 117)">P</text></g><g><rect class="st1" x="710" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(735.17 117)">[</text></g><g><rect class="st1" x="770" y="85" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(795.17 117)">]</text></g><g><rect class="st1" x="830" y="85" width="85" height="55" rx="6" ry="6"/><text class="st0" transform="translate(870.47 117)">\</text></g></g>
                 <g id="row-3">
-                    <g><rect class="st1" x="20" y="150" width="105" height="55" rx="6" ry="6"/><text class="st0 st-func" transform="translate(72.5 177.5)">CAPS</text></g>
-                    <g><rect class="st1" x="130" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(157.5 177.5)">A</text></g>
-                    <g><rect class="st1" x="190" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(217.5 177.5)">S</text></g>
-                    <g><rect class="st1" x="250" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(277.5 177.5)">D</text></g>
-                    <g><rect class="st1" x="310" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(337.5 177.5)">F</text><rect class="bump" x="327" y="190" width="20" height="2" rx="1"/></g>
-                    <g><rect class="st1" x="370" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(397.5 177.5)">G</text></g>
-                    <g><rect class="st1" x="430" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(457.5 177.5)">H</text></g>
-                    <g><rect class="st1" x="490" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(517.5 177.5)">J</text><rect class="bump" x="507" y="190" width="20" height="2" rx="1"/></g>
-                    <g><rect class="st1" x="550" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(577.5 177.5)">K</text></g>
-                    <g><rect class="st1" x="610" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(637.5 177.5)">L</text></g>
-                    <g><rect class="st1" x="670" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(697.5 177.5)">;</text></g>
-                    <g><rect class="st1" x="730" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(757.5 177.5)">'</text></g>
-                    <g><rect class="st1" x="790" y="150" width="125" height="55" rx="6" ry="6"/><text class="st0 st-func" transform="translate(852.5 177.5)">ENTER</text></g>
+                    <g><rect class="st1" x="20" y="150" width="105" height="55" rx="6" ry="6"/><text class="st0" transform="translate(56.72 182)">CAPS</text></g>
+                    <g id="key-A"><rect class="st1" x="130" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(153.03 182)">A</text></g>
+                    <g id="key-S"><rect class="st1" x="190" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(213.33 182)">S</text></g>
+                    <g id="key-D"><rect class="st1" x="250" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(273.03 182)">D</text></g>
+                    <g id="key-F"><rect class="st1" x="310" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(333.64 182)">F</text><rect class="bump" x="327" y="190" width="20" height="2" rx="1"/></g>
+                    <g><rect class="st1" x="370" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(392.72 182)">G</text></g>
+                    <g><rect class="st1" x="430" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(453.03 182)">H</text></g>
+                    <g id="key-J"><rect class="st1" x="490" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(513.94 182)">J</text><rect class="bump" x="507" y="190" width="20" height="2" rx="1"/></g>
+                    <g id="key-K"><rect class="st1" x="550" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(573.03 182)">K</text></g>
+                    <g id="key-L"><rect class="st1" x="610" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(633.64 182)">L</text></g>
+                    <g id="key-SEMI"><rect class="st1" x="670" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(695.17 182)">;</text></g>
+                    <g><rect class="st1" x="730" y="150" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(755.69 182)">'</text></g>
+                    <g><rect class="st1" x="790" y="150" width="125" height="55" rx="6" ry="6"/><text class="st0" transform="translate(833.36 182)">ENTER</text></g>
                 </g>
-                <g id="row-4">
-                    <g><rect class="st1" x="20" y="215" width="135" height="55" rx="6" ry="6"/><text class="st0 st-func" transform="translate(87.5 242.5)">SHIFT</text></g>
-                    <g><rect class="st1" x="160" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(187.5 242.5)">Z</text></g>
-                    <g><rect class="st1" x="220" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(247.5 242.5)">X</text></g>
-                    <g><rect class="st1" x="280" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(307.5 242.5)">C</text></g>
-                    <g><rect class="st1" x="340" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(367.5 242.5)">V</text></g>
-                    <g><rect class="st1" x="400" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(427.5 242.5)">B</text></g>
-                    <g><rect class="st1" x="460" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(487.5 242.5)">N</text></g>
-                    <g><rect class="st1" x="520" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(547.5 242.5)">M</text></g>
-                    <g><rect class="st1" x="580" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(607.5 242.5)">,</text></g>
-                    <g><rect class="st1" x="640" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(667.5 242.5)">.</text></g>
-                    <g><rect class="st1" x="700" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(727.5 242.5)">/</text></g>
-                    <g><rect class="st1" x="760" y="215" width="155" height="55" rx="6" ry="6"/><text class="st0 st-func" transform="translate(837.5 242.5)">SHIFT</text></g>
-                </g>
-                <g id="row-5">
-                    <g><rect class="st1" x="270" y="280" width="400" height="55" rx="6" ry="6"/><text class="st0 st-func" transform="translate(470 307.5)">SPACEBAR</text></g>
-                </g>
+                <g id="row-4"><g><rect class="st1" x="20" y="215" width="135" height="55" rx="6" ry="6"/><text class="st0" transform="translate(71.11 247)">SHIFT</text></g><g><rect class="st1" x="160" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(183.64 247)">Z</text></g><g><rect class="st1" x="220" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(243.33 247)">X</text></g><g><rect class="st1" x="280" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(303.03 247)">C</text></g><g><rect class="st1" x="340" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(363.33 247)">V</text></g><g><rect class="st1" x="400" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(423.03 247)">B</text></g><g><rect class="st1" x="460" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(483.03 247)">N</text></g><g><rect class="st1" x="520" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(542.42 247)">M</text></g><g><rect class="st1" x="580" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(605.47 247)">,</text></g><g><rect class="st1" x="640" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(665.47 247)">.</text></g><g><rect class="st1" x="700" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(725.47 247)">/</text></g><g><rect class="st1" x="760" y="215" width="155" height="55" rx="6" ry="6"/><text class="st0" transform="translate(821.11 247)">SHIFT</text></g></g>
+                <g id="row-5"><g id="key-SPACE"><rect class="st1" x="270" y="280" width="400" height="55" rx="6" ry="6"/><text class="st0" transform="translate(439.54 312)">SPACEBAR</text></g></g>
+            </svg>
+
+            <svg id="layer-hands" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 400">
+                <defs>
+                    <linearGradient id="finger-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#00e6ff; stop-opacity:0.8" />
+                        <stop offset="60%" style="stop-color:#00e6ff; stop-opacity:0.4" />
+                        <stop offset="100%" style="stop-color:#00e6ff; stop-opacity:0" />
+                    </linearGradient>
+                </defs>
+                <path id="RH" d="M754.2,400c.37-.531.106-1.985.034-2.736-.37-4.862-1.011-10.146-1.681-15.182-1.441-10.13-1.95-20.345-2.69-30.569-.954-9.7-3.288-19.262-3.742-28.957-.761-11.824-2.911-41.026-3.219-46.104-.535-7.84-.539-16.157-3.047-23.662-4.035-10.739-7.699-30.893-15.631-41.571-3.251-5.043-9.46-14.674-12.502-19.393-1.905-2.875-3.367-5.936-7.045-7.2-5.925-1.178-11.8,3.765-13.533,8.969-5.739,15.743,7.052,31.369,11.125,44.756,3.449,15.935,5.995,29.056,5.096,42.655-.443,3.243-.542,23.763-3.837,8.292-1.676-10.268-4.09-27.928-5.252-35.44-1.869-13.26-3.435-23.559-9.075-32.673-7.608-12.712-13.21-28.468-24.634-38.545-5.481-4.597-13.298-9.234-18.859-13.653-2.178-1.742-4.578-3.408-7.307-4.124-9.724-3.054-17.054,6.918-15.261,15.952,1.804,9.419,8.591,16.769,15.166,23.322,3.184,3.247,4.438,7.155,6.086,11.202,1.917,4.77,5.214,12.972,6.872,17.098,4.52,11.281,5.778,34.068,6.353,50.151.585,4.946-3.268,9.318-5.834,2.689-3.389-9.418-6.62-18.868-9.031-28.605-4.147-15.497-5.936-31.528-13.023-45.943-5.636-9.037-12.156-17.262-16.882-26.877-3.984-8.907-11.842-13.724-20.153-18.048-7.131-4.966-16.58-10.255-24.325-3.259-13.21,13.32,2.96,27.993,10.047,38.111,2.285,4.014,3.682,8.635,5.551,12.891,2.545,6.058,5.901,11.794,7.608,18.15,3.101,11.935,5.113,25.668,7.641,37.542.765,6.033,6.336,24.419-.491,27.906-4.625,2.167-8.223,3.506-10.584-1.82-10.037-17.428-15.859-36.901-25.415-54.514-3.747-5.84-7.748-11.497-11.018-17.487-7.045-13.871-13.655-28.356-25.557-38.656-7.506-7.978-20.55-5.473-23.986,5.064-3.864,12.027,3.029,27.687,8.419,39.242,10.827,25.881,19.629,51.665,29.184,78.255,4.175,10.888,6.508,22.082,8.824,33.493,4.19,17.204,5.398,30.801,3.59,47.206-.222,7.018-7.499,3.162-9.608-.513-3.385-5.534-15.34-22.093-19.056-28.252-1.664-2.629-2.984-5.755-3.975-8.808-6.183-17.604-20.381-47.77-42.363-46.111-6.633.676-13.301,5.68-12.89,12.919.258,8.983,5.054,16.895,7.76,25.263,4.028,12.495,3.591,27.187,8.617,37.451,2.79,5.628,9.283,15.442,12.051,20.121" />
+                <path id="LH" d="M368.16,400c.066-.061,1.545-2.211,1.594-2.287,15.707-24.32,15.466-26.394,19.807-54.446,1.944-12.887,17.841-33.622-.123-41.305l-.201-.077c-28.677-8.427-42.263,35.467-50.573,55.317-.02.048-.043.092-.07.137-4.199,6.957-10.57,16.149-14.947,23.086-2.145,3.127-3.55,6.413-7.348,8.079-.058.026-.12.049-.181.068-3.159.966-7.198-.719-7.561-4.268-4.432-20.761.586-41.826,4.292-62.099,6.417-28.865,17.36-57.488,26.948-85.274,5.021-14.794,13.845-27.315,14.719-41.904.002-.027.005-.054.01-.08,2.394-13.06-9.479-26.337-22.097-17.465-9.841,7.213-16.785,17.934-22.21,28.706-.009.017-.017.035-.025.053-5.824,13.63-15.462,24.946-21.466,38.401-4.731,11.099-15.398,35.971-17.446,40.786-1.638,3.292-3.491,8.867-7.15,10.036-.135.043-.283.057-.424.049-15.821-.95-7.451-22.732-6.253-32.597,2.855-14.776,3.415-30.072,9.467-44.08,2.583-6.124,5.464-12.098,8.01-18.245.01-.025.021-.049.033-.074,6.551-13.216,25.654-26.882,12.122-42.004-.025-.027-.052-.056-.078-.082-9.7-9.608-20.171,1.237-29.971,6.525-15.057,7.629-19.028,25.684-28.775,38.418-.017.022-.033.046-.049.069-15.329,23.763-13.661,59.065-24.39,82.066-.209.448-.71.694-1.19.578-5.85-1.417-1.037-29.389-1.86-34.816-.006-.041-.01-.079-.01-.121-.152-7.572.797-14.836,3.769-21.853,2.892-7.488,5.717-16.957,8.747-23.729.019-.041.037-.079.06-.118,3.637-6.326,17.053-16.381,18.302-29.005,1.877-12.963-11.246-21.99-21.338-12.309-.026.025-.055.049-.084.071-13.395,9.915-27.105,19.509-33.598,35.517-.015.038-.034.076-.054.112-18.131,31.754-16.424,29.801-19.392,65.883-.594,5.565-.9,11.169-1.57,16.75-.149,1.244-1.975,1.207-2.075-.042-.229-2.872-.403-5.818-.623-8.229-.596-14.81,1.648-29.93,5.156-44.254.01-.04.022-.08.035-.119,3.001-8.585,8.369-16.638,9.651-26.069.003-.021.007-.042.012-.062,2.774-11.094-4.286-30.043-18.082-21.332-.134.085-.252.201-.337.335-6.63,10.309-12.679,21.388-18.753,32.129-.018.031-.034.063-.049.096-4.094,9.062-6.066,19.65-9.066,29.397-6.426,19.985-3.714,41.643-4.351,62.486-.377,28.631-4.856,65.888-5.524,93.195" />
+                <path id="T" d="M549.91,391.769c-2.381.522-5.958-1.952-7.335-4.352-3.385-5.534-15.34-22.093-19.056-28.252-1.664-2.629-2.984-5.755-3.975-8.808-6.183-17.604-20.381-47.77-42.363-46.111-6.633.676-13.301,5.68-12.89,12.919.258,8.983,5.054,16.896,7.76,25.263,4.028,12.495,3.591,27.187,8.617,37.451,2.79,5.628,9.352,14.366,12.121,19.045.897,1.377,2.998,1.603,2.018-.923-4.83-8.749-11.71-15.621-14.378-25.697-2.495-9.671-2.844-20.835-5.786-30.185-3.124-7.454-7.499-16.731-8.297-25.163,2.063-12.759,15.84-12.613,24.65-6.674,10.258,7.085,16.595,18.52,21.943,29.489,3.334,6.849,4.86,14.508,8.851,21.034,4.272,7.252,11.212,16.244,16.866,24.886,1.597,2.309,2.638,4.178,4.703,5.986,1.595,1.478,5.639,3.447,8.381,2.983-.661-.931-1.273-1.896-1.832-2.892Z" />
+                <path id="RP" d="M707.366,281.007c-.14,1.026-.246,3.784-.43,6.583.142.213.284.426.425.639.479.547,1.023,1.168,1.523,1.736.406-5.043.821-10.336.96-14.151.351-7.994-1.025-15.982-2.439-23.921-1.352-8.253-2.741-16.309-6.529-23.554-5.311-10.471-11.148-22.064-7.667-34.091,1.692-4.619,7.616-9.652,12.292-6.593,3.704,2.651,5.711,8.992,8.266,12.484,3.815,5.626,8.477,11.885,11.785,17.424,5.428,10.989,7.833,23.852,11.855,35.555,2.809,8.364,2.967,17.461,3.399,26.323.221,3.356.455,7.13.694,11.059.776-.148,1.562-.264,2.357-.352-.463-6.499-.837-11.793-.953-13.697-.535-7.84-.539-16.157-3.047-23.662-4.035-10.74-7.699-30.893-15.631-41.571-3.251-5.043-9.46-14.674-12.502-19.393-1.905-2.875-3.367-5.936-7.045-7.2-5.925-1.178-11.8,3.765-13.533,8.969-5.739,15.743,7.052,31.369,11.125,44.756,3.449,15.935,5.995,29.056,5.096,42.655Z" />
+                <path id="RR" d="M638.306,204.139c3.184,3.247,4.438,7.155,6.086,11.202,1.917,4.77,5.214,12.972,6.872,17.098,4.345,10.846,5.676,32.324,6.283,48.258.918.459,1.842.906,2.776,1.333.248-4.37-.403-9.204-.784-12.766-1.431-8.169-2.076-26.794-5.374-36.563-2.116-5.882-4.956-11.884-7.23-17.45-1.616-3.56-2.434-6.955-4.647-10.189-7.046-7.991-17.464-16.741-16.903-28.424-.03-7.146,7.573-12.589,14.162-8.907,5.621,2.923,9.218,7.696,14.793,10.455,16.333,9.695,18.84,19.215,26.841,33.268,8.031,14.232,11.595,20.104,13.764,35.856,1.896,10.644,2.912,22.395,4.746,33.917.818-.36,1.629-.696,2.433-1.018-1.429-9.59-2.983-20.77-3.847-26.35-1.869-13.26-3.435-23.559-9.075-32.673-7.608-12.712-13.21-28.468-24.634-38.545-5.481-4.597-13.298-9.234-18.859-13.653-2.178-1.742-4.578-3.408-7.307-4.124-9.724-3.054-17.054,6.918-15.261,15.952,1.804,9.419,8.591,16.769,15.166,23.322Z" />
+                <path id="RM" d="M583.968,213.549c2.545,6.058,5.901,11.794,7.608,18.15,3.101,11.935,5.113,25.668,7.641,37.542.376,2.966,1.913,8.919,2.568,14.619.737-.225,1.472-.451,2.211-.669-.712-7.613-2.904-15.552-4.147-22.827-1.819-8.735-3.565-19.129-5.431-27.308-2.717-11.322-6.193-14.335-9.974-24.545-1.832-5.534-3.438-9.294-7.487-13.963-3.702-5.087-8.183-9.087-10.211-15.297-3.255-8.633,2.166-18.768,11.705-17.641,4.79.189,9.532,4.4,13.026,6.368,4.529,2.466,9.699,4.786,13.245,8.344,5.673,6.181,8.569,14.37,13.297,21.243,5.286,7.956,11.373,15.767,13.93,25.16,3.55,11.436,7.295,31.448,12.557,49.113.527-.184,1.055-.367,1.582-.552.025-.83.055-1.66.091-2.489-1.252-4.004-2.414-8.039-3.426-12.125-4.147-15.497-5.936-31.528-13.023-45.943-5.636-9.037-12.156-17.262-16.882-26.877-3.984-8.907-11.842-13.724-20.153-18.048-7.131-4.966-16.58-10.255-24.325-3.259-13.21,13.32,2.96,27.993,10.047,38.111,2.285,4.014,3.682,8.635,5.551,12.891Z" />
+                <path id="RI" d="M530.624,281.621c.8-.106,1.591-.182,2.372-.226-6.394-17.6-12.925-35.046-19.743-52.493-5.171-11.382-11.681-23.908-9.412-36.82,2.842-11.264,15.032-12.821,22.365-4.683,10.42,9.819,16.186,22.757,22.447,35.402,4.317,7.911,9.781,15.158,14.34,23.064,5.078,10.708,9.32,21.808,14.164,32.623.624-.497,1.259-.989,1.909-1.474-5.343-12.128-10.029-24.568-16.339-36.199-3.747-5.84-7.748-11.497-11.018-17.487-7.045-13.872-13.655-28.356-25.557-38.656-7.506-7.978-20.55-5.473-23.986,5.064-3.864,12.027,3.029,27.687,8.419,39.242,7.32,17.497,13.713,34.956,20.04,52.645Z" />
+                <path id="LI" d="M276.388,279.321c6.461-14.472,12.991-32.921,21.096-46.112,10.51-14.748,16.316-33.259,28.505-46.947,3.434-3.234,6.613-7.035,10.988-8.945,7.767-2.555,15.129,4.307,15.289,12.319.711,16.427-8.002,28.336-13.546,43.163-4.545,12.987-9.186,26.033-13.557,39.172.783.011,1.569.049,2.358.117,4.043-11.836,8.275-23.57,12.273-35.158,5.025-14.808,13.861-27.338,14.721-41.943,2.426-13.073-9.458-26.386-22.09-17.505-9.849,7.219-16.796,17.951-22.223,28.732-5.823,13.643-15.469,24.964-21.477,38.428-3.331,7.815-9.602,22.45-13.738,32.112.186.32.383.633.563.956.298.533.573,1.071.836,1.611Z" />
+                <path id="LM" d="M206.378,279.191c.798.065,1.595.108,2.392.156,6.668-19.899,8.73-41.698,14.53-61.685,3.008-8.244,7.862-13.908,12.45-21.645,3.959-6.479,7.615-14.214,12.066-20.753,4.077-5.646,11.377-8.566,17.005-12.021,5.795-4.483,15.333-9.675,21.199-2.619,9.473,14.422-3.365,21.953-11.466,35.564-4.121,8.012-8.563,18.935-12.628,28.572-3.161,11.993-4.942,27.59-7.277,39.564-.323,3.057-1.167,6.86-1.834,10.805.757.012,1.515.039,2.273.085.828-4.608,1.976-9.084,2.366-12.296,2.855-14.776,3.415-30.072,9.467-44.08,2.589-6.137,5.476-12.123,8.026-18.284,6.541-13.239,25.719-26.929,12.102-42.08-9.712-9.678-20.198,1.189-30.012,6.485-15.07,7.636-19.035,25.716-28.801,38.452-14.008,21.681-13.843,52.984-21.858,75.782Z" />
+                <path id="LR" d="M202.633,286.065c-5.857-1.448-1.002-29.571-1.869-34.851-.159-7.595.788-14.88,3.767-21.916,2.901-7.51,5.734-17.013,8.774-23.79,3.588-6.322,17.083-16.4,18.335-29.063,1.88-12.98-11.281-22.015-21.379-12.27-13.424,9.938-27.174,19.547-33.664,35.607-7.662,13.418-11.78,20.822-14.212,27.611-.526,1.782-1.069,3.558-1.608,5.334-1.848,7.572-2.215,16.127-3.602,32.992-.59,5.527-.905,11.092-1.565,16.636.805.551,1.6,1.118,2.378,1.708,2.356-20.641.711-42.517,9.147-61.73,4.32-8.311,9.966-18.642,14.604-27.447,4.187-9.322,12.376-15.668,20.525-21.452,4.947-3.382,9.894-8.552,15.332-10.63,12.054-2.737,14.432,14.071,9.078,21.732-4.465,8.387-12.889,13.807-16.522,22.599-2.715,6.814-6.264,17.143-8.693,23.591-3.578,10.345-6.089,49.236-1.662,56.639.694.872,1.315,1.488,1.632,2.146.387-.501.774-1.002,1.161-1.503-.002-.645.013-1.293.045-1.944Z" />
+                <path id="LP" d="M149.472,182.496c-6.691,10.381-12.787,21.552-18.909,32.378-4.109,9.072-6.083,19.681-9.088,29.446-5.172,16.085-4.425,33.252-4.269,50.206.756-.133,1.523-.234,2.295-.314-.052-8.569-.09-17.158.293-25.775.915-18.068,7.556-35.371,12.686-52.744,2.798-6.968,7.986-13.13,11.963-19.518,2.151-3.656,3.716-9.312,6.458-11.99,13.504-7.987,16.888,13.08,13.983,21.852-1.668,7.944-6.282,15.962-9.311,23.51-3.816,16.665-6.386,33.69-4.542,50.873.307,4.324.886,8.65,1.058,12.951.774-1.285,1.529-2.585,2.252-3.918-.768-4.271-1.021-10.709-1.434-15.254-.597-14.831,1.654-29.972,5.171-44.314,3-8.616,8.398-16.693,9.676-26.159,2.809-11.145-4.336-30.272-18.282-21.231Z" />
             </svg>
         </div>
     </div>
 
     <div id="result-modal">
         <div class="result-box">
-            <div class="res-msg">
-                SYSTEM CALIBRATED<br><br>
-                FINGER POSITIONING: OPTIMAL<br>
-                HOME ROW: LOCKED<br><br>
-                READY FOR ASCENT
-            </div>
-            <button class="res-btn" onclick="window.location.href='lessons.html'">Return to Map</button>
+            <div class="res-msg">CALIBRATION<br>COMPLETE</div>
+            <button class="res-btn" onclick="window.location.href='lessons.html'">BEGIN ASCENT</button>
         </div>
     </div>
 
-    <a href="lessons.html" class="back-btn">← Abort Ascent</a>
+    <a href="lessons.html" class="back-btn">← Abort</a>
 
     <script>
-        // --- CONFIG ---
-        const TARGET_STRING = "asdf jkl; asdf jkl;"; 
+        const CALIBRATION_STRING = "asdf jkl;"; 
         let currentIndex = 0;
+        let isGameActive = false;
+        let countdownVal = 5;
 
+        // Elements
+        const preloader = document.getElementById('preloader');
+        const introOverlay = document.getElementById('intro-overlay');
+        const tibetanText = document.getElementById('tibetan-text');
+        const keyboardWrapper = document.getElementById('keyboard-wrapper');
+        const layerHands = document.getElementById('layer-hands');
+        const hud = document.getElementById('main-hud');
         const display = document.getElementById('target-display');
+        const embeddedCountdown = document.getElementById('embedded-countdown');
 
-        // --- RENDER ---
-        function renderString() {
-            display.innerHTML = '';
-            const chars = TARGET_STRING.split('');
-            
-            chars.forEach((char, i) => {
-                const span = document.createElement('span');
-                span.innerText = char.toUpperCase(); // Visuals are Upper
-                span.className = 'char' + (i === 0 ? ' current' : '');
-                if(char === ' ') span.classList.add('space-char');
-                display.appendChild(span);
+        // MAPPING
+        const keyMap = {
+            'a': { finger: 'LP', key: 'key-A' },
+            's': { finger: 'LR', key: 'key-S' },
+            'd': { finger: 'LM', key: 'key-D' },
+            'f': { finger: 'LI', key: 'key-F' },
+            'j': { finger: 'RI', key: 'key-J' },
+            'k': { finger: 'RM', key: 'key-K' },
+            'l': { finger: 'RR', key: 'key-L' },
+            ';': { finger: 'RP', key: 'key-SEMI' },
+            ' ': { finger: 'T', key: 'key-SPACE' }
+        };
+
+        // --- PRELOADER LOGIC ---
+        window.addEventListener('load', () => {
+            document.fonts.ready.then(() => {
+                preloader.style.opacity = '0';
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                    startSequence();
+                }, 800);
             });
-            updateGuide();
+        });
+
+        function startSequence() {
+            introOverlay.style.opacity = '1';
+            tibetanText.classList.add('animate-intro');
+            
+            setTimeout(() => {
+                introOverlay.style.opacity = '0';
+                keyboardWrapper.classList.add('keyboard-visible');
+                hud.style.opacity = '1';
+                
+                setTimeout(() => {
+                    layerHands.classList.add('hands-visible');
+                    // Instruction is already in HUD, no need to fade in separately
+                    setTimeout(startCountdown, 1000);
+                }, 1000);
+            }, 3500);
         }
 
-        renderString();
+        function startCountdown() {
+            embeddedCountdown.style.display = 'block';
+            let timer = setInterval(() => {
+                countdownVal--;
+                if(countdownVal > 0) {
+                    embeddedCountdown.innerText = countdownVal;
+                } else {
+                    clearInterval(timer);
+                    embeddedCountdown.style.display = 'none';
+                    startActionPhase();
+                }
+            }, 1000);
+        }
 
-        // --- INPUT HANDLING ---
+        function startActionPhase() {
+            isGameActive = true;
+            display.classList.add('active');
+            
+            document.getElementById('key-F').querySelector('rect').classList.add('anchor-glow');
+            document.getElementById('key-J').querySelector('rect').classList.add('anchor-glow');
+            
+            renderString();
+        }
+
+        function renderString() {
+            display.innerHTML = '';
+            const chars = CALIBRATION_STRING.split('');
+            chars.forEach((char, i) => {
+                const span = document.createElement('span');
+                span.innerText = char.toUpperCase();
+                span.className = 'char' + (i === 0 ? ' current' : '');
+                if(char === ' ') { 
+                    span.innerHTML = "&nbsp;"; 
+                    span.className += " space"; 
+                }
+                display.appendChild(span);
+            });
+            updateGuides();
+        }
+
+        function updateGuides() {
+            document.querySelectorAll('.finger-active').forEach(d => d.classList.remove('finger-active'));
+            document.querySelectorAll('.key-active').forEach(k => k.classList.remove('key-active'));
+            document.querySelectorAll('.anchor-glow').forEach(el => el.classList.remove('anchor-glow'));
+
+            if(currentIndex < CALIBRATION_STRING.length) {
+                const nextChar = CALIBRATION_STRING[currentIndex].toLowerCase();
+                const targetData = keyMap[nextChar];
+                
+                if(targetData) {
+                    const fingerEl = document.getElementById(targetData.finger);
+                    if(fingerEl) fingerEl.classList.add('finger-active');
+
+                    const keyGroup = document.getElementById(targetData.key);
+                    if(keyGroup) {
+                        const rect = keyGroup.querySelector('rect');
+                        if(rect) rect.classList.add('key-active');
+                    }
+                }
+            }
+        }
+
         window.addEventListener('keydown', (e) => {
-            if (e.key === "Tab" || e.key === "Alt" || e.key === "Shift") return;
+            // Check for Modal Shortcut (ENTER or SPACE) when game is over
+            const modal = document.getElementById('result-modal');
+            if (modal.style.display === 'flex') {
+                if (e.key === 'Enter' || e.code === 'Space') {
+                    window.location.href = 'lessons.html';
+                }
+                return;
+            }
 
-            triggerHitEffect(e.key);
+            if(!isGameActive) return; 
+            if(e.key === "Shift" || e.key === "Tab") return;
 
             const spans = document.querySelectorAll('.char');
-            if (currentIndex >= spans.length) return;
+            if(currentIndex >= spans.length) return;
 
-            const typedChar = e.key.toLowerCase(); 
-            const targetChar = TARGET_STRING[currentIndex];
+            const typed = e.key.toLowerCase();
+            const target = CALIBRATION_STRING[currentIndex].toLowerCase();
+            
+            let isMatch = (typed === target);
+            if(target === " " && e.code === "Space") isMatch = true;
 
-            let isMatch = (typedChar === targetChar);
-            if (targetChar === " " && e.code === "Space") isMatch = true;
-
-            if (isMatch) {
+            if(isMatch) {
                 spans[currentIndex].className = 'char correct';
                 currentIndex++;
                 
-                if (currentIndex < spans.length) {
+                if(currentIndex < spans.length) {
                     spans[currentIndex].className = 'char current';
-                    updateGuide();
+                    updateGuides();
                 } else {
                     finishLevel();
                 }
             } else {
-                spans[currentIndex].classList.add('wrong');
-                setTimeout(() => spans[currentIndex].classList.remove('wrong'), 200);
+                spans[currentIndex].classList.add('wrong'); 
             }
         });
 
-        // --- KEYBOARD LIGHTS ---
-        function updateGuide() {
-            document.querySelectorAll('.key-guide').forEach(el => el.classList.remove('key-guide'));
-            if (currentIndex >= TARGET_STRING.length) return;
-            
-            const nextChar = TARGET_STRING[currentIndex];
-            highlightSVGKey(nextChar, 'key-guide');
-        }
-
-        function highlightSVGKey(keyChar, className) {
-            const texts = document.querySelectorAll('text.st0');
-            const target = keyChar === " " ? "SPACEBAR" : keyChar.toUpperCase();
-            
-            texts.forEach(t => {
-                const label = t.textContent.trim();
-                let match = (label === target);
-                if (target === ";" && label === ";") match = true;
-                
-                if (match) {
-                    const rect = t.parentElement.querySelector('rect.st1');
-                    if (rect) rect.classList.add(className);
-                }
-            });
-        }
-
-        function triggerHitEffect(key) {
-            let k = key; if(key === " ") k = "SPACEBAR";
-            highlightSVGKey(k, 'key-hit');
-            setTimeout(() => { document.querySelectorAll('.key-hit').forEach(el => el.classList.remove('key-hit')); }, 100);
-        }
-
         function finishLevel() {
-            // SAVE PROGRESS
-            localStorage.setItem('tk_lvl_0', 'true');
-            // SHOW MODAL
+            isGameActive = false;
+            document.querySelectorAll('.finger-active').forEach(d => d.classList.remove('finger-active'));
+            document.querySelectorAll('.key-active').forEach(k => k.classList.remove('key-active'));
             document.getElementById('result-modal').style.display = 'flex';
+            localStorage.setItem('tk_lvl_0', 'true');
         }
     </script>
 </body>
