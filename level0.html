@@ -187,6 +187,10 @@
             transition: all 0.3s ease; box-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
         }
         .res-btn:hover { transform: scale(1.05); background: #fff; box-shadow: 0 0 40px #fff; }
+        
+        .prompt-txt { font-size: 12px; color: #888; margin-top: -20px; letter-spacing: 1px; text-transform: uppercase; }
+        .prompt-txt span { color: #fff; font-weight: bold; border: 1px solid #555; padding: 2px 6px; border-radius: 4px; margin: 0 5px; }
+
         .back-btn { position: fixed; bottom: 15px; left: 40px; color: rgba(255,255,255,0.3); text-decoration: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; z-index: 50; }
     </style>
 </head>
@@ -265,6 +269,7 @@
         <div class="result-box">
             <div class="res-msg">CALIBRATION<br>COMPLETE</div>
             <button class="res-btn" onclick="window.location.href='lessons.html'">BEGIN ASCENT</button>
+            <div class="prompt-txt">Press <span>SPACE</span> to Map | <span>ENTER</span> to Level 1</div>
         </div>
     </div>
 
@@ -393,7 +398,11 @@
             // Check for Modal Shortcut (ENTER or SPACE) when game is over
             const modal = document.getElementById('result-modal');
             if (modal.style.display === 'flex') {
-                if (e.key === 'Enter' || e.code === 'Space') {
+                if (e.key === 'Enter') {
+                    // Go to Level 1
+                    window.location.href = 'basic-room.html?level=1';
+                } else if (e.code === 'Space') {
+                    // Return to Map
                     window.location.href = 'lessons.html';
                 }
                 return;

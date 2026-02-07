@@ -11,7 +11,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TibetanKeys | Level 1</title>
+    <title>TibetanKeys | Play</title>
     <link rel="icon" type="image/png" href="og.png">
 
     <style>
@@ -29,6 +29,9 @@
             --blue-glow: #00ffff;
             --cursor-bg: rgba(0, 255, 255, 0.15);
             --cursor-border: rgba(0, 255, 255, 0.5);
+            /* SNOW LION COLORS */
+            --frost-cyan: #00ffff;
+            --frost-white: #ffffff;
         }
         
         body, html { 
@@ -41,7 +44,7 @@
             user-select: none;
         }
 
-        /* --- MASSIVE FONTS & STAGE HEIGHTS --- */
+        /* --- LAYOUT SIZES --- */
         body.layout-large  { --dynamic-font-size: 90px; --stage-height: 40vh; }
         body.layout-medium { --dynamic-font-size: 110px; --stage-height: 55vh; }
         body.layout-small  { --dynamic-font-size: 130px; --stage-height: 70vh; }
@@ -85,44 +88,21 @@
             border-radius: 8px; transition: all 0.2s ease;
         }
         .icon-btn:hover { color: #fff; } 
-        
-        /* Universal Active State */
         .icon-btn.active { color: #fff !important; background: transparent !important; }
-        
-        /* Hand Icon specific override to ensure no background */
         #btn-hand { color: #888; background: transparent !important; }
         #btn-hand.active { color: #fff !important; }
-        
         .icon-btn.disabled { opacity: 0.3; cursor: not-allowed; }
         .icon-btn svg { width: 22px; height: 22px; fill: currentColor; } 
 
-        /* --- DROPDOWN FIX --- */
+        /* --- DROPDOWN --- */
         .dropdown { position: relative; height: 44px; display: flex; align-items: center; }
         .dropdown-menu {
-            display: none; 
-            position: absolute; 
-            top: 100%; 
-            left: 50%; 
-            transform: translateX(-50%); /* Perfect Center */
-            background: #1a1a1a; 
-            border: 1px solid #333;
-            border-radius: 8px; 
-            padding: 5px; 
-            min-width: 140px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
-            z-index: 200;
-            margin-top: 10px; 
+            display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 5px; min-width: 140px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 200; margin-top: 10px; 
         }
-        
-        /* Invisible Bridge to prevent closing */
-        .dropdown-menu::before {
-            content: '';
-            position: absolute; top: -15px; left: 0;
-            width: 100%; height: 15px; background: transparent;
-        }
-
+        .dropdown-menu::before { content: ''; position: absolute; top: -15px; left: 0; width: 100%; height: 15px; background: transparent; }
         .dropdown:hover .dropdown-menu { display: block; }
-        
         .dropdown-item {
             width: 100%; text-align: left; padding: 10px 15px; font-size: 12px; color: #aaa;
             background: none; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
@@ -131,188 +111,173 @@
         .dropdown-item:hover { background: #333; color: #fff; }
         .dropdown-item.selected { color: var(--accent); font-weight: bold; background: rgba(212, 175, 55, 0.1); }
 
-        .size-controls { 
-            display: flex; align-items: center; gap: 5px; 
-            background: rgba(255,255,255,0.05); padding: 3px; 
-            border-radius: 6px; border: 1px solid #333; height: 40px; 
-        }
-        .size-btn { 
-            background: none; border: none; color: #888; 
-            font-size: 14px; cursor: pointer; font-weight: bold; 
-            width: 32px; height: 100%; display: flex; justify-content: center; align-items: center; 
-            transition: 0.2s; border-radius: 4px;
-        }
+        .size-controls { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); padding: 3px; border-radius: 6px; border: 1px solid #333; height: 40px; }
+        .size-btn { background: none; border: none; color: #888; font-size: 14px; cursor: pointer; font-weight: bold; width: 32px; height: 100%; display: flex; justify-content: center; align-items: center; transition: 0.2s; border-radius: 4px; }
         .size-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        /* --- STAGE --- */
-        .stage { 
-            flex: 1; display: flex; flex-direction: column; width: 100%; 
-            overflow: hidden; position: relative; 
-            justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.8s ease-in; 
-        }
-        
-        .target-container {
-            width: 90%; max-width: 1200px;
-            height: var(--stage-height); 
-            display: block; 
-            overflow-y: auto; overflow-x: hidden; 
-            background: transparent;
-            /* MASK REMOVED to prevent cutting off tall characters */
-            scroll-behavior: smooth;
-            text-align: center;
-        }
+        /* --- STAGE & KEYBOARD --- */
+        .stage { flex: 1; display: flex; flex-direction: column; width: 100%; overflow: hidden; position: relative; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.8s ease-in; }
+        .target-container { width: 90%; max-width: 1200px; height: var(--stage-height); display: block; overflow-y: auto; overflow-x: hidden; background: transparent; padding: 40px 0; scroll-behavior: smooth; text-align: center; }
         .target-container::-webkit-scrollbar { width: 0; background: transparent; }
-
-        .target-text { 
-            font-family: 'OuChan2', serif; 
-            display: flex; flex-wrap: wrap; 
-            justify-content: center; align-content: flex-start; 
-            width: 100%; gap: 15px; row-gap: 20px; 
-            line-height: 1.6; transition: all 0.3s ease;
-            font-size: var(--dynamic-font-size);
-            padding: 10vh 0; 
-        }
-
-        .char { 
-            opacity: 0.3; transition: all 0.15s ease; position: relative; 
-            display: inline-block; min-width: 0.6em; text-align: center;
-            padding: 5px 8px; border-radius: 8px; 
-            border: 1px solid transparent; vertical-align: middle;
-        }
-        
-        .char.current { 
-            opacity: 1; color: #fff; transform: scale(1.1); z-index: 10; 
-            background: var(--cursor-bg);
-            border-color: var(--cursor-border); 
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
-        }
-
+        .target-text { font-family: 'OuChan2', serif; display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; width: 100%; gap: 15px; row-gap: 20px; line-height: 1.6; transition: all 0.3s ease; font-size: var(--dynamic-font-size); padding: 10vh 0; }
+        .char { opacity: 0.3; transition: all 0.15s ease; position: relative; display: inline-block; min-width: 0.6em; text-align: center; padding: 5px 8px; border-radius: 8px; border: 1px solid transparent; vertical-align: middle; }
+        .char.current { opacity: 1; color: #fff; transform: scale(1.1); z-index: 10; background: var(--cursor-bg); border-color: var(--cursor-border); box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1); text-shadow: 0 0 10px rgba(255,255,255,0.8); }
         .char.correct { opacity: 0.8; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
         .char.wrong { opacity: 1; color: var(--error); animation: shake 0.3s; }
         .char.space-char { display: none; } 
-        
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
-        /* --- KEYBOARD --- */
-        #keyboard-wrapper { 
-            width: 100%; max-width: 1000px; aspect-ratio: 950 / 400; 
-            margin: 0 auto; flex-shrink: 0; position: relative; z-index: 20; 
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            overflow: visible !important;
-        }
-        
+        #keyboard-wrapper { width: 100%; max-width: 1000px; aspect-ratio: 950 / 400; margin: 0 auto; flex-shrink: 0; position: relative; z-index: 20; transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); overflow: visible !important; }
         body.layout-large #keyboard-wrapper  { height: 55vh; opacity: 1; margin-bottom: 10px;}
         body.layout-medium #keyboard-wrapper { height: 35vh; opacity: 1; margin-bottom: 20px;}
         body.layout-small #keyboard-wrapper  { height: 25vh; opacity: 1; margin-bottom: 30px;}
         body.layout-clean #keyboard-wrapper  { height: 0; opacity: 0; pointer-events: none; margin-bottom: 0;}
         body.hands-hidden #layer-hands-container { display: none; }
-
-        #layer-keyboard {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: block; filter: drop-shadow(0 -20px 40px rgba(0,0,0,0.8)); z-index: 1;
-        }
-
-        #layer-hands-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 2; pointer-events: none;
-        }
-        #layer-hands-container svg {
-            width: 100%; height: 100%; display: block;
-            preserveAspectRatio: xMidYMid meet;
-        }
-
-        #active-finger {
-            fill: url(#finger-gradient) !important; stroke: none !important;
-            filter: drop-shadow(0 0 15px var(--blue-glow)) !important; opacity: 1 !important;
-        }
-        #layer-hands-container svg g:not(#active-finger),
-        #layer-hands-container svg path:not(#active-finger) { opacity: 0.5; }
-
+        #layer-keyboard { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; filter: drop-shadow(0 -20px 40px rgba(0,0,0,0.8)); z-index: 1; }
+        #layer-hands-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+        #layer-hands-container svg { width: 100%; height: 100%; display: block; preserveAspectRatio: xMidYMid meet; }
+        #active-finger { fill: url(#finger-gradient) !important; stroke: #00ffff !important; stroke-width: 0.5px !important; filter: drop-shadow(0 0 10px #00ffff) drop-shadow(0 0 20px #00ffff) !important; opacity: 1 !important; }
+        #layer-hands-container svg g:not(#active-finger), #layer-hands-container svg path:not(#active-finger) { opacity: 0.5; }
         .st0 { fill: #d4af37; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; pointer-events: none; }
         .st1 { fill: none; opacity: .5; stroke: #d4af37; stroke-width: 1.5px; transition: all 0.1s; }
         .st2 { fill: transparent; } 
         .key-guide { stroke: var(--blue-glow) !important; stroke-width: 3px !important; fill: rgba(0, 255, 255, 0.15) !important; opacity: 1 !important; filter: drop-shadow(0 0 15px var(--blue-glow)); }
         .key-hit { fill: var(--success) !important; stroke: var(--success) !important; filter: drop-shadow(0 0 15px var(--success)); transition: 0s; }
 
-        /* --- MODAL --- */
-        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
-        .result-box { background: rgba(0, 20, 10, 0.95); border: 2px solid var(--success); padding: 50px; text-align: center; box-shadow: 0 0 80px rgba(0,230,118,0.2); max-width: 400px; width: 90%; border-radius: 20px; }
-        .res-title { color: var(--success); font-size: 24px; letter-spacing: 4px; margin-bottom: 30px; text-transform: uppercase; font-weight: 800; }
-        .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
-        .res-val { font-size: 48px; font-weight: bold; color: #fff; line-height: 1; }
-        .res-label { font-size: 11px; color: #666; letter-spacing: 2px; margin-top: 5px; text-transform: uppercase; }
-        .res-btn { background: var(--success); color: #000; border: none; padding: 15px 40px; font-weight: bold; letter-spacing: 2px; cursor: pointer; transition: 0.2s; text-transform: uppercase; margin-top: 10px; border-radius: 4px; font-size: 12px; }
-        .res-btn:hover { background: #fff; transform: scale(1.05); }
+        /* =========================================
+           VICTORY CONSTELLATION (DUAL DISPLAY)
+           ========================================= */
+        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(15px); }
+        
+        .victory-container {
+            display: grid;
+            grid-template-columns: 1fr 400px 1fr; /* Left Stage | Center Box | Right Stage */
+            width: 95%; max-width: 1400px;
+            height: 80vh;
+            align-items: center;
+        }
 
-        .back-btn { position: fixed; bottom: 20px; left: 30px; color: #444; text-decoration: none; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; transition: 0.3s; z-index: 50; display: flex; align-items: center; gap: 8px; }
+        /* CENTER BOX (THE PERMANENT RECORD) */
+        .center-box {
+            background: rgba(0, 15, 10, 0.95);
+            border: 2px solid var(--success);
+            padding: 30px; text-align: center;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0,230,118,0.1);
+            display: flex; flex-direction: column; gap: 20px;
+            height: fit-content;
+            transition: all 0.3s ease;
+        }
+        .center-box.legendary { border-color: var(--frost-cyan); box-shadow: 0 0 60px var(--frost-cyan); }
+
+        .res-title { color: var(--success); font-size: 20px; letter-spacing: 4px; text-transform: uppercase; font-weight: 800; margin: 0; }
+        .center-box.legendary .res-title { color: var(--frost-cyan); text-shadow: 0 0 10px var(--frost-cyan); }
+
+        .res-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .res-val { font-size: 28px; font-weight: bold; color: #fff; }
+        .res-label { font-size: 9px; color: #888; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* THE COLLECTION ROW (Center) */
+        .collection-label { font-size: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+        .collection-row {
+            display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;
+            min-height: 80px; align-items: center; /* Increased min-height */
+        }
+        
+        /* BIGGER MINI ICONS (64px) */
+        .mini-icon { 
+            width: 64px; height: 64px; 
+            opacity: 0; transform: scale(0); 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+        }
+        .mini-icon.show { opacity: 1; transform: scale(1); }
+
+        .action-prompt { 
+            font-size: 12px; color: #666; letter-spacing: 2px; text-transform: uppercase; 
+            margin-top: 10px; animation: pulse 2s infinite; 
+        }
+        .action-prompt span { color: #fff; font-weight: bold; border: 1px solid #444; padding: 2px 6px; border-radius: 4px; margin: 0 5px; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* SIDE STAGES (THE STORY - NO BOX) */
+        .side-stage { 
+            height: 100%; display: flex; flex-direction: column; 
+            justify-content: center; gap: 20px; 
+            pointer-events: none; /* Let clicks pass through */
+        }
+        .popup-card {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            opacity: 0; transform: translateY(20px); transition: all 0.5s ease;
+            /* BOX REMOVED HERE */
+            background: transparent; 
+            padding: 15px; 
+            border: none;
+        }
+        .popup-card.show { opacity: 1; transform: translateY(0); }
+        
+        .popup-icon { width: 100px; height: 100px; margin-bottom: 10px; filter: drop-shadow(0 0 15px var(--accent)); }
+        .popup-title { font-size: 18px; color: var(--accent); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .popup-reason { 
+            font-size: 12px; color: var(--success); font-weight: bold; 
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(0, 230, 118, 0.4);
+        }
+        .popup-desc { 
+            font-size: 12px; color: #ccc; font-style: italic; line-height: 1.4; max-width: 80%; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); /* Shadow for readability without box */
+        }
+
+        /* RESTORED BACK BUTTON (TEXT STYLE) */
+        .back-btn { 
+            position: fixed; bottom: 20px; left: 30px; 
+            color: #666; text-decoration: none; 
+            font-size: 11px; letter-spacing: 2px; text-transform: uppercase; 
+            transition: 0.3s; z-index: 50; display: flex; align-items: center; gap: 8px; 
+        }
         .back-btn:hover { color: var(--accent); }
 
-        @media (max-width: 768px) {
-            .hud { padding: 0 15px; height: 60px; grid-template-columns: 1fr 1fr; row-gap: 5px; }
-            .level-info { grid-column: 1 / 2; justify-self: start; }
-            .phase-indicator { grid-column: 2 / 3; justify-self: end; font-size: 10px; }
-            .controls-group { display: none; }
+        /* Mobile Adjustments */
+        @media (max-width: 1000px) {
+            .victory-container { grid-template-columns: 1fr; grid-template-rows: auto auto; height: 90vh; overflow-y: auto; }
+            .side-stage { display: none; } /* Hide sides on mobile, show summary only */
+            .collection-row { min-height: auto; }
         }
     </style>
 </head>
 <body class="layout-large">
 
-    <div id="preloader">
-        <div class="loader-dots">
-            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-        </div>
-    </div>
+    <div id="preloader"><div class="loader-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
 
     <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
-        <defs>
-            <linearGradient id="finger-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#00e6ff; stop-opacity:0.9" />
-                <stop offset="60%" style="stop-color:#00e6ff; stop-opacity:0.4" />
-                <stop offset="100%" style="stop-color:#00e6ff; stop-opacity:0" />
-            </linearGradient>
-        </defs>
+        <defs><linearGradient id="finger-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#00ffff; stop-opacity:0.9" /><stop offset="50%" style="stop-color:#00ccff; stop-opacity:0.7" /><stop offset="90%" style="stop-color:#00ffff; stop-opacity:0" /></linearGradient></defs>
     </svg>
 
     <div class="hud">
         <div class="level-info"><h1 id="level-title">Ascent</h1></div>
-        
         <div class="controls-group">
-            <button class="icon-btn disabled" title="Narrator (Disabled)" onmousedown="event.preventDefault()">
-                <svg viewBox="0 0 24 24"><path d="M17 20c-.29 0-.56-.06-.76-.15-.71-.37-1.21-.88-1.71-2.38-.51-1.56-1.47-2.29-2.39-3-.79-.61-1.61-1.24-2.32-2.53C9.29 10.98 9 9.93 9 9c0-2.8 2.2-5 5-5s5 2.2 5 5h2c0-3.93-3.07-7-7-7S7 5.07 7 9c0 1.26.38 2.65 1.07 3.9.91 1.65 1.98 2.48 2.85 3.15.81.62 1.39 1.14 1.71 2.05.6 1.82 1.37 2.84 2.73 3.55.51.23 1.07.35 1.64.35 2.21 0 4-1.79 4-4h-2c0 1.1-.9 2-2 2zM7.64 2.64L6.22 1.22C4.23 3.21 3 5.96 3 9s1.23 5.79 3.22 7.78l1.41-1.41C6.01 13.74 5 11.49 5 9s1.01-4.74 2.64-6.36z"/></svg>
-            </button>
-            <button class="icon-btn active" id="btn-hand" onclick="toggleHands()" title="Toggle Hands" onmousedown="event.preventDefault()">
-                <svg id="icon-hand-on" viewBox="0 0 24 24"><path d="M23 5.5V20c0 2.2-1.8 4-4 4h-7.3c-1.08 0-2.1-.43-2.85-1.19L1 14.83s1.26-1.23 1.3-1.25c.22-.19.49-.29.79-.29.22 0 .42.06.6.16.04.01 4.31 2.46 4.31 2.46V4c0-.83.67-1.5 1.5-1.5S11 3.17 11 4v7h1V1.5c0-.83.67-1.5 1.5-1.5S15 .67 15 1.5V11h1V2.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5V11h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5z"/></svg>
-            </button>
+            <button class="icon-btn disabled"><svg viewBox="0 0 24 24"><path d="M17 20c-.29 0-.56-.06-.76-.15-.71-.37-1.21-.88-1.71-2.38-.51-1.56-1.47-2.29-2.39-3-.79-.61-1.61-1.24-2.32-2.53C9.29 10.98 9 9.93 9 9c0-2.8 2.2-5 5-5s5 2.2 5 5h2c0-3.93-3.07-7-7-7S7 5.07 7 9c0 1.26.38 2.65 1.07 3.9.91 1.65 1.98 2.48 2.85 3.15.81.62 1.39 1.14 1.71 2.05.6 1.82 1.37 2.84 2.73 3.55.51.23 1.07.35 1.64.35 2.21 0 4-1.79 4-4h-2c0 1.1-.9 2-2 2zM7.64 2.64L6.22 1.22C4.23 3.21 3 5.96 3 9s1.23 5.79 3.22 7.78l1.41-1.41C6.01 13.74 5 11.49 5 9s1.01-4.74 2.64-6.36z"/></svg></button>
+            <button class="icon-btn active" id="btn-hand" onclick="toggleHands()"><svg id="icon-hand-on" viewBox="0 0 24 24"><path d="M23 5.5V20c0 2.2-1.8 4-4 4h-7.3c-1.08 0-2.1-.43-2.85-1.19L1 14.83s1.26-1.23 1.3-1.25c.22-.19.49-.29.79-.29.22 0 .42.06.6.16.04.01 4.31 2.46 4.31 2.46V4c0-.83.67-1.5 1.5-1.5S11 3.17 11 4v7h1V1.5c0-.83.67-1.5 1.5-1.5S15 .67 15 1.5V11h1V2.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5V11h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5z"/></svg></button>
             <div class="dropdown">
-                <button class="icon-btn" id="btn-kb" title="Keyboard Size" onmousedown="event.preventDefault()">
-                    <svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
-                </button>
+                <button class="icon-btn" id="btn-kb"><svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg></button>
                 <div class="dropdown-menu">
-                    <button class="dropdown-item selected" onclick="setLayout('layout-large', true)" onmousedown="event.preventDefault()">Large</button>
-                    <button class="dropdown-item" onclick="setLayout('layout-medium', true)" onmousedown="event.preventDefault()">Medium</button>
-                    <button class="dropdown-item" onclick="setLayout('layout-small', true)" onmousedown="event.preventDefault()">Small</button>
-                    <button class="dropdown-item" onclick="setLayout('layout-clean', true)" onmousedown="event.preventDefault()">Clean (Off)</button>
+                    <button class="dropdown-item selected" onclick="setLayout('layout-large', true)">Large</button>
+                    <button class="dropdown-item" onclick="setLayout('layout-medium', true)">Medium</button>
+                    <button class="dropdown-item" onclick="setLayout('layout-small', true)">Small</button>
+                    <button class="dropdown-item" onclick="setLayout('layout-clean', true)">Clean (Off)</button>
                 </div>
             </div>
-            <button id="sound-btn" class="icon-btn" onclick="sfx.toggle()" title="Mute/Unmute" onmousedown="event.preventDefault()">
-                <svg id="icon-vol-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-            </button>
+            <button id="sound-btn" class="icon-btn" onclick="sfx.toggle()"><svg id="icon-vol-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></button>
             <div class="size-controls">
-                <button class="size-btn" onclick="adjustFontSize(-10)" onmousedown="event.preventDefault()">A-</button>
-                <button class="size-btn" onclick="adjustFontSize(10)" onmousedown="event.preventDefault()">A+</button>
+                <button class="size-btn" onclick="adjustFontSize(-10)">A-</button>
+                <button class="size-btn" onclick="adjustFontSize(10)">A+</button>
             </div>
         </div>
-
         <div class="phase-indicator" id="phase-txt">Phase 1: Learning</div>
     </div>
 
     <div class="stage">
-        <div class="target-container" id="scroll-container">
-            <div class="target-text" id="target-display"></div>
-        </div>
-        
+        <div class="target-container" id="scroll-container"><div class="target-text" id="target-display"></div></div>
         <div id="keyboard-wrapper">
              <svg id="layer-keyboard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 400" preserveAspectRatio="xMidYMid meet">
                 <rect class="st2" width="950" height="400"/>
@@ -328,43 +293,60 @@
     </div>
 
     <div id="result-modal">
-        <div class="result-box">
-            <div class="res-title">Level Mastered</div>
-            <div class="res-grid">
-                <div><div class="res-val" id="res-wpm">0</div><div class="res-label">WPM</div></div>
-                <div><div class="res-val" id="res-acc">100%</div><div class="res-label">ACCURACY</div></div>
+        <div class="victory-container">
+            <div id="left-stage" class="side-stage"></div>
+
+            <div id="center-box" class="center-box">
+                <div class="res-title" id="res-msg">Level Mastered</div>
+                <div class="res-grid">
+                    <div><div class="res-val" id="res-wpm">0</div><div class="res-label">WPM</div></div>
+                    <div><div class="res-val" id="res-acc">0%</div><div class="res-label">ACCURACY</div></div>
+                    <div><div class="res-val" id="res-time">00:00</div><div class="res-label">TIME</div></div>
+                </div>
+                
+                <div class="collection-label">Badges Collected</div>
+                <div class="collection-row" id="center-badge-row"></div>
+
+                <div class="action-prompt" id="prompt-txt">Press <span>SPACE</span> to Skip</div>
             </div>
-            <button class="res-btn" onclick="window.location.href='lessons.html'">Return to Map</button>
+
+            <div id="right-stage" class="side-stage"></div>
         </div>
     </div>
 
     <a href="lessons.html" class="back-btn">← Abort Ascent</a>
 
     <script>
-        // --- CONSTANTS FOR STORAGE ---
         const PREF_LAYOUT = 'tk_pref_layout';
         const PREF_HANDS = 'tk_pref_hands';
         const PREF_SOUND = 'tk_pref_sound';
         const PREF_TEXT_SIZE = 'tk_pref_text_size';
+
+        const BADGE_DEFINITIONS = [
+            { id: 'conch', img: 'badges/conch.svg', title: 'White Conch', criteria: 'Accuracy > 90%', desc: 'The Spiral of Sound. You found the rhythm.', check: (w, a) => a >= 90 },
+            { id: 'fish', img: 'badges/fish.svg', title: 'Golden Fish', criteria: 'Accuracy > 95%', desc: 'Freedom from Fear. You swam past errors.', check: (w, a) => a >= 95 },
+            { id: 'lotus', img: 'badges/lotus.svg', title: 'Lotus Flower', criteria: 'Accuracy 100%', desc: 'Born from Mud, unstained. Absolute Perfection.', check: (w, a) => a >= 100 },
+            { id: 'vase', img: 'badges/vase.svg', title: 'Treasure Vase', criteria: 'Speed > 20 WPM', desc: 'Inexhaustible Wealth. You are gathering speed.', check: (w, a) => w >= 20 },
+            { id: 'knot', img: 'badges/knot.svg', title: 'Endless Knot', criteria: 'Speed > 25 WPM', desc: 'Interwoven Wisdom. Your fingers are connecting.', check: (w, a) => w >= 25 },
+            { id: 'banner', img: 'badges/banner.svg', title: 'Victory Banner', criteria: 'Speed > 30 WPM', desc: 'Victory over ignorance. You conquered the keys.', check: (w, a) => w >= 30 },
+            { id: 'parasol', img: 'badges/parasol.svg', title: 'Precious Parasol', criteria: 'Speed > 35 WPM', desc: 'Protection from heat. Your focus shielded you.', check: (w, a) => w >= 35 },
+            { id: 'wheel', img: 'badges/wheel.svg', title: 'Dharma Wheel', criteria: 'Speed > 36 WPM', desc: 'The Turning Wheel. You have set motion.', check: (w, a) => w >= 36 },
+            { id: 'snowlion', img: 'badges/snowlion.svg', title: 'SNOW LION', criteria: 'Speed > 50 WPM', desc: 'Fearless Guardian. You have reached Legendary status.', check: (w, a) => w >= 50 }
+        ];
 
         const sfx = {
             ctx: null, muted: false,
             init: function() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if(this.ctx.state === 'suspended') this.ctx.resume(); },
             toggle: function() { 
                 this.muted = !this.muted; 
-                
-                // SAVE PREFERENCE
                 localStorage.setItem(PREF_SOUND, this.muted);
-
                 const btn = document.getElementById('sound-btn'); 
                 if(this.muted) { 
                     btn.classList.add('muted'); 
-                    // Muted Icon
                     btn.innerHTML = '<svg id="icon-vol-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>';
                 } else { 
                     this.init(); 
                     btn.classList.remove('muted'); 
-                    // Active Icon
                     btn.innerHTML = '<svg id="icon-vol-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
                 } 
                 btn.blur(); 
@@ -377,14 +359,7 @@
         const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ' };
         const LEFT_HAND_KEYS = ['`','1','2','3','4','5','q','w','e','r','t','a','s','d','f','g','z','x','c','v','b'];
 
-        const poseMap = {
-            'ཀ': 'hands/k.svg',
-            'ཁ': 'hands/sk.svg',
-            'ག': 'hands/g.svg',
-            'ང': 'hands/f.svg',
-            'default': 'hands/rest.svg'
-        };
-
+        const poseMap = { 'ཀ': 'hands/k.svg', 'ཁ': 'hands/sk.svg', 'ག': 'hands/g.svg', 'ང': 'hands/f.svg', 'default': 'hands/rest.svg' };
         const svgCache = {};
 
         const basicLessons = [
@@ -405,6 +380,8 @@
             { type: "tibetan", text: "ཧ ཨ ་ །", footer: "ALPHABET" },
             { type: "special", text: "TEST IV", footer: "MIXED 7 & 8" },
             { type: "special", text: "GAME IV", footer: "REWARD" },
+            /* NEW LEVEL 17 (INDEX 17) INSERTED HERE */
+            { type: "tibetan", text: "ཊ ཋ ཌ ཎ ཥ", footer: "EXTRA" },
             { type: "special", text: "FINAL", footer: "ALL 30 CHARS" },
             { type: "special", text: "GAME", footer: "BASIC COMPLETE" }
         ];
@@ -416,13 +393,12 @@
         let currentLesson = basicLessons[levelIndex];
         let baseChars = [];
 
-        // UPDATED LOGIC: REMOVE SPACES from lesson text
         if (currentLesson.text === "TEST I") baseChars = "ཀཁགངཅཆཇཉ".split('');
         else if (currentLesson.text === "TEST II") baseChars = "ཏཐདནཔཕབམ".split('');
         else if (currentLesson.text === "TEST III") baseChars = "ཙཚཛཝཞཟའཡ".split('');
         else if (currentLesson.text === "TEST IV") baseChars = "རལཤསཧཨ།".split('');
         else if (currentLesson.text === "FINAL") baseChars = "ཀཁགངཅཆཇཉཏཐདནཔཕབམཙཚཛཝཞཟའཡརལཤསཧཨ".split('');
-        else baseChars = currentLesson.text.replace(/ /g, '').split(''); // STRIP SPACES
+        else baseChars = currentLesson.text.replace(/ /g, '').split('');
 
         let targetString = "";
         let currentIndex = 0;
@@ -434,349 +410,309 @@
         let charCount = 0;
         let currentFontSize = 140; 
         let currentLayout = 'layout-large';
+        let resultState = 'hidden'; // 'hidden', 'animating', 'finished'
+        let animationTimeouts = [];
+        let earnedBadgesCache = [];
 
-        // Elements
         const stage = document.querySelector('.stage');
         const display = document.getElementById('target-display');
-        const scrollContainer = document.getElementById('scroll-container');
-        const phaseTxt = document.getElementById('phase-txt');
         const handContainer = document.getElementById('layer-hands-container');
         const preloader = document.getElementById('preloader');
+        const phaseTxt = document.getElementById('phase-txt');
 
         document.getElementById('level-title').innerText = isTestMode ? `Test: ${currentLesson.footer}` : `Level ${levelIndex}: ${currentLesson.footer}`;
         if(isTestMode) phaseTxt.innerText = "ASSESSMENT MODE";
 
+        // ... [ASSET LOADING CODE SAME AS BEFORE] ...
         function preloadAssets() {
             const uniqueChars = [...new Set(baseChars)];
             const assetsToLoad = [];
             assetsToLoad.push(poseMap['default']);
             uniqueChars.forEach(char => { if (poseMap[char]) assetsToLoad.push(poseMap[char]); });
-
             let loaded = 0;
             if (assetsToLoad.length === 0) { hidePreloader(); return; }
-
             assetsToLoad.forEach(src => {
-                fetch(src)
-                .then(response => response.text())
-                .then(text => {
+                fetch(src).then(r => r.text()).then(text => {
                     let cleanText = text.replace(/<svg([^>]*)>/, '<svg$1 width="100%" height="100%" preserveAspectRatio="xMidYMid meet">');
                     svgCache[src] = cleanText; 
-                    loaded++;
-                    if (loaded === assetsToLoad.length) hidePreloader();
-                })
-                .catch(err => {
-                    console.warn("Failed to load:", src);
-                    loaded++;
-                    if (loaded === assetsToLoad.length) hidePreloader();
-                });
+                    loaded++; if (loaded === assetsToLoad.length) hidePreloader();
+                }).catch(() => { loaded++; if (loaded === assetsToLoad.length) hidePreloader(); });
             });
         }
-
         function hidePreloader() {
-            // Ensure font is ready before hiding
             document.fonts.ready.then(() => {
-                setTimeout(() => {
-                    preloader.style.opacity = '0';
-                    setTimeout(() => {
-                        preloader.style.display = 'none';
-                        startActionPhase();
-                        // Smooth Fade In
-                        stage.style.opacity = '1';
-                    }, 500);
-                }, 200); 
+                setTimeout(() => { preloader.style.opacity = '0'; setTimeout(() => { preloader.style.display = 'none'; startActionPhase(); stage.style.opacity = '1'; }, 500); }, 200); 
             });
         }
 
-        // --- LOAD PREFERENCES ON START ---
-        window.addEventListener('load', () => {
-            loadPreferences();
-            prepareLevel();
-            preloadAssets(); 
-        });
+        window.addEventListener('load', () => { loadPreferences(); prepareLevel(); preloadAssets(); });
 
         function loadPreferences() {
-            // 1. Layout
             const savedLayout = localStorage.getItem(PREF_LAYOUT);
-            if (savedLayout) {
-                setLayout(savedLayout, false); // false = don't save again
-            } else {
-                setLayout('layout-large', false);
-            }
-
-            // 2. Hands (Default Visible)
+            if (savedLayout) setLayout(savedLayout, false); else setLayout('layout-large', false);
             const handsHidden = localStorage.getItem(PREF_HANDS) === 'true';
-            if (handsHidden) {
-                toggleHands(false); // false = don't save, just apply
-            }
-
-            // 3. Sound (Default Unmuted)
+            if (handsHidden) toggleHands(false);
             const isMuted = localStorage.getItem(PREF_SOUND) === 'true';
-            if (isMuted) {
-                // Manually apply mute state without toggling logic loop
-                sfx.muted = true;
-                const btn = document.getElementById('sound-btn');
-                btn.classList.add('muted');
-                btn.innerHTML = '<svg id="icon-vol-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>';
-            }
-
-            // 4. Text Size
+            if (isMuted) { sfx.muted = true; document.getElementById('sound-btn').classList.add('muted'); }
             const savedSize = localStorage.getItem(PREF_TEXT_SIZE);
-            if (savedSize) {
-                currentFontSize = parseInt(savedSize);
-                if(window.innerWidth > 768) display.style.fontSize = currentFontSize + "px";
-            }
+            if (savedSize) { currentFontSize = parseInt(savedSize); if(window.innerWidth > 768) display.style.fontSize = currentFontSize + "px"; }
         }
 
-        function toggleHands(save = true) {
-            document.body.classList.toggle('hands-hidden');
-            const btn = document.getElementById('btn-hand');
-            const isHidden = document.body.classList.contains('hands-hidden');
-            
-            if (save) localStorage.setItem(PREF_HANDS, isHidden);
-
-            if (isHidden) {
-                btn.classList.remove('active');
-                // HOLLOW HAND
-                btn.innerHTML = '<svg id="icon-hand-off" viewBox="0 0 24 24"><path d="M23 5.5V20c0 2.2-1.8 4-4 4h-7.3c-1.08 0-2.1-.43-2.85-1.19L1 14.83s1.26-1.23 1.3-1.25c.22-.19.49-.29.79-.29.22 0 .42.06.6.16.04.01 4.31 2.46 4.31 2.46V4c0-.83.67-1.5 1.5-1.5S11 3.17 11 4v7h1V1.5c0-.83.67-1.5 1.5-1.5S15 .67 15 1.5V11h1V2.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5V11h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5z" style="fill:none;stroke:currentColor;stroke-width:2"/><line x1="2" y1="22" x2="22" y2="2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-            } else {
-                btn.classList.add('active');
-                // SOLID HAND
-                btn.innerHTML = '<svg id="icon-hand-on" viewBox="0 0 24 24"><path d="M23 5.5V20c0 2.2-1.8 4-4 4h-7.3c-1.08 0-2.1-.43-2.85-1.19L1 14.83s1.26-1.23 1.3-1.25c.22-.19.49-.29.79-.29.22 0 .42.06.6.16.04.01 4.31 2.46 4.31 2.46V4c0-.83.67-1.5 1.5-1.5S11 3.17 11 4v7h1V1.5c0-.83.67-1.5 1.5-1.5S15 .67 15 1.5V11h1V2.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5V11h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5z"/></svg>';
-            }
-        }
-
-        function setLayout(mode, save = true) {
+        function toggleHands(save=true) { document.body.classList.toggle('hands-hidden'); if(save) localStorage.setItem(PREF_HANDS, document.body.classList.contains('hands-hidden')); }
+        function setLayout(mode, save=true) { 
             document.body.classList.remove('layout-large', 'layout-medium', 'layout-small', 'layout-clean');
-            document.body.classList.add(mode);
-            currentLayout = mode;
-
-            document.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('selected'));
-            const map = { 'layout-large': 0, 'layout-medium': 1, 'layout-small': 2, 'layout-clean': 3 };
-            const idx = map[mode];
-            if(idx !== undefined) {
-                document.querySelectorAll('.dropdown-item')[idx].classList.add('selected');
-            }
-            
-            // SMART SAVE: Only save if user manually clicked (save=true)
-            if (save) {
-                localStorage.setItem(PREF_LAYOUT, mode);
-            }
-
+            document.body.classList.add(mode); currentLayout = mode;
+            if(save) localStorage.setItem(PREF_LAYOUT, mode);
             setTimeout(scrollToCursor, 100);
         }
+        function adjustFontSize(delta) { currentFontSize = Math.max(10, Math.min(300, currentFontSize + delta)); localStorage.setItem(PREF_TEXT_SIZE, currentFontSize); if(window.innerWidth > 768) display.style.fontSize = currentFontSize + "px"; }
 
-        function prepareLevel() {
-            if (!isTestMode) targetString = baseChars.join(''); 
-            else targetString = generateDrillString(100);
-        }
-
-        function startActionPhase() {
-            renderString();
-            if(isTestMode && !startTime) startTime = new Date();
-        }
-
+        function prepareLevel() { if (!isTestMode) targetString = baseChars.join(''); else targetString = generateDrillString(100); }
+        function startActionPhase() { renderString(); if(isTestMode && !startTime) startTime = new Date(); }
+        function generateDrillString(len) { let s=""; for(let i=0;i<len;i++) s+=baseChars[Math.floor(Math.random()*baseChars.length)]; return s; }
+        
         function renderString() {
             display.innerHTML = '';
-            
             const chars = targetString.split('');
             chars.forEach((char, i) => {
-                const span = document.createElement('span');
-                span.innerText = char;
-                span.className = 'char';
+                const span = document.createElement('span'); span.innerText = char; span.className = 'char';
                 if (i < currentIndex) span.classList.add('correct');
                 if (i === currentIndex) span.classList.add('current');
                 display.appendChild(span);
             });
-            
-            if(!isPhase1) ensureNoOrphan();
-            updateGuide();
-            setTimeout(scrollToCursor, 50);
-        }
-        
-        function ensureNoOrphan() {
-            setTimeout(() => {
-                const spans = Array.from(document.querySelectorAll('.char'));
-                if (spans.length < 5) return;
-            }, 50);
+            if(!isPhase1) setTimeout(() => { if(document.querySelectorAll('.char').length < 5) return; }, 50);
+            updateGuide(); setTimeout(scrollToCursor, 50);
         }
 
-        function generateDrillString(length) {
-            let newStr = "";
-            for(let i=0; i<length; i++) {
-                newStr += baseChars[Math.floor(Math.random() * baseChars.length)];
-            }
-            return newStr;
-        }
-
-        function startDrillPhase() {
-            targetString = generateDrillString(60); 
-            currentIndex = 0;
-            isPhase1 = false;
-            phaseTxt.innerText = "Phase 2: Speed Drill";
-            
-            // SMART PHASE 2 LOGIC:
-            // Temporarily switch to Medium if on Large, but DO NOT SAVE IT (false)
-            if (currentLayout === 'layout-large') {
-                setLayout('layout-medium', false);
-            }
-
-            renderString();
-            drillStarted = true;
-            startTime = new Date();
-        }
-
-        function scrollToCursor() {
-            const currentEl = document.querySelector('.char.current');
-            if (currentEl) {
-                currentEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-            }
-        }
+        function startDrillPhase() { targetString = generateDrillString(60); currentIndex = 0; isPhase1 = false; phaseTxt.innerText = "Phase 2: Speed Drill"; if (currentLayout === 'layout-large') setLayout('layout-medium', false); renderString(); drillStarted = true; startTime = new Date(); }
+        function scrollToCursor() { const el = document.querySelector('.char.current'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' }); }
 
         function updateGuide() {
             document.querySelectorAll('.key-guide').forEach(el => el.classList.remove('key-guide'));
-            
             if (currentIndex >= targetString.length) return;
-
             const nextChar = targetString[currentIndex];
             const poseFile = poseMap[nextChar] || poseMap['default'];
-            
-            if (svgCache[poseFile]) {
-                if (handContainer.getAttribute('data-current') !== poseFile) {
-                    handContainer.innerHTML = svgCache[poseFile];
-                    handContainer.setAttribute('data-current', poseFile);
-                }
-            } else {
-                fetch(poseFile).then(r => r.text()).then(t => {
-                     let cleanText = t.replace(/<svg([^>]*)>/, '<svg$1 width="100%" height="100%" preserveAspectRatio="xMidYMid meet">');
-                     handContainer.innerHTML = cleanText;
-                     handContainer.setAttribute('data-current', poseFile);
-                });
+            if (svgCache[poseFile] && handContainer.getAttribute('data-current') !== poseFile) {
+                handContainer.innerHTML = svgCache[poseFile]; handContainer.setAttribute('data-current', poseFile);
+            } else if (!svgCache[poseFile]) {
+                fetch(poseFile).then(r=>r.text()).then(t=>{ handContainer.innerHTML = t.replace(/<svg([^>]*)>/, '<svg$1 width="100%" height="100%" preserveAspectRatio="xMidYMid meet">'); handContainer.setAttribute('data-current', poseFile); });
             }
-
-            let keyToHighlight = "";
-            let useShift = false;
-
-            for(let [k, v] of Object.entries(NORMAL_MAP)) { if(v === nextChar) { keyToHighlight = k; break; } }
-            if(!keyToHighlight) {
-                for(let [k, v] of Object.entries(SHIFT_MAP)) { if(v === nextChar) { keyToHighlight = k; useShift = true; break; } }
-            }
-
-            if (keyToHighlight) {
-                highlightSVGKey(keyToHighlight, 'key-guide');
-                if (useShift) {
-                    if (LEFT_HAND_KEYS.includes(keyToHighlight)) highlightShiftKey('right', 'key-guide');
-                    else highlightShiftKey('left', 'key-guide');
-                }
+            // Key Highlight Logic
+            let key = "", shift = false;
+            for(let [k,v] of Object.entries(NORMAL_MAP)) if(v===nextChar) { key=k; break; }
+            if(!key) for(let [k,v] of Object.entries(SHIFT_MAP)) if(v===nextChar) { key=k; shift=true; break; }
+            if(key) {
+                highlightSVGKey(key, 'key-guide');
+                if(shift) highlightShiftKey(LEFT_HAND_KEYS.includes(key)?'right':'left', 'key-guide');
             }
         }
 
-        function highlightSVGKey(keyChar, className) {
-            const texts = document.querySelectorAll('text.st0');
-            const target = (keyChar === " ") ? "SPACEBAR" : keyChar.toUpperCase();
-            texts.forEach(t => {
-                const label = t.textContent.trim();
-                if ((label === target) || (target === ";" && label === ";") || (target === "SPACEBAR" && label === "SPACEBAR")) {
-                    const rect = t.parentElement.querySelector('rect.st1');
-                    if (rect) rect.classList.add(className);
-                }
+        function highlightSVGKey(k, cls) {
+            const t = (k===" ") ? "SPACEBAR" : k.toUpperCase();
+            document.querySelectorAll('text.st0').forEach(txt => {
+                if(txt.textContent.trim() === t || (t===";" && txt.textContent.trim()===";") || (t==="SPACEBAR" && txt.textContent.trim()==="SPACEBAR")) 
+                    txt.parentElement.querySelector('rect.st1').classList.add(cls);
             });
         }
-
-        function highlightShiftKey(side, className) {
-            const shifts = [];
-            document.querySelectorAll('text.st0').forEach(t => { if (t.textContent.trim() === "SHIFT") shifts.push(t); });
-            if (shifts.length >= 2) {
-                const targetText = (side === 'left') ? shifts[0] : shifts[1];
-                const rect = targetText.parentElement.querySelector('rect.st1');
-                if (rect) rect.classList.add(className);
-            }
+        function highlightShiftKey(side, cls) {
+            const shifts = []; document.querySelectorAll('text.st0').forEach(t=>{if(t.textContent.trim()==="SHIFT") shifts.push(t)});
+            if(shifts.length>=2) (side==='left'?shifts[0]:shifts[1]).parentElement.querySelector('rect.st1').classList.add(cls);
         }
+        function triggerHitEffect(k) { let key=k; if(k===" ") key="SPACEBAR"; highlightSVGKey(key, 'key-hit'); setTimeout(()=>document.querySelectorAll('.key-hit').forEach(el=>el.classList.remove('key-hit')), 100); }
 
-        function triggerHitEffect(key) {
-            let k = key; if(key === " ") k = "SPACEBAR";
-            highlightSVGKey(k, 'key-hit');
-            setTimeout(() => { document.querySelectorAll('.key-hit').forEach(el => el.classList.remove('key-hit')); }, 100);
-        }
-
-        function adjustFontSize(delta) {
-            currentFontSize = Math.max(10, Math.min(300, currentFontSize + delta));
-            // Save Preference
-            localStorage.setItem(PREF_TEXT_SIZE, currentFontSize);
-            if (window.innerWidth > 768) display.style.fontSize = currentFontSize + "px";
-        }
-
+        // --- GAME INPUT ---
         window.addEventListener('keydown', (e) => {
-            const modal = document.getElementById('result-modal');
-            if (modal.style.display === 'flex') {
-                if (e.key === 'Enter' || e.code === 'Space') {
-                    window.location.href = 'lessons.html';
+            if (resultState !== 'hidden') {
+                if(e.key === "Shift" || e.code === "ShiftLeft" || e.code === "ShiftRight") {
+                    // RETRY: Reload current level with same params
+                    window.location.reload();
+                    return;
+                }
+                if(e.code === 'Space') {
+                    if(resultState === 'animating') skipAnimation(earnedBadgesCache);
+                    else window.location.href = 'lessons.html';
+                }
+                if(e.code === 'Enter' && resultState === 'finished') {
+                    // Logic: Jump to Next Level if exists
+                    if (levelIndex + 1 < basicLessons.length) {
+                        const nextType = basicLessons[levelIndex+1].type;
+                        if(nextType === 'special' && basicLessons[levelIndex+1].text.includes('GAME')) {
+                            const gTxt = basicLessons[levelIndex+1].text;
+                            if(gTxt.includes('I')) window.location.href = 'game1.html';
+                            else if(gTxt.includes('II')) window.location.href = 'game2.html';
+                            else if(gTxt.includes('III')) window.location.href = 'game3.html';
+                            else if(gTxt.includes('IV')) window.location.href = 'game4.html';
+                            else window.location.href = 'game.html';
+                        } else if(nextType === 'special' && (basicLessons[levelIndex+1].text.includes('TEST') || basicLessons[levelIndex+1].text.includes('FINAL'))) {
+                            window.location.href = `basic-room.html?level=${levelIndex+1}&mode=test`;
+                        } else {
+                            window.location.href = `basic-room.html?level=${levelIndex+1}`;
+                        }
+                    } else {
+                        window.location.href = 'lessons.html';
+                    }
                 }
                 return;
             }
 
             sfx.init(); 
-
             if (e.key === "Tab" || e.key === "Alt") { e.preventDefault(); return; }
             if (e.key === "Shift") return;
 
             triggerHitEffect(e.key);
-
             const spans = document.querySelectorAll('.char');
             if (currentIndex >= spans.length) return;
 
             const physicalKey = e.key.toLowerCase();
             let typedChar = (e.shiftKey ? SHIFT_MAP[physicalKey] : NORMAL_MAP[physicalKey]) || "";
-            
             if (e.code === "Space") typedChar = " ";
-
             const targetChar = targetString[currentIndex];
-            let isMatch = (typedChar === targetChar);
-            
-            if (targetChar === " " && e.code === "Space") isMatch = true;
+            let isMatch = (typedChar === targetChar) || (targetChar === " " && e.code === "Space");
 
             if (isMatch) {
                 sfx.playClick(); 
                 spans[currentIndex].className = 'char correct';
-                
-                currentIndex++;
-                charCount++;
-                
-                if (currentIndex < spans.length) {
-                    spans[currentIndex].className = 'char current';
-                    updateGuide();
-                    scrollToCursor();
-                } else {
+                currentIndex++; charCount++;
+                if (currentIndex < spans.length) { spans[currentIndex].className = 'char current'; updateGuide(); scrollToCursor(); }
+                else {
                     if (isPhase1) {
-                         if (phase1RepCount === 0) {
-                            phase1RepCount++;
-                            currentIndex = 0; 
-                            targetString = baseChars.join('') + baseChars.join(''); 
-                            renderString(); 
-                        } else {
-                            setTimeout(startDrillPhase, 200);
-                        }
-                    } else {
-                        finishLevel();
-                    }
+                         if (phase1RepCount === 0) { phase1RepCount++; currentIndex = 0; targetString = baseChars.join('') + baseChars.join(''); renderString(); }
+                         else setTimeout(startDrillPhase, 200);
+                    } else finishLevel();
                 }
             } else {
-                errors++;
-                sfx.playError();
-                spans[currentIndex].classList.add('wrong');
-                setTimeout(() => spans[currentIndex].classList.remove('wrong'), 200);
+                errors++; sfx.playError();
+                spans[currentIndex].classList.add('wrong'); setTimeout(() => spans[currentIndex].classList.remove('wrong'), 200);
             }
         });
 
+        // --- VICTORY LOGIC ---
+        function formatTime(ms) {
+            const s = Math.floor(ms/1000);
+            return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+        }
+
         function finishLevel() {
             localStorage.setItem('tk_lvl_' + levelIndex, 'true');
-            const timeMins = (new Date() - startTime) / 60000;
-            const wpm = Math.round((charCount / 5) / timeMins) || 0;
+            const duration = new Date() - startTime;
+            const wpm = Math.round((charCount / 5) / (duration / 60000)) || 0;
             const acc = Math.round(((charCount - errors) / charCount) * 100) || 100;
-            const stats = { wpm: wpm, acc: acc };
+            
+            // Calculate Badges
+            earnedBadgesCache = [];
+            let isLegendary = false;
+            BADGE_DEFINITIONS.forEach(def => {
+                if (def.check(wpm, acc)) {
+                    earnedBadgesCache.push(def);
+                    if(def.id === 'snowlion') isLegendary = true;
+                }
+            });
+
+            // Save Data
+            const stats = { wpm: wpm, acc: acc, time: formatTime(duration), badges: earnedBadgesCache.map(b=>b.id) };
             localStorage.setItem('tk_stats_' + levelIndex, JSON.stringify(stats));
+
+            // Setup Center Box
             document.getElementById('res-wpm').innerText = wpm;
             document.getElementById('res-acc').innerText = acc + "%";
+            document.getElementById('res-time').innerText = formatTime(duration);
+            document.getElementById('center-badge-row').innerHTML = ''; // Clear old icons
+            
+            const centerBox = document.getElementById('center-box');
+            const resMsg = document.getElementById('res-msg');
+            if (isLegendary) { centerBox.classList.add('legendary'); resMsg.innerText = "LEGENDARY ASCENT"; }
+            else { centerBox.classList.remove('legendary'); resMsg.innerText = "Level Mastered"; }
+
+            // Show Modal
             document.getElementById('result-modal').style.display = 'flex';
+            
+            // Start Animation Sequence
+            resultState = 'animating';
+            runAnimationSequence(earnedBadgesCache);
+        }
+
+        async function runAnimationSequence(badges) {
+            const leftStage = document.getElementById('left-stage');
+            const rightStage = document.getElementById('right-stage');
+            const centerRow = document.getElementById('center-badge-row');
+            
+            leftStage.innerHTML = ''; rightStage.innerHTML = ''; // Clear previous
+
+            for (let i = 0; i < badges.length; i++) {
+                if (resultState !== 'animating') break; // Handle Skip
+
+                const b = badges[i];
+                const side = (i % 2 === 0) ? leftStage : rightStage;
+                
+                // create Side Popup
+                const card = document.createElement('div');
+                card.className = 'popup-card';
+                card.innerHTML = `
+                    <img src="${b.img}" class="popup-icon">
+                    <div class="popup-title">${b.title}</div>
+                    <div class="popup-reason">${b.criteria}</div>
+                    <div class="popup-desc">${b.desc}</div>
+                `;
+                side.appendChild(card);
+                
+                // Create Center Mini-Icon
+                const mini = document.createElement('img');
+                mini.src = b.img; mini.className = 'mini-icon';
+                centerRow.appendChild(mini);
+
+                // Trigger CSS Animation (Reflow hack)
+                await new Promise(r => setTimeout(r, 50)); 
+                card.classList.add('show');
+                mini.classList.add('show');
+
+                // Wait delay
+                await new Promise(r => {
+                    const t = setTimeout(r, 500); 
+                    animationTimeouts.push(t);
+                });
+            }
+            
+            finishAnimation();
+        }
+
+        function skipAnimation(badges) {
+            // Clear timeouts
+            animationTimeouts.forEach(clearTimeout);
+            animationTimeouts = [];
+
+            const leftStage = document.getElementById('left-stage');
+            const rightStage = document.getElementById('right-stage');
+            const centerRow = document.getElementById('center-badge-row');
+
+            // Immediate render of everything not yet shown
+            // Actually, safest is to clear and re-render ALL immediately
+            leftStage.innerHTML = ''; rightStage.innerHTML = ''; centerRow.innerHTML = '';
+
+            badges.forEach((b, i) => {
+                const side = (i % 2 === 0) ? leftStage : rightStage;
+                
+                const card = document.createElement('div');
+                card.className = 'popup-card show'; // Add 'show' immediately
+                card.innerHTML = `
+                    <img src="${b.img}" class="popup-icon">
+                    <div class="popup-title">${b.title}</div>
+                    <div class="popup-reason">${b.criteria}</div>
+                    <div class="popup-desc">${b.desc}</div>
+                `;
+                side.appendChild(card);
+
+                const mini = document.createElement('img');
+                mini.src = b.img; mini.className = 'mini-icon show';
+                centerRow.appendChild(mini);
+            });
+
+            finishAnimation();
+        }
+
+        function finishAnimation() {
+            resultState = 'finished';
+            const prompt = document.getElementById('prompt-txt');
+            prompt.innerHTML = 'Press <span>SPACE</span> to Exit | <span>ENTER</span> for Next | <span>SHIFT</span> for Retry';
         }
     </script>
 </body>
