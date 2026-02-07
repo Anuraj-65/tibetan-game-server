@@ -147,14 +147,30 @@
         /* =========================================
            VICTORY CONSTELLATION (DUAL DISPLAY)
            ========================================= */
-        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(15px); }
+        #result-modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; 
+            backdrop-filter: blur(15px); overflow: hidden; /* FIX JUMP */
+        }
         
+        /* Snow Lion Aura (Initially Hidden) */
+        .snowlion-aura {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('badges/snowlion.svg'); 
+            background-repeat: no-repeat; background-position: center; background-size: 80%;
+            opacity: 0; pointer-events: none; z-index: 0;
+            transition: opacity 2s ease-in;
+        }
+        .snowlion-aura.active { opacity: 0.15; }
+
         .victory-container {
             display: grid;
             grid-template-columns: 1fr 400px 1fr; /* Left Stage | Center Box | Right Stage */
             width: 95%; max-width: 1400px;
-            height: 80vh;
+            height: 100vh; /* LOCK HEIGHT */
+            max-height: 100vh;
             align-items: center;
+            position: relative; z-index: 1;
         }
 
         /* CENTER BOX (THE PERMANENT RECORD) */
@@ -177,14 +193,13 @@
         .res-val { font-size: 28px; font-weight: bold; color: #fff; }
         .res-label { font-size: 9px; color: #888; letter-spacing: 2px; text-transform: uppercase; }
 
-        /* THE COLLECTION ROW (Center) */
+        /* THE COLLECTION ROW */
         .collection-label { font-size: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
         .collection-row {
             display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;
-            min-height: 80px; align-items: center; /* Increased min-height */
+            min-height: 80px; align-items: center; 
         }
         
-        /* BIGGER MINI ICONS (64px) */
         .mini-icon { 
             width: 64px; height: 64px; 
             opacity: 0; transform: scale(0); 
@@ -193,31 +208,37 @@
         }
         .mini-icon.show { opacity: 1; transform: scale(1); }
 
-        .action-prompt { 
-            font-size: 12px; color: #666; letter-spacing: 2px; text-transform: uppercase; 
-            margin-top: 10px; animation: pulse 2s infinite; 
+        /* PROMPTS */
+        .prompt-container {
+            display: flex; flex-direction: column; gap: 8px; margin-top: 15px;
+            animation: pulse 2s infinite; width: 100%;
         }
-        .action-prompt span { color: #fff; font-weight: bold; border: 1px solid #444; padding: 2px 6px; border-radius: 4px; margin: 0 5px; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        .prompt-keys-row, .prompt-actions-row { display: flex; justify-content: center; gap: 25px; width: 100%; }
+        .prompt-key {
+            color: #fff; font-weight: bold; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+            border: 1px solid #555; background: rgba(255,255,255,0.05); padding: 4px 10px;
+            border-radius: 6px; min-width: 60px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .prompt-action { color: #888; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; min-width: 60px; text-align: center; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-        /* SIDE STAGES (THE STORY - NO BOX) */
+        /* SIDE STAGES */
         .side-stage { 
             height: 100%; display: flex; flex-direction: column; 
             justify-content: center; gap: 20px; 
-            pointer-events: none; /* Let clicks pass through */
+            pointer-events: none; 
+            padding: 20px;
         }
+        
+        /* STANDARD POPUP CARD */
         .popup-card {
             display: flex; flex-direction: column; align-items: center; text-align: center;
             opacity: 0; transform: translateY(20px); transition: all 0.5s ease;
-            /* BOX REMOVED HERE */
-            background: transparent; 
-            padding: 15px; 
-            border: none;
+            background: transparent; padding: 15px; border: none;
         }
         .popup-card.show { opacity: 1; transform: translateY(0); }
-        
-        .popup-icon { width: 100px; height: 100px; margin-bottom: 10px; filter: drop-shadow(0 0 15px var(--accent)); }
-        .popup-title { font-size: 18px; color: var(--accent); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .popup-icon { width: 100px; height: 100px; margin-bottom: 10px; filter: drop-shadow(0 0 15px var(--accent)); transition: all 0.3s; }
+        .popup-title { font-size: 18px; color: var(--accent); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; transition: all 0.3s; }
         .popup-reason { 
             font-size: 12px; color: var(--success); font-weight: bold; 
             text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;
@@ -225,10 +246,16 @@
         }
         .popup-desc { 
             font-size: 12px; color: #ccc; font-style: italic; line-height: 1.4; max-width: 80%; 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8); /* Shadow for readability without box */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
         }
 
-        /* RESTORED BACK BUTTON (TEXT STYLE) */
+        /* --- COMPACT MODE (DYNAMIC DENSITY) --- */
+        .victory-container.compact-layout .side-stage { gap: 5px; } /* Tighten vertical gap */
+        .victory-container.compact-layout .popup-card { padding: 5px; } /* Reduce padding */
+        .victory-container.compact-layout .popup-icon { width: 60px; height: 60px; margin-bottom: 5px; } /* Shrink Icons */
+        .victory-container.compact-layout .popup-title { font-size: 14px; margin-bottom: 2px; } /* Shrink Title */
+        .victory-container.compact-layout .popup-desc { font-size: 10px; line-height: 1.2; max-width: 95%; } /* Shrink Text */
+
         .back-btn { 
             position: fixed; bottom: 20px; left: 30px; 
             color: #666; text-decoration: none; 
@@ -237,10 +264,9 @@
         }
         .back-btn:hover { color: var(--accent); }
 
-        /* Mobile Adjustments */
         @media (max-width: 1000px) {
             .victory-container { grid-template-columns: 1fr; grid-template-rows: auto auto; height: 90vh; overflow-y: auto; }
-            .side-stage { display: none; } /* Hide sides on mobile, show summary only */
+            .side-stage { display: none; } 
             .collection-row { min-height: auto; }
         }
     </style>
@@ -287,13 +313,14 @@
                 <g id="row-4"><g id="key-LSHIFT"><rect class="st1" x="20" y="215" width="135" height="55" rx="6" ry="6"/><text class="st0" transform="translate(71.11 247)">SHIFT</text></g><g id="key-Z"><rect class="st1" x="160" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(183.64 247)">Z</text></g><g id="key-X"><rect class="st1" x="220" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(243.33 247)">X</text></g><g id="key-C"><rect class="st1" x="280" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(303.03 247)">C</text></g><g id="key-V"><rect class="st1" x="340" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(363.33 247)">V</text></g><g id="key-B"><rect class="st1" x="400" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(423.03 247)">B</text></g><g id="key-N"><rect class="st1" x="460" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(483.03 247)">N</text></g><g id="key-M"><rect class="st1" x="520" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(542.42 247)">M</text></g><g id="key-COMMA"><rect class="st1" x="580" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(605.47 247)">,</text></g><g id="key-DOT"><rect class="st1" x="640" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(665.47 247)">.</text></g><g id="key-SLASH"><rect class="st1" x="700" y="215" width="55" height="55" rx="6" ry="6"/><text class="st0" transform="translate(725.47 247)">/</text></g><g id="key-RSHIFT"><rect class="st1" x="760" y="215" width="155" height="55" rx="6" ry="6"/><text class="st0" transform="translate(821.11 247)">SHIFT</text></g></g>
                 <g id="row-5"><g id="key-SPACE"><rect class="st1" x="270" y="280" width="400" height="55" rx="6" ry="6"/><text class="st0" transform="translate(439.54 312)">SPACEBAR</text></g></g>
             </svg>
-
             <div id="layer-hands-container"></div>
         </div>
     </div>
 
     <div id="result-modal">
-        <div class="victory-container">
+        <div id="snowlion-aura" class="snowlion-aura"></div>
+
+        <div id="victory-container" class="victory-container">
             <div id="left-stage" class="side-stage"></div>
 
             <div id="center-box" class="center-box">
@@ -307,7 +334,7 @@
                 <div class="collection-label">Badges Collected</div>
                 <div class="collection-row" id="center-badge-row"></div>
 
-                <div class="action-prompt" id="prompt-txt">Press <span>SPACE</span> to Skip</div>
+                <div class="prompt-container" id="prompt-cont"></div>
             </div>
 
             <div id="right-stage" class="side-stage"></div>
@@ -374,13 +401,12 @@
             { type: "special", text: "GAME II", footer: "REWARD" },
             { type: "tibetan", text: "ཙ ཚ ཛ ཝ", footer: "ALPHABET" },
             { type: "tibetan", text: "ཞ ཟ འ ཡ", footer: "ALPHABET" },
-            { type: "special", text: "TEST III", footer: "MIXED 5 & 6" },
+            { type: "special", text: "TEST III", footer: "MIXED 9 & 10" },
             { type: "special", text: "GAME III", footer: "REWARD" },
             { type: "tibetan", text: "ར ལ ཤ ས", footer: "ALPHABET" },
             { type: "tibetan", text: "ཧ ཨ ་ །", footer: "ALPHABET" },
             { type: "special", text: "TEST IV", footer: "MIXED 7 & 8" },
             { type: "special", text: "GAME IV", footer: "REWARD" },
-            /* NEW LEVEL 17 (INDEX 17) INSERTED HERE */
             { type: "tibetan", text: "ཊ ཋ ཌ ཎ ཥ", footer: "EXTRA" },
             { type: "special", text: "FINAL", footer: "ALL 30 CHARS" },
             { type: "special", text: "GAME", footer: "BASIC COMPLETE" }
@@ -620,8 +646,28 @@
             
             const centerBox = document.getElementById('center-box');
             const resMsg = document.getElementById('res-msg');
-            if (isLegendary) { centerBox.classList.add('legendary'); resMsg.innerText = "LEGENDARY ASCENT"; }
-            else { centerBox.classList.remove('legendary'); resMsg.innerText = "Level Mastered"; }
+            const snowLionAura = document.getElementById('snowlion-aura');
+            const victoryContainer = document.getElementById('victory-container');
+
+            // RESET CLASSES
+            centerBox.classList.remove('legendary');
+            victoryContainer.classList.remove('compact-layout');
+            snowLionAura.classList.remove('active');
+
+            if (isLegendary) { 
+                centerBox.classList.add('legendary'); 
+                resMsg.innerText = "LEGENDARY ASCENT"; 
+                // Activate Snow Lion Aura
+                snowLionAura.classList.add('active');
+            } else { 
+                resMsg.innerText = "Level Mastered"; 
+            }
+
+            // AUTO COMPACT MODE if badges > 6 (e.g. 7 or more)
+            // (Standard view holds 3 per side comfortably. 4 per side is tight.)
+            if (earnedBadgesCache.length > 6) {
+                victoryContainer.classList.add('compact-layout');
+            }
 
             // Show Modal
             document.getElementById('result-modal').style.display = 'flex';
@@ -642,6 +688,7 @@
                 if (resultState !== 'animating') break; // Handle Skip
 
                 const b = badges[i];
+                // Distribute: Evens left, Odds right
                 const side = (i % 2 === 0) ? leftStage : rightStage;
                 
                 // create Side Popup
@@ -711,8 +758,19 @@
 
         function finishAnimation() {
             resultState = 'finished';
-            const prompt = document.getElementById('prompt-txt');
-            prompt.innerHTML = 'Press <span>SPACE</span> to Exit | <span>ENTER</span> for Next | <span>SHIFT</span> for Retry';
+            const promptCont = document.getElementById('prompt-cont');
+            promptCont.innerHTML = `
+                <div class="prompt-keys-row">
+                    <div class="prompt-key">SPACE</div>
+                    <div class="prompt-key">SHIFT</div>
+                    <div class="prompt-key">ENTER</div>
+                </div>
+                <div class="prompt-actions-row">
+                    <div class="prompt-action">Exit</div>
+                    <div class="prompt-action">Retry</div>
+                    <div class="prompt-action">Next</div>
+                </div>
+            `;
         }
     </script>
 </body>
