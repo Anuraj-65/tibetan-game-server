@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Selecting Challenge...</title>
+    <style>
+        /* Optional: A simple loading screen in case the internet is slow */
+        body {
+            background-color: #000;
+            color: #d4af37; /* Gold */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div>Choosing your destiny...</div>
+
+    <script>
+        // --- 1. THE GAME LIST ---
+        // Add all your Level 1 game files here.
+        // If you create a new game later (e.g., 'Game1Space.html'), just add it to this list!
+       const offlineGames = [
+    "Game2MS.html", 
+    "Game2HA.html" 
+    ];
+
+        // --- 2. THE RANDOM LOGIC ---
+        // This line picks a random number (0 or 1) based on the list length
+        const randomIndex = Math.floor(Math.random() * offlineGames.length);
+        const selectedGame = offlineGames[randomIndex];
+
+        // --- 3. THE REDIRECT ---
+        // "replace" is better than "href" here so the user can't click "Back" 
+        // and get stuck in the router again.
+        window.location.replace(selectedGame);
+    </script>
+</body>
+</html>

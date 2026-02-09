@@ -150,10 +150,10 @@
         #result-modal { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; 
-            backdrop-filter: blur(15px); overflow: hidden; /* FIX JUMP */
+            backdrop-filter: blur(15px); overflow: hidden; 
         }
         
-        /* Snow Lion Aura (Initially Hidden) */
+        /* Snow Lion Aura */
         .snowlion-aura {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('badges/snowlion.svg'); 
@@ -165,15 +165,14 @@
 
         .victory-container {
             display: grid;
-            grid-template-columns: 1fr 400px 1fr; /* Left Stage | Center Box | Right Stage */
-            width: 95%; max-width: 1400px;
-            height: 100vh; /* LOCK HEIGHT */
-            max-height: 100vh;
+            grid-template-columns: 1fr 400px 1fr; 
+            width: 95%; max-width: 1600px; /* Widened for double columns */
+            height: 100vh; max-height: 100vh;
             align-items: center;
             position: relative; z-index: 1;
         }
 
-        /* CENTER BOX (THE PERMANENT RECORD) */
+        /* CENTER BOX */
         .center-box {
             background: rgba(0, 15, 10, 0.95);
             border: 2px solid var(--success);
@@ -193,51 +192,59 @@
         .res-val { font-size: 28px; font-weight: bold; color: #fff; }
         .res-label { font-size: 9px; color: #888; letter-spacing: 2px; text-transform: uppercase; }
 
-        /* THE COLLECTION ROW */
         .collection-label { font-size: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
         .collection-row {
             display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;
             min-height: 80px; align-items: center; 
         }
-        
         .mini-icon { 
-            width: 64px; height: 64px; 
-            opacity: 0; transform: scale(0); 
+            width: 64px; height: 64px; opacity: 0; transform: scale(0); 
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
         }
         .mini-icon.show { opacity: 1; transform: scale(1); }
 
         /* PROMPTS */
-        .prompt-container {
-            display: flex; flex-direction: column; gap: 8px; margin-top: 15px;
-            animation: pulse 2s infinite; width: 100%;
-        }
+        .prompt-container { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; animation: pulse 2s infinite; width: 100%; }
         .prompt-keys-row, .prompt-actions-row { display: flex; justify-content: center; gap: 25px; width: 100%; }
+        
+        /* Updated .prompt-key to be Clickable */
         .prompt-key {
             color: #fff; font-weight: bold; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
             border: 1px solid #555; background: rgba(255,255,255,0.05); padding: 4px 10px;
             border-radius: 6px; min-width: 60px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            cursor: pointer; /* Change cursor to pointer */
+            transition: all 0.2s ease;
+            pointer-events: auto; /* Ensure it captures clicks */
         }
+        /* Hover Effect for Keys */
+        .prompt-key:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(212, 175, 55, 0.1);
+        }
+        /* Click Effect */
+        .prompt-key:active {
+            transform: scale(0.95);
+        }
+
         .prompt-action { color: #888; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; min-width: 60px; text-align: center; }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-        /* SIDE STAGES */
+        /* SIDE STAGES (STANDARD) */
         .side-stage { 
             height: 100%; display: flex; flex-direction: column; 
-            justify-content: center; gap: 20px; 
-            pointer-events: none; 
-            padding: 20px;
+            justify-content: space-evenly; 
+            gap: 0px; 
+            pointer-events: none; padding: 20px;
         }
-        
-        /* STANDARD POPUP CARD */
         .popup-card {
             display: flex; flex-direction: column; align-items: center; text-align: center;
             opacity: 0; transform: translateY(20px); transition: all 0.5s ease;
             background: transparent; padding: 15px; border: none;
         }
         .popup-card.show { opacity: 1; transform: translateY(0); }
-        .popup-icon { width: 100px; height: 100px; margin-bottom: 10px; filter: drop-shadow(0 0 15px var(--accent)); transition: all 0.3s; }
+        .popup-icon { width: 90px; height: 90px; margin-bottom: 10px; filter: drop-shadow(0 0 15px var(--accent)); transition: all 0.3s; }
         .popup-title { font-size: 18px; color: var(--accent); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; transition: all 0.3s; }
         .popup-reason { 
             font-size: 12px; color: var(--success); font-weight: bold; 
@@ -249,12 +256,24 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
         }
 
-        /* --- COMPACT MODE (DYNAMIC DENSITY) --- */
-        .victory-container.compact-layout .side-stage { gap: 5px; } /* Tighten vertical gap */
-        .victory-container.compact-layout .popup-card { padding: 5px; } /* Reduce padding */
-        .victory-container.compact-layout .popup-icon { width: 60px; height: 60px; margin-bottom: 5px; } /* Shrink Icons */
-        .victory-container.compact-layout .popup-title { font-size: 14px; margin-bottom: 2px; } /* Shrink Title */
-        .victory-container.compact-layout .popup-desc { font-size: 10px; line-height: 1.2; max-width: 95%; } /* Shrink Text */
+        /* --- DOUBLE COLUMN MODE (>4 Badges) --- */
+        .victory-container.compact-layout .side-stage { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* Two Columns */
+            align-content: center;
+            gap: 10px;
+        }
+        
+        /* Ensure cards in grid are centered */
+        .victory-container.compact-layout .popup-card {
+            padding: 5px; 
+            justify-content: center;
+        }
+        
+        /* Maintain Big Size */
+        .victory-container.compact-layout .popup-icon { width: 80px; height: 80px; margin-bottom: 5px; }
+        .victory-container.compact-layout .popup-title { font-size: 15px; margin-bottom: 2px; }
+        .victory-container.compact-layout .popup-desc { font-size: 10px; max-width: 100%; }
 
         .back-btn { 
             position: fixed; bottom: 20px; left: 30px; 
@@ -282,6 +301,7 @@
     <div class="hud">
         <div class="level-info"><h1 id="level-title">Ascent</h1></div>
         <div class="controls-group">
+            <button class="icon-btn" id="btn-restart" onclick="window.location.reload()" title="Restart Level"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
             <button class="icon-btn disabled"><svg viewBox="0 0 24 24"><path d="M17 20c-.29 0-.56-.06-.76-.15-.71-.37-1.21-.88-1.71-2.38-.51-1.56-1.47-2.29-2.39-3-.79-.61-1.61-1.24-2.32-2.53C9.29 10.98 9 9.93 9 9c0-2.8 2.2-5 5-5s5 2.2 5 5h2c0-3.93-3.07-7-7-7S7 5.07 7 9c0 1.26.38 2.65 1.07 3.9.91 1.65 1.98 2.48 2.85 3.15.81.62 1.39 1.14 1.71 2.05.6 1.82 1.37 2.84 2.73 3.55.51.23 1.07.35 1.64.35 2.21 0 4-1.79 4-4h-2c0 1.1-.9 2-2 2zM7.64 2.64L6.22 1.22C4.23 3.21 3 5.96 3 9s1.23 5.79 3.22 7.78l1.41-1.41C6.01 13.74 5 11.49 5 9s1.01-4.74 2.64-6.36z"/></svg></button>
             <button class="icon-btn active" id="btn-hand" onclick="toggleHands()"><svg id="icon-hand-on" viewBox="0 0 24 24"><path d="M23 5.5V20c0 2.2-1.8 4-4 4h-7.3c-1.08 0-2.1-.43-2.85-1.19L1 14.83s1.26-1.23 1.3-1.25c.22-.19.49-.29.79-.29.22 0 .42.06.6.16.04.01 4.31 2.46 4.31 2.46V4c0-.83.67-1.5 1.5-1.5S11 3.17 11 4v7h1V1.5c0-.83.67-1.5 1.5-1.5S15 .67 15 1.5V11h1V2.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5V11h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5z"/></svg></button>
             <div class="dropdown">
@@ -350,14 +370,21 @@
         const PREF_TEXT_SIZE = 'tk_pref_text_size';
 
         const BADGE_DEFINITIONS = [
+            // --- ACCURACY BADGES ---
             { id: 'conch', img: 'badges/conch.svg', title: 'White Conch', criteria: 'Accuracy > 90%', desc: 'The Spiral of Sound. You found the rhythm.', check: (w, a) => a >= 90 },
             { id: 'fish', img: 'badges/fish.svg', title: 'Golden Fish', criteria: 'Accuracy > 95%', desc: 'Freedom from Fear. You swam past errors.', check: (w, a) => a >= 95 },
             { id: 'lotus', img: 'badges/lotus.svg', title: 'Lotus Flower', criteria: 'Accuracy 100%', desc: 'Born from Mud, unstained. Absolute Perfection.', check: (w, a) => a >= 100 },
+            
+            // --- SPEED BADGES (Updated Logic) ---
             { id: 'vase', img: 'badges/vase.svg', title: 'Treasure Vase', criteria: 'Speed > 20 WPM', desc: 'Inexhaustible Wealth. You are gathering speed.', check: (w, a) => w >= 20 },
             { id: 'knot', img: 'badges/knot.svg', title: 'Endless Knot', criteria: 'Speed > 25 WPM', desc: 'Interwoven Wisdom. Your fingers are connecting.', check: (w, a) => w >= 25 },
             { id: 'banner', img: 'badges/banner.svg', title: 'Victory Banner', criteria: 'Speed > 30 WPM', desc: 'Victory over ignorance. You conquered the keys.', check: (w, a) => w >= 30 },
             { id: 'parasol', img: 'badges/parasol.svg', title: 'Precious Parasol', criteria: 'Speed > 35 WPM', desc: 'Protection from heat. Your focus shielded you.', check: (w, a) => w >= 35 },
-            { id: 'wheel', img: 'badges/wheel.svg', title: 'Dharma Wheel', criteria: 'Speed > 36 WPM', desc: 'The Turning Wheel. You have set motion.', check: (w, a) => w >= 36 },
+            
+            // Fixed: Moved Dharma Wheel to 40 WPM (Distinct from Parasol)
+            { id: 'wheel', img: 'badges/wheel.svg', title: 'Dharma Wheel', criteria: 'Speed > 40 WPM', desc: 'The Turning Wheel. You have set motion.', check: (w, a) => w >= 40 },
+            
+            // Legendary Cap at 50 WPM (Realistic for Tibetan)
             { id: 'snowlion', img: 'badges/snowlion.svg', title: 'SNOW LION', criteria: 'Speed > 50 WPM', desc: 'Fearless Guardian. You have reached Legendary status.', check: (w, a) => w >= 50 }
         ];
 
@@ -382,11 +409,60 @@
             playError: function() { if(this.muted || !this.ctx) return; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, this.ctx.currentTime); osc.frequency.linearRampToValueAtTime(100, this.ctx.currentTime + 0.1); gain.gain.setValueAtTime(0.1, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.1); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.1); }
         };
 
-        const NORMAL_MAP = { 'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',',':'‚','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':' ' };
+        const NORMAL_MAP = { 'k':'ཀ','t':'ཏ','p':'པ','s':'ས','d':'ད','f':'ང','g':'ག','h':'ཧ','j':'ཇ','l':'ལ','z':'ཟ','x':'ཙ','c':'ཅ','v':'ཌ','b':'བ','n':'ན','m':'མ','q':'ཊ','w':'ཝ','e':'ེ','r':'ར','y':'ཡ','u':'ུ','i':'ི','o':'ོ', '[':'༷',']':'྄','\\':'༔',';':'ཌྷ','\'':'འ',',':'‚','.':'ྲ','/':'།','`':'༌','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩','0':'༠','-':'ྀ','=':'ཾ',' ':'་' };
         const SHIFT_MAP = { 'k':'ཁ','t':'ཐ','p':'ཕ','a':'ཨ','s':'ཤ','d':'ཛ','f':'དྷ','g':'གྷ','h':'ྷ','j':'ཛྷ','l':'ླ','z':'ཞ','x':'ཚ','c':'ཆ','v':'ཎ','b':'བྷ','n':'ཉ','m':'ཥ','q':'ཋ','w':'ྭ','e':'ཻ','r':'ཪ','y':'ྱ','u':'ཱུ','i':'ྀ','o':'ཽ', '[':'ྂ',']':'༵','\\':'྅',';':'ཿ','\'':'ཱ',',':'‚','.':'ླ','/':'„','`':'༸','1':'༑','2':'༄༅','3':'༅','4':'“','5':'”','6':'༈','7':'༼','8':'༽','9':'(','0':')','-':'ཱྀ','=':'ྃ',' ':' ' };
         const LEFT_HAND_KEYS = ['`','1','2','3','4','5','q','w','e','r','t','a','s','d','f','g','z','x','c','v','b'];
 
-        const poseMap = { 'ཀ': 'hands/k.svg', 'ཁ': 'hands/sk.svg', 'ག': 'hands/g.svg', 'ང': 'hands/f.svg', 'default': 'hands/rest.svg' };
+        // --- HAND ASSET LOGIC ---
+        // List of Shift-keys you have actually drawn. 
+        const AVAILABLE_SHIFTS = ['sa', 'sc', 'sd', 'sk', 'sm', 'sn', 'sp', 'sq', 'ss', 'st', 'sv', 'sw', 'sx', 'sz'];
+
+        const poseMap = { 
+            'default': 'hands/rest.svg',
+            '་': 'hands/space.svg',   // Tsheg (Normal Space Key)
+            ' ': 'hands/sspace.svg'   // Actual Space (Shift + Space)
+        };
+
+        function generatePoseMap() {
+            // Map Normal Keys
+            for (let [key, char] of Object.entries(NORMAL_MAP)) {
+                if (char === '་') continue; 
+                if (char === ' ') continue;
+
+                let filename = `hands/${key}.svg`;
+                
+                // Handle your specific naming overrides
+                if (key === '.') filename = 'hands/rata.svg';
+                if (key === '/') filename = 'hands/shea.svg';
+                
+                poseMap[char] = filename;
+            }
+
+            // Map Shift Keys
+            for (let [key, char] of Object.entries(SHIFT_MAP)) {
+                if (char === ' ') continue; 
+
+                let shiftName = 's' + key;
+                let filename = `hands/${shiftName}.svg`;
+
+                // Handle your specific naming overrides
+                if (key === '.') {
+                    filename = 'hands/lata.svg'; // Your special name for Shift + .
+                } else if (!AVAILABLE_SHIFTS.includes(shiftName)) {
+                    // Fallback to normal hand if shift version doesn't exist
+                    filename = `hands/${key}.svg`;
+                    // Apply special normal name fallback
+                    if (key === '.') filename = 'hands/rata.svg';
+                    if (key === '/') filename = 'hands/shea.svg';
+                }
+
+                poseMap[char] = filename;
+            }
+        }
+        
+        // Run generation immediately
+        generatePoseMap();
+
         const svgCache = {};
 
         const basicLessons = [
@@ -407,6 +483,7 @@
             { type: "tibetan", text: "ཧ ཨ ་ །", footer: "ALPHABET" },
             { type: "special", text: "TEST IV", footer: "MIXED 7 & 8" },
             { type: "special", text: "GAME IV", footer: "REWARD" },
+            /* NEW LEVEL 17 (INDEX 17) INSERTED HERE */
             { type: "tibetan", text: "ཊ ཋ ཌ ཎ ཥ", footer: "EXTRA" },
             { type: "special", text: "FINAL", footer: "ALL 30 CHARS" },
             { type: "special", text: "GAME", footer: "BASIC COMPLETE" }
@@ -510,7 +587,20 @@
             updateGuide(); setTimeout(scrollToCursor, 50);
         }
 
-        function startDrillPhase() { targetString = generateDrillString(60); currentIndex = 0; isPhase1 = false; phaseTxt.innerText = "Phase 2: Speed Drill"; if (currentLayout === 'layout-large') setLayout('layout-medium', false); renderString(); drillStarted = true; startTime = new Date(); }
+        function startDrillPhase() { 
+            targetString = generateDrillString(60); 
+            currentIndex = 0; 
+            isPhase1 = false; 
+            phaseTxt.innerText = "Phase 2: Speed Drill"; 
+            if (currentLayout === 'layout-large') setLayout('layout-medium', false); 
+            renderString(); 
+            drillStarted = true; 
+            
+            // RESET COUNTERS FOR ACCURATE DRILL SCORING
+            startTime = new Date(); 
+            errors = 0; 
+            charCount = 0; 
+        }
         function scrollToCursor() { const el = document.querySelector('.char.current'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' }); }
 
         function updateGuide() {
@@ -527,6 +617,7 @@
             let key = "", shift = false;
             for(let [k,v] of Object.entries(NORMAL_MAP)) if(v===nextChar) { key=k; break; }
             if(!key) for(let [k,v] of Object.entries(SHIFT_MAP)) if(v===nextChar) { key=k; shift=true; break; }
+            
             if(key) {
                 highlightSVGKey(key, 'key-guide');
                 if(shift) highlightShiftKey(LEFT_HAND_KEYS.includes(key)?'right':'left', 'key-guide');
@@ -559,24 +650,8 @@
                     else window.location.href = 'lessons.html';
                 }
                 if(e.code === 'Enter' && resultState === 'finished') {
-                    // Logic: Jump to Next Level if exists
-                    if (levelIndex + 1 < basicLessons.length) {
-                        const nextType = basicLessons[levelIndex+1].type;
-                        if(nextType === 'special' && basicLessons[levelIndex+1].text.includes('GAME')) {
-                            const gTxt = basicLessons[levelIndex+1].text;
-                            if(gTxt.includes('I')) window.location.href = 'game1.html';
-                            else if(gTxt.includes('II')) window.location.href = 'game2.html';
-                            else if(gTxt.includes('III')) window.location.href = 'game3.html';
-                            else if(gTxt.includes('IV')) window.location.href = 'game4.html';
-                            else window.location.href = 'game.html';
-                        } else if(nextType === 'special' && (basicLessons[levelIndex+1].text.includes('TEST') || basicLessons[levelIndex+1].text.includes('FINAL'))) {
-                            window.location.href = `basic-room.html?level=${levelIndex+1}&mode=test`;
-                        } else {
-                            window.location.href = `basic-room.html?level=${levelIndex+1}`;
-                        }
-                    } else {
-                        window.location.href = 'lessons.html';
-                    }
+                    // Use helper function for next level logic
+                    goToNextLevel();
                 }
                 return;
             }
@@ -591,9 +666,13 @@
 
             const physicalKey = e.key.toLowerCase();
             let typedChar = (e.shiftKey ? SHIFT_MAP[physicalKey] : NORMAL_MAP[physicalKey]) || "";
-            if (e.code === "Space") typedChar = " ";
+            // CHANGE: Strict Space vs Tsheg Logic
+            if (e.code === "Space") {
+                typedChar = e.shiftKey ? " " : "་";
+            }
+            
             const targetChar = targetString[currentIndex];
-            let isMatch = (typedChar === targetChar) || (targetChar === " " && e.code === "Space");
+            let isMatch = (typedChar === targetChar);
 
             if (isMatch) {
                 sfx.playClick(); 
@@ -618,13 +697,35 @@
             return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
         }
 
+        // New Helper Function for Next Level Logic
+        function goToNextLevel() {
+            if (levelIndex + 1 < basicLessons.length) {
+                const nextType = basicLessons[levelIndex+1].type;
+                if(nextType === 'special' && basicLessons[levelIndex+1].text.includes('GAME')) {
+                    // Map to game file (simple mapping for now)
+                    const gTxt = basicLessons[levelIndex+1].text;
+                    if(gTxt.includes('I')) window.location.href = 'game1.html';
+                    else if(gTxt.includes('II')) window.location.href = 'game2.html';
+                    else if(gTxt.includes('III')) window.location.href = 'game3.html';
+                    else if(gTxt.includes('IV')) window.location.href = 'game4.html';
+                    else window.location.href = 'game.html';
+                } else if(nextType === 'special' && (basicLessons[levelIndex+1].text.includes('TEST') || basicLessons[levelIndex+1].text.includes('FINAL'))) {
+                    window.location.href = `basic-room.html?level=${levelIndex+1}&mode=test`;
+                } else {
+                    window.location.href = `basic-room.html?level=${levelIndex+1}`;
+                }
+            } else {
+                window.location.href = 'lessons.html';
+            }
+        }
+
         function finishLevel() {
             localStorage.setItem('tk_lvl_' + levelIndex, 'true');
             const duration = new Date() - startTime;
             const wpm = Math.round((charCount / 5) / (duration / 60000)) || 0;
             const acc = Math.round(((charCount - errors) / charCount) * 100) || 100;
             
-            // Calculate Badges
+            // 1. Calculate Badges for THIS run
             earnedBadgesCache = [];
             let isLegendary = false;
             BADGE_DEFINITIONS.forEach(def => {
@@ -634,22 +735,43 @@
                 }
             });
 
-            // Save Data
-            const stats = { wpm: wpm, acc: acc, time: formatTime(duration), badges: earnedBadgesCache.map(b=>b.id) };
-            localStorage.setItem('tk_stats_' + levelIndex, JSON.stringify(stats));
+            // 2. High Score Logic (Protect the User's History)
+            const storageKey = 'tk_stats_' + levelIndex;
+            const previousData = localStorage.getItem(storageKey);
+            let shouldSave = true; // Default to saving if no previous data
 
-            // Setup Center Box
+            if (previousData) {
+                const prevStats = JSON.parse(previousData);
+                const prevBadgeCount = prevStats.badges ? prevStats.badges.length : 0;
+                
+                // Compare: New vs Old
+                if (earnedBadgesCache.length < prevBadgeCount) {
+                    shouldSave = false; // Fewer badges? Don't save.
+                } else if (earnedBadgesCache.length === prevBadgeCount) {
+                    if (wpm < prevStats.wpm) {
+                        shouldSave = false; // Slower speed? Don't save.
+                    }
+                }
+            }
+
+            // Only overwrite storage if this run was actually better
+            if (shouldSave) {
+                const stats = { wpm: wpm, acc: acc, time: formatTime(duration), badges: earnedBadgesCache.map(b=>b.id) };
+                localStorage.setItem(storageKey, JSON.stringify(stats));
+            }
+
+            // 3. UI Updates (Show the CURRENT run results)
             document.getElementById('res-wpm').innerText = wpm;
             document.getElementById('res-acc').innerText = acc + "%";
             document.getElementById('res-time').innerText = formatTime(duration);
-            document.getElementById('center-badge-row').innerHTML = ''; // Clear old icons
+            document.getElementById('center-badge-row').innerHTML = ''; 
             
             const centerBox = document.getElementById('center-box');
             const resMsg = document.getElementById('res-msg');
             const snowLionAura = document.getElementById('snowlion-aura');
             const victoryContainer = document.getElementById('victory-container');
 
-            // RESET CLASSES
+            // Reset Classes
             centerBox.classList.remove('legendary');
             victoryContainer.classList.remove('compact-layout');
             snowLionAura.classList.remove('active');
@@ -657,22 +779,19 @@
             if (isLegendary) { 
                 centerBox.classList.add('legendary'); 
                 resMsg.innerText = "LEGENDARY ASCENT"; 
-                // Activate Snow Lion Aura
                 snowLionAura.classList.add('active');
             } else { 
-                resMsg.innerText = "Level Mastered"; 
+                // Feedback on performance vs history
+                resMsg.innerText = shouldSave ? "New High Score!" : "Level Complete"; 
             }
 
-            // AUTO COMPACT MODE if badges > 6 (e.g. 7 or more)
-            // (Standard view holds 3 per side comfortably. 4 per side is tight.)
-            if (earnedBadgesCache.length > 6) {
+            // Auto Compact Mode
+            if (earnedBadgesCache.length > 4) {
                 victoryContainer.classList.add('compact-layout');
             }
 
-            // Show Modal
+            // Show Modal & Animate
             document.getElementById('result-modal').style.display = 'flex';
-            
-            // Start Animation Sequence
             resultState = 'animating';
             runAnimationSequence(earnedBadgesCache);
         }
@@ -712,9 +831,9 @@
                 card.classList.add('show');
                 mini.classList.add('show');
 
-                // Wait delay
+                // Wait delay (1000ms = 1s)
                 await new Promise(r => {
-                    const t = setTimeout(r, 500); 
+                    const t = setTimeout(r, 1000); 
                     animationTimeouts.push(t);
                 });
             }
@@ -759,11 +878,13 @@
         function finishAnimation() {
             resultState = 'finished';
             const promptCont = document.getElementById('prompt-cont');
+            
+            // Updated HTML to include onclick events
             promptCont.innerHTML = `
                 <div class="prompt-keys-row">
-                    <div class="prompt-key">SPACE</div>
-                    <div class="prompt-key">SHIFT</div>
-                    <div class="prompt-key">ENTER</div>
+                    <div class="prompt-key" onclick="window.location.href='lessons.html'">SPACE</div>
+                    <div class="prompt-key" onclick="window.location.reload()">SHIFT</div>
+                    <div class="prompt-key" onclick="goToNextLevel()">ENTER</div>
                 </div>
                 <div class="prompt-actions-row">
                     <div class="prompt-action">Exit</div>
